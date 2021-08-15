@@ -273,10 +273,10 @@
     <content><![CDATA[<p>在 Java 8 中，增加了Lambda表达式、函数式接口、接口的默认方法和静态方法等语言新特性；在类库方面又新增了Stream API、Optional类等。</p>
 <h2 id="Stream-API"><a href="#Stream-API" class="headerlink" title="Stream API"></a>Stream API</h2>]]></content>
       <categories>
-        <category>java</category>
+        <category>Java</category>
       </categories>
       <tags>
-        <tag>java</tag>
+        <tag>Java</tag>
       </tags>
   </entry>
 </search>
