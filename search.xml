@@ -4,6 +4,7 @@
     <title>Java 8新特性：Lambda表达式, Stream API, Optional类</title>
     <url>/2021/08/15/Java-8%E6%96%B0%E7%89%B9%E6%80%A7%EF%BC%9ALambda%E8%A1%A8%E8%BE%BE%E5%BC%8F-Stream-API-Optional%E7%B1%BB/</url>
     <content><![CDATA[<p>在 Java 8 中，增加了Lambda表达式、函数式接口、接口的默认方法和静态方法等语言新特性；在类库方面又新增了Stream API、Optional类等。</p>
+<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><p>Lambda 表达式 − Lambda允许把函数作为一个方法的参数（函数作为参数传递进方法中。  方法引用− 方法引用提供了非常有用的语法，可以直接引用已有Java类或对象（实例）的方法或构造器。与lambda联合使用，方法引用可以使语言的构造更紧凑简洁，减少冗余代码。  默认方法− 默认方法就是一个在接口里面有了一个实现的方法。</p>
 <h2 id="Stream-API"><a href="#Stream-API" class="headerlink" title="Stream API"></a>Stream API</h2><h3 id="什么是Stream"><a href="#什么是Stream" class="headerlink" title="什么是Stream"></a>什么是Stream</h3><blockquote>
 <p>Stream（流）是一个来自数据源的元素队列，它可以支持聚合操作，极大简化了集合的操作。</p>
 <ul>
@@ -96,6 +97,9 @@
 <h4 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h4><p>实现读写分离，首先要对Mysql做主从复制，即搭建一个主数据库，以及一个或多个从数据库。</p>
 <p>具体实现主从复制，可参照<a href="https://blog.tojintao.cn/2021/05/27/%E5%9F%BA%E4%BA%8Edocker%E5%AE%9E%E7%8E%B0MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/">《基于docker实现MySQL主从复制》</a></p>
 <p>使用Aop的方式，当调用业务层方法前，判断请求是否是只读操作，动态切换数据源，如果是只读操作，则切换从数据库的数据源，否则使用主数据库的数据源。</p>
+<h4 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h4><p>:rocket: 项目仓库：<a href="https://github.com/KimTou/Open-LetFit">KimTou/Open-LetFit: LetFit小程序后台开源版 </a></p>
+<p>这是我之前写的一个项目，具体代码可以在可以在上面我的GitHub仓库中找到，项目就是使用了本文章介绍的读写分离方式，感兴趣的同学可以作为参考。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.png"></p>
 <h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><ul>
 <li><strong>在application.yml配置MySQL</strong></li>
 </ul>
