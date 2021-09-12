@@ -4,7 +4,7 @@
     <title>Java 8新特性：Lambda表达式, Stream API, Optional类</title>
     <url>/2021/08/15/Java-8%E6%96%B0%E7%89%B9%E6%80%A7%EF%BC%9ALambda%E8%A1%A8%E8%BE%BE%E5%BC%8F-Stream-API-Optional%E7%B1%BB/</url>
     <content><![CDATA[<p>在 Java 8 中，增加了Lambda表达式、函数式接口、接口的默认方法和静态方法等语言新特性；在类库方面又新增了Stream API、Optional类等。</p>
-<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><p>Lambda 表达式 − Lambda允许把函数作为一个方法的参数（函数作为参数传递进方法中。  方法引用− 方法引用提供了非常有用的语法，可以直接引用已有Java类或对象（实例）的方法或构造器。与lambda联合使用，方法引用可以使语言的构造更紧凑简洁，减少冗余代码。  默认方法− 默认方法就是一个在接口里面有了一个实现的方法。</p>
+<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><p>Lambda 表达式 − Lambda允许把函数作为一个方法的参数（函数作为参数传递进方法中。</p>
 <h2 id="Stream-API"><a href="#Stream-API" class="headerlink" title="Stream API"></a>Stream API</h2><h3 id="什么是Stream"><a href="#什么是Stream" class="headerlink" title="什么是Stream"></a>什么是Stream</h3><blockquote>
 <p>Stream（流）是一个来自数据源的元素队列，它可以支持聚合操作，极大简化了集合的操作。</p>
 <ul>
@@ -78,7 +78,13 @@
 
 
 
-<h2 id="Optional类"><a href="#Optional类" class="headerlink" title="Optional类"></a>Optional类</h2><p>Optional类主要是用于解决空指针异常（NullPointerException），它能帮助我们减少各种null检查的代码，使程序变得更加简洁。从Java 8开始成为类库的一部分。</p>
+<h2 id="Optional类"><a href="#Optional类" class="headerlink" title="Optional类"></a>Optional类</h2><p>Optional类主要是用于解决<strong>空指针异常NullPointerException</strong>，它能帮助我们减少各种null检查的代码，使程序变得更加简洁，从Java 8开始成为类库的一部分。</p>
+<h4 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h4><p>从下面源码可以发现，Optional类维护了一个变量value，初始时其值为null。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Optional</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Optional&lt;?&gt; EMPTY = <span class="keyword">new</span> Optional&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> T value;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Optional</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.value = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span>&lt;T&gt; Optional&lt;T&gt; <span class="title">empty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">        Optional&lt;T&gt; t = (Optional&lt;T&gt;) EMPTY;</span><br><span class="line">        <span class="keyword">return</span> t;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Constructs an instance with the value present.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Optional</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.value = Objects.requireNonNull(value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns an &#123;<span class="doctag">@code</span> Optional&#125; with the specified present non-null value.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Optional&lt;T&gt; <span class="title">of</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Optional&lt;&gt;(value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Optional&lt;T&gt; <span class="title">ofNullable</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value == <span class="keyword">null</span> ? empty() : of(value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果value值为空，则抛出异常</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException(<span class="string">&quot;No value present&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>可以看到，<code>of</code>以及<code>ofNullable</code>这两个方法都可以创建Optional对象，那么它们有上面不同呢。主要在于使用<code>of</code>方法创建对象时，如果传入的value值为null，则会报NullPointerException空指针异常；而<code>ofNullable</code>方法不会报空指针异常，而是创建一个空的Optional对象。</p>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://blog.nowcoder.net/n/4e5c389e638147938bcd7b2340474a45">字节二面被问“Java Stream 流操作‘’？看完这篇，教你自信应对！</a></p>
 <p><a href="http://www.macrozheng.com/#/technology/java_stream?id=java-8%E9%83%BD%E5%87%BA%E9%82%A3%E4%B9%88%E4%B9%85%E4%BA%86%EF%BC%8Cstream-api%E4%BA%86%E8%A7%A3%E4%B8%8B%EF%BC%9F">Java 8都出那么久了，Stream API了解下？</a></p>
 ]]></content>
@@ -357,6 +363,60 @@
       <tags>
         <tag>MySQL</tag>
         <tag>docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>剑指 Offer 31.栈的压入、弹出序列</title>
+    <url>/2021/09/12/%E5%89%91%E6%8C%87-Offer-31-%E6%A0%88%E7%9A%84%E5%8E%8B%E5%85%A5%E3%80%81%E5%BC%B9%E5%87%BA%E5%BA%8F%E5%88%97/</url>
+    <content><![CDATA[<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p><strong>输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如，序列 {1,2,3,4,5} 是某栈的压栈序列，序列 {4,5,3,2,1} 是该压栈序列对应的一个弹出序列，但 {4,3,5,1,2} 就不可能是该压栈序列的弹出序列。</strong></p>
+<p>示例 1：</p>
+<figure class="highlight livescript"><table><tr><td class="code"><pre><span class="line">输入：pushed = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>], popped = [<span class="number">4</span>,<span class="number">5</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>]</span><br><span class="line">输出：<span class="literal">true</span></span><br><span class="line">解释：我们可以按以下顺序执行：</span><br><span class="line">push<span class="function"><span class="params">(<span class="number">1</span>)</span>, <span class="title">push</span><span class="params">(<span class="number">2</span>)</span>, <span class="title">push</span><span class="params">(<span class="number">3</span>)</span>, <span class="title">push</span><span class="params">(<span class="number">4</span>)</span>, <span class="title">pop</span><span class="params">()</span> -&gt;</span> <span class="number">4</span>,</span><br><span class="line">push<span class="function"><span class="params">(<span class="number">5</span>)</span>, <span class="title">pop</span><span class="params">()</span> -&gt;</span> <span class="number">5</span>, pop<span class="function"><span class="params">()</span> -&gt;</span> <span class="number">3</span>, pop<span class="function"><span class="params">()</span> -&gt;</span> <span class="number">2</span>, pop<span class="function"><span class="params">()</span> -&gt;</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>示例 2：</p>
+<figure class="highlight nix"><table><tr><td class="code"><pre><span class="line">输入：<span class="attr">pushed</span> = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>], <span class="attr">popped</span> = [<span class="number">4</span>,<span class="number">3</span>,<span class="number">5</span>,<span class="number">1</span>,<span class="number">2</span>]</span><br><span class="line">输出：<span class="literal">false</span></span><br><span class="line">解释：<span class="number">1</span> 不能在 <span class="number">2</span> 之前弹出。</span><br></pre></td></tr></table></figure>
+
+
+<p>提示：</p>
+<ol>
+<li>0 &lt;= pushed.length == popped.length &lt;= 1000</li>
+<li>0 &lt;= pushed[i], popped[i] &lt; 1000</li>
+<li>pushed 是 popped 的排列。</li>
+</ol>
+<h2 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h2><h3 id="利用数组模拟栈"><a href="#利用数组模拟栈" class="headerlink" title="利用数组模拟栈"></a>利用数组模拟栈</h3><h4 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h4><p>既然题目给我们的压入、弹出序列是数组，那么我们创建一个数组来模拟一个栈，作为中间的一个辅助栈，其长度最大不会超过pushed压入序列的长度。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span>[] stack = <span class="keyword">new</span> <span class="keyword">int</span>[pushed.length];</span><br></pre></td></tr></table></figure>
+
+<p><strong>算法实现：</strong></p>
+<p>1、遍历压入序列<code>pushed</code>的元素，并将其压入辅助栈<code>stack</code>。若遍历完压入序列<code>pushed</code>，则进行步骤三。</p>
+<p>2、辅助栈每压入一个元素，就去循环判断自己的栈顶元素与<code>popped</code>序列的栈顶元素是否相同。相同则一起弹出该元素并指针下移，继续判断下一栈顶元素是否相同；若不相同，则回到步骤一。</p>
+<p>3、检查辅助栈是否为空，若辅助栈不为空，则popped序列不是弹出序列。</p>
+<p><strong>关于循环条件的说明：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> (stackIndex &gt;= <span class="number">0</span> &amp;&amp; popIndex &lt; popped.length &amp;&amp;</span><br><span class="line">                                 stack[stackIndex] == popped[popIndex])</span><br></pre></td></tr></table></figure>
+
+<p>由于题目说明指出压入序列与弹出序列长度相同（<code>0 &lt;= pushed.length == popped.length &lt;= 1000</code>），且stack数组在当前循环中的长度小于等于pushed压入序列，故可知stack数组在当前循环中的长度必然小于等于poped弹出序列长度，因此我们便可把循环条件简化为：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> (stackIndex &gt;= <span class="number">0</span> &amp;&amp; stack[stackIndex] == popped[popIndex])</span><br></pre></td></tr></table></figure>
+
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">validateStackSequences</span><span class="params">(<span class="keyword">int</span>[] pushed, <span class="keyword">int</span>[] popped)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> pushIndex = <span class="number">0</span>, popIndex = <span class="number">0</span>, stackIndex = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span>[] stack = <span class="keyword">new</span> <span class="keyword">int</span>[pushed.length];</span><br><span class="line">        <span class="keyword">while</span> (pushIndex &lt; pushed.length)&#123;</span><br><span class="line">            stack[stackIndex] = pushed[pushIndex++];</span><br><span class="line">            <span class="keyword">while</span> (stackIndex &gt;= <span class="number">0</span> &amp;&amp; stack[stackIndex] == popped[popIndex])&#123;</span><br><span class="line">                stackIndex--;</span><br><span class="line">                popIndex++;</span><br><span class="line">            &#125;</span><br><span class="line">            stackIndex++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> stackIndex == <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>复杂度分析</strong></p>
+<ul>
+<li>时间复杂度O(N)：N为<code>pushed</code>压入序列的元素个数，每个元素最多入栈、出栈一次，即最多2N次出入栈操作</li>
+<li>空间复杂度O(N)：创建模拟栈stack，最多同时存储N个元素</li>
+</ul>
+<h3 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">validateStackSequences</span><span class="params">(<span class="keyword">int</span>[] pushed, <span class="keyword">int</span>[] popped)</span> </span>&#123;</span><br><span class="line">        Stack&lt;Integer&gt; stack = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> num : pushed)&#123;</span><br><span class="line">            stack.push(num);</span><br><span class="line">            <span class="keyword">while</span> (!stack.isEmpty() &amp;&amp; stack.peek() == popped[i])&#123;</span><br><span class="line">                stack.pop();</span><br><span class="line">                i++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> stack.isEmpty();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<hr>
+<ul>
+<li>题目链接：<a href="https://leetcode-cn.com/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/">剑指 Offer 31. 栈的压入、弹出序列 - 力扣（LeetCode） (leetcode-cn.com)</a></li>
+<li>题解链接：<a href="https://leetcode-cn.com/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/solution/zhi-xing-yong-shi-0-ms-li-yong-shu-zu-mo-1vwk/">执行用时: 0 ms 利用数组模拟栈（剑指31.栈的压入、弹出序列） - 栈的压入、弹出序列 - 力扣（LeetCode） (leetcode-cn.com)</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>数据结构与算法</tag>
       </tags>
   </entry>
 </search>
