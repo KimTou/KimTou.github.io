@@ -981,4 +981,86 @@
         <tag>设计模式</tag>
       </tags>
   </entry>
+  <entry>
+    <title>ElasticSearch、Kibana安装教程</title>
+    <url>/2021/10/07/ElasticSearch%E3%80%81Kibana%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<h2 id="初始ElasticSearch"><a href="#初始ElasticSearch" class="headerlink" title="初始ElasticSearch"></a>初始ElasticSearch</h2><h4 id="关于ES"><a href="#关于ES" class="headerlink" title="关于ES"></a>关于ES</h4><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214537.svg" style="zoom:200%;" />
+
+<p>Elasticsearch是一个基于Lucene的搜索引擎。适用于所有类型的数据，包括文本、数字、地理空间、结构化和非结构化数据。是一个分布式、RESTful 风格的搜索和数据分析引擎。</p>
+<h4 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h4><p>下载网址：<a href="https://www.elastic.co/cn/elasticsearch/">https://www.elastic.co/cn/elasticsearch</a></p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214603.PNG"></p>
+<h4 id="了解目录"><a href="#了解目录" class="headerlink" title="了解目录"></a>了解目录</h4><ul>
+<li><p><code>bin</code>：启动文件</p>
+</li>
+<li><p><code>config</code>：配置文件</p>
+</li>
+<li><p><code>log4j2</code>：日志配置文件</p>
+<ul>
+<li><code>jvm.options</code>：java虚拟机相关配置</li>
+<li><code>elasticsearch.yml</code>：elasticsearch的配置文件（默认端口：9200）</li>
+</ul>
+</li>
+<li><p><code>lib</code>：相关jar包</p>
+</li>
+<li><p><code>logs</code>：日志</p>
+</li>
+<li><p><code>modules</code>：功能模块</p>
+</li>
+<li><p><code>plugins</code>：插件（比如 ik 分词器）</p>
+</li>
+</ul>
+<h4 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h4><p>启动 <code>elasticsearch.bat</code>，并访问 <code>localhost:9200</code></p>
+<p><strong>解决跨域：</strong></p>
+<ul>
+<li>打开 elasticsearch.yml（添加以下代码）</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">http.cors.enabled:</span> <span class="literal">true</span>				<span class="string">//开启跨域支持</span></span><br><span class="line"><span class="attr">http.cors.allow-origin:</span> <span class="string">&quot;*&quot;</span>			<span class="string">//允许所有访问</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="可视化插件-ES-head"><a href="#可视化插件-ES-head" class="headerlink" title="可视化插件 ES-head"></a>可视化插件 ES-head</h4><p>下载地址：<a href="https://github.com/mobz/elasticsearch-head">https://github.com/mobz/elasticsearch-head</a></p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214606.PNG"></p>
+<ul>
+<li><strong>下载相关依赖：</strong></li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">D:\Environment\ElasticSearch\elasticsearch-head-master&gt;cnpm install</span><br><span class="line"></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>启动：</strong></li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">D:\Environment\ElasticSearch\elasticsearch-head-master&gt;npm run start</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**访问 <code>localhost:9100</code>**，若点击页面没有反应，因为我们是使用9100端口连接9200端口，因为跨端口而出现的问题。解决跨域问题的方法参考文章前面。</li>
+</ul>
+<h2 id="初始Kibana"><a href="#初始Kibana" class="headerlink" title="初始Kibana"></a>初始Kibana</h2><h4 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h4><p>下载地址：<a href="https://www.elastic.co/cn/kibana/%EF%BC%88%E6%B3%A8%E6%84%8F%E8%A6%81%E4%B8%8Ees%E7%89%88%E6%9C%AC%E4%B8%80%E8%87%B4%EF%BC%89">https://www.elastic.co/cn/kibana/（注意要与es版本一致）</a></p>
+<h4 id="启动-1"><a href="#启动-1" class="headerlink" title="启动"></a>启动</h4><p>打开 <code>kibana.bat</code></p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line"><span class="regexp">//</span>启动失败可以尝试修改es的jvm选项，提升运行内存到<span class="number">2</span>g</span><br></pre></td></tr></table></figure>
+
+<h4 id="访问测试"><a href="#访问测试" class="headerlink" title="访问测试"></a>访问测试</h4><p>访问：<code>localhost:5601</code>，之后所有操作都在 Dev Tools 进行</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214608.PNG"></p>
+<h4 id="汉化"><a href="#汉化" class="headerlink" title="汉化"></a>汉化</h4><p>打开 <code>kibana.yml</code>，修改为：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Specifies locale to be used for all localizable strings, dates and number formats.</span></span><br><span class="line"><span class="comment"># Supported languages are the following: English - en , by default , Chinese - zh-CN .</span></span><br><span class="line"><span class="comment">#i18n.locale: &quot;en&quot;</span></span><br><span class="line"><span class="attr">i18n.locale:</span> <span class="string">&quot;zh-CN&quot;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">汉化yml在</span><br><span class="line">D:<span class="symbol">\E</span>nvironment<span class="symbol">\E</span>lasticSearch<span class="symbol">\k</span>ibana-7.6.1-windows-x86_64<span class="symbol">\x</span>-pack<span class="symbol">\p</span>lugins<span class="symbol">\t</span>ranslations<span class="symbol">\t</span>ranslations</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>ElasticSearch</category>
+      </categories>
+      <tags>
+        <tag>ElasticSearch</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ElasticSearch入门实战</title>
+    <url>/2021/10/07/ElasticSearch%E5%85%A5%E9%97%A8%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[]]></content>
+      <categories>
+        <category>ElasticSearch</category>
+      </categories>
+      <tags>
+        <tag>ElasticSearch</tag>
+      </tags>
+  </entry>
 </search>
