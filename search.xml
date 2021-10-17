@@ -3,15 +3,15 @@
   <entry>
     <title>SpringBoot实现MySQL读写分离</title>
     <url>/2021/05/27/SpringBoot%E5%AE%9E%E7%8E%B0MySQL%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/</url>
-    <content><![CDATA[<h2 id="读写分离"><a href="#读写分离" class="headerlink" title="读写分离"></a>读写分离</h2><p>在高并发下，需要对应用进行读写分离，配置多数据源，即写操作走主库，读操作则走从库，主从数据库负责各自的读和写，缓解了锁的争用，提高了读取性能。</p>
+    <content><![CDATA[<p>在高并发下，需要对应用进行读写分离，配置多数据源，即写操作走主库，读操作则走从库，主从数据库负责各自的读和写，缓解了锁的争用，提高了读取性能。</p>
 <p>实现读写分离有多种方式，如使用中间件MyCat、Sharding-JDBC等，这里我们使用<strong>Aop</strong>的方式在代码层面实现读写分离。</p>
-<h4 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h4><p>实现读写分离，首先要对Mysql做主从复制，即搭建一个主数据库，以及一个或多个从数据库。</p>
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><p>实现读写分离，首先要对Mysql做主从复制，即搭建一个主数据库，以及一个或多个从数据库。</p>
 <p>具体实现主从复制，可参照<a href="https://blog.tojintao.cn/2021/05/27/%E5%9F%BA%E4%BA%8Edocker%E5%AE%9E%E7%8E%B0MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/">《基于docker实现MySQL主从复制》</a></p>
 <p>使用Aop的方式，当调用业务层方法前，判断请求是否是只读操作，动态切换数据源，如果是只读操作，则切换从数据库的数据源，否则使用主数据库的数据源。</p>
-<h4 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h4><p>:rocket: 项目仓库：<a href="https://github.com/KimTou/Open-LetFit">KimTou/Open-LetFit: LetFit小程序后台开源版 </a></p>
+<h2 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h2><p>:rocket: 项目仓库：<a href="https://github.com/KimTou/Open-LetFit">KimTou/Open-LetFit: LetFit小程序后台开源版 </a></p>
 <p>这是我之前写的一个项目，具体代码可以在可以在上面我的GitHub仓库中找到，项目就是使用了本文章介绍的读写分离方式，感兴趣的同学可以作为参考。</p>
 <p><img src="https://gitee.com/KIMTOU/img/raw/master/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.png"></p>
-<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><ul>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><ul>
 <li><strong>在application.yml配置MySQL</strong></li>
 </ul>
 <figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">datasource:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">com.alibaba.druid.pool.DruidDataSource</span></span><br><span class="line">    <span class="comment">#主机</span></span><br><span class="line">    <span class="attr">master:</span></span><br><span class="line">      <span class="attr">username:</span> <span class="string">root</span></span><br><span class="line">      <span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line">      <span class="attr">url:</span> <span class="string">jdbc:mysql://服务器ip:3306/letfit?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf8&amp;serverTimezone=GMT</span></span><br><span class="line">      <span class="attr">driver-class-name:</span> <span class="string">com.mysql.cj.jdbc.Driver</span></span><br><span class="line">    <span class="comment">#从机</span></span><br><span class="line">    <span class="attr">slave:</span></span><br><span class="line">      <span class="attr">username:</span> <span class="string">root</span></span><br><span class="line">      <span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line">      <span class="attr">url:</span> <span class="string">jdbc:mysql://服务器ip:3307/letfit?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf8&amp;serverTimezone=GMT</span></span><br><span class="line">      <span class="attr">driver-class-name:</span> <span class="string">com.mysql.cj.jdbc.Driver</span></span><br><span class="line">    <span class="comment">#连接池</span></span><br><span class="line">    <span class="attr">druid:</span></span><br><span class="line">      <span class="attr">initialSize:</span> <span class="number">5</span></span><br><span class="line">      <span class="attr">minIdle:</span> <span class="number">5</span></span><br><span class="line">      <span class="attr">maxActive:</span> <span class="number">20</span></span><br><span class="line">      <span class="attr">maxWait:</span> <span class="number">60000</span></span><br><span class="line">      <span class="attr">timeBetweenEvictionRunsMillis:</span> <span class="number">60000</span></span><br><span class="line">      <span class="attr">minEvictableIdleTimeMillis:</span> <span class="number">300000</span></span><br><span class="line">      <span class="attr">validationQuery:</span> <span class="string">SELECT</span> <span class="number">1</span> <span class="string">FROM</span> <span class="string">DUAL</span></span><br><span class="line">      <span class="attr">testWhileIdle:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">testOnBorrow:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">testOnReturn:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">poolPreparedStatements:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">filters:</span> <span class="string">stat,wall</span></span><br><span class="line">      <span class="attr">maxPoolPreparedStatementPerConnectionSize:</span> <span class="number">20</span></span><br><span class="line">      <span class="attr">useGlobalDataSourceStat:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">connectionProperties:</span> <span class="string">druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500</span></span><br></pre></td></tr></table></figure>
@@ -346,6 +346,8 @@
 <blockquote>
 <p>在发布订阅模式中一般会涉及到多个消费者组，而<strong>每个消费者组在每个队列中的消费位置都是不同的</strong>。如果此时有多个消费者组，那么消息被一个消费者组消费完之后是不会删除的（因为一个Topic可以被多个消费者订阅，那么其它消费者组也需要呀），它仅仅是为每个消费者组维护一个 <strong>消费位移(offset)</strong> ，每次消费者组消费完会返回一个成功的响应，然后队列再把维护的消费位移加一，这样就不会出现刚刚消费过的消息再一次被消费了。</p>
 </blockquote>
+<br>
+
 <h2 id="为什么一个主题中需要维护多个队列"><a href="#为什么一个主题中需要维护多个队列" class="headerlink" title="为什么一个主题中需要维护多个队列"></a>为什么一个主题中需要维护多个队列</h2><ul>
 <li><strong>提高并发能力</strong></li>
 </ul>
@@ -353,6 +355,8 @@
 <blockquote>
 <p><code>RocketMQ</code> 通过<strong>使用在一个 <code>Topic</code> 中配置多个队列并且每个队列维护每个消费者组的消费位置</strong> 实现了 <strong>主题模式/发布订阅模式</strong></p>
 </blockquote>
+<br>
+
 <h2 id="如何解决消息重复问题"><a href="#如何解决消息重复问题" class="headerlink" title="如何解决消息重复问题"></a>如何解决消息重复问题</h2><p><strong>首先分析引起重复消费的原因：</strong></p>
 <p><strong>1、ACK （网络因素）</strong></p>
 <p>正常情况下在consumer真正消费完消息后应该发送ack，通知broker该消息已正常消费。<strong>当ack因为网络原因无法发送到broker，broker会认为此条消息没有被消费</strong>，此后会开启消息重投机制把消息再次投递到consumer。</p>
@@ -363,6 +367,8 @@
 <p>只要保持幂等性，不管来多少条重复消息，最后处理的结果都一样。</p>
 <p>RocketMQ无法避免消息重复（Exactly-Once），所以如果业务对消费重复非常敏感，务必要在业务层面进行去重处理。可以借助关系数据库进行去重。首先需要确定消息的唯一键，可以是msgId，也可以是消息内容中的唯一标识字段，例如订单Id等。在消费之前判断唯一键是否在关系数据库中存在。如果不存在则插入，并消费，否则跳过。（实际过程要考虑原子性问题，判断是否存在可以尝试插入，如果报主键冲突，则插入失败，直接跳过）</p>
 <p>msgId一定是全局唯一标识符，但是实际使用中，可能会存在相同的消息有两个不同msgId的情况（消费者主动重发、因客户端重投机制导致的重复等），这种情况就需要使业务字段进行重复消费。</p>
+<br>
+
 <h2 id="如何保证消息的顺序消费"><a href="#如何保证消息的顺序消费" class="headerlink" title="如何保证消息的顺序消费"></a>如何保证消息的顺序消费</h2><p>首先Topic内的queue队列满足FIFO先进先出原则，本身就是顺序的，但多个queue同时消费并无法保证消息有序。那么此时我们只要保证将一类消息（如一个订单的创建、支付、完成）固定发送至同一queue队列即可。</p>
 <h4 id="那么如何保证消息发送至同一queue"><a href="#那么如何保证消息发送至同一queue" class="headerlink" title="那么如何保证消息发送至同一queue"></a>那么如何保证消息发送至同一queue</h4><p><strong>RocketMQ提供了MessageQueueSelector接口，可以重写接口的select方法，定义自己的选择策略。</strong></p>
 <p><strong>比如使用Hash取模法</strong>，让同一个订单发送到同一个队列中，再使用同步发送，只有同个订单的创建消息发送成功，再发送支付消息，这样我们保证了发送有序。</p>
@@ -376,7 +382,7 @@
 </ul>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">consumer.registerMessageListener(<span class="keyword">new</span> MessageListenerOrderly() &#123;</span><br><span class="line"></span><br><span class="line">    Random random = <span class="keyword">new</span> Random();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ConsumeOrderlyStatus <span class="title">consumeMessage</span><span class="params">(List&lt;MessageExt&gt; msgs, ConsumeOrderlyContext context)</span> </span>&#123;</span><br><span class="line">        context.setAutoCommit(<span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">for</span> (MessageExt msg : msgs) &#123;</span><br><span class="line">            <span class="comment">// 可以看到每个queue有唯一的consume线程来消费, 订单对每个queue(分区)有序</span></span><br><span class="line">            System.out.println(<span class="string">&quot;consumeThread=&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;queueId=&quot;</span> + msg.getQueueId() + <span class="string">&quot;, content:&quot;</span> + <span class="keyword">new</span> String(msg.getBody()));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//模拟业务逻辑处理中...</span></span><br><span class="line">            TimeUnit.SECONDS.sleep(random.nextInt(<span class="number">10</span>));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ConsumeOrderlyStatus.SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
-
+<br>
 
 <h2 id="RocketMQ如何保证消息不丢失"><a href="#RocketMQ如何保证消息不丢失" class="headerlink" title="RocketMQ如何保证消息不丢失"></a>RocketMQ如何保证消息不丢失</h2><p>首先在如下三个部分都可能会出现丢失消息的情况：</p>
 <ul>
@@ -406,12 +412,16 @@
 <h4 id="Consumer端如何保证消息不丢失"><a href="#Consumer端如何保证消息不丢失" class="headerlink" title="Consumer端如何保证消息不丢失"></a>Consumer端如何保证消息不丢失</h4><ul>
 <li>完全消费正常后在进行手动ack确认。</li>
 </ul>
+<br>
+
 <h2 id="消息刷盘机制"><a href="#消息刷盘机制" class="headerlink" title="消息刷盘机制"></a>消息刷盘机制</h2><blockquote>
 <p><strong>Broker</strong> 在消息的存取时直接操作的是内存（内存映射文件），这可以提供系统的吞吐量，但是无法避免机器掉电时数据丢失，所以需要持久化到磁盘中。</p>
 <p><strong>刷盘的最终实现都是使用NIO中的 MappedByteBuffer.force() 将映射区的数据写入到磁盘</strong></p>
 </blockquote>
 <p><strong>同步刷盘</strong>：在Broker把消息写到<strong>CommitLog</strong>映射区后，便进行持久化。只有在消息真正持久化至磁盘后RocketMQ的Broker端才会真正返回给Producer端一个成功的ACK响应。同步刷盘对MQ消息可靠性更好，但是性能上会有较大影响。</p>
 <p><strong>异步刷盘</strong>：能够充分利用OS的PageCache的优势，只要消息写入PageCache即可将成功的ACK返回给Producer端。<strong>消息刷盘采用后台异步线程提交的方式进行，降低了读写延迟</strong>，提高了MQ的性能和吞吐量。</p>
+<br>
+
 <h2 id="分布式事务"><a href="#分布式事务" class="headerlink" title="分布式事务"></a>分布式事务</h2><blockquote>
 <p>常见的分布式事务实现有 2PC(两阶段提交）、TCC 和事务消息(half 半消息机制)。每一种实现都有其特定的使用场景，但是也有各自的问题，<strong>都不是完美的解决方案</strong>。</p>
 </blockquote>
@@ -432,7 +442,12 @@
 <p>其中，补偿阶段用于解决消息Commit或者Rollback发生超时或者失败的情况。</p>
 <h4 id="事务消息在一阶段对用户不可见"><a href="#事务消息在一阶段对用户不可见" class="headerlink" title="事务消息在一阶段对用户不可见"></a>事务消息在一阶段对用户不可见</h4><p>事务消息相对普通消息最大的特点就是一阶段发送的消息对用户是不可见的。RocketMQ事务消息的做法是：<strong>如果消息是half消息，将备份原消息的主题与消息消费队列，然后改变主题为RMQ_SYS_TRANS_HALF_TOPIC。由于消费组未订阅该主题，故消费端无法消费half类型的消息</strong>，然后Broker会开启一个定时任务，从Topic为RMQ_SYS_TRANS_HALF_TOPIC中拉取消息进行消费，根据生产者组获取一个服务提供者<strong>发送回查事务状态请求</strong>，根据事务状态来决定是提交或回滚消息。若Commit，则恢复原消息的主题与队列，重新发送到Broker，消费端感知后消费。</p>
 <hr>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://github.com/apache/rocketmq/blob/master/docs/cn">https://github.com/apache/rocketmq/blob/master/docs/cn</a></p>
+<br>
+
+<blockquote>
+<p>参考资料</p>
+</blockquote>
+<p><a href="https://github.com/apache/rocketmq/blob/master/docs/cn">https://github.com/apache/rocketmq/blob/master/docs/cn</a></p>
 <p><a href="https://blog.csdn.net/qq_35190492/article/details/103341634?ops_request_misc=%7B%22request_id%22:%22162972269016780271584378%22,%22scm%22:%2220140713.130102334.pc_blog.%22%7D&request_id=162972269016780271584378&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-1-103341634.pc_v2_rank_blog_default&utm_term=rocket&spm=1018.2226.3001.4450">看完保送阿里的RocketMQ知识点（超详细）_敖丙-CSDN博客</a></p>
 <p><a href="https://github.com/Snailclimb/JavaGuide/blob/master/docs/system-design/distributed-system/message-queue/RocketMQ.md">JavaGuide/RocketMQ.md at master · Snailclimb/JavaGuide (github.com)</a></p>
 <p><a href="https://mp.weixin.qq.com/s/vxHzNs23-P4BvYvyME6_nQ">RocketMQ在面试中那些常见问题及答案 (qq.com)</a></p>
@@ -2300,8 +2315,7 @@
 
 
 
-<h1 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h1><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker pull mongo:4.4.1</span><br><span class="line">docker run -p 27017:27017 --name mongo -v /home/mongo/db:/data/db -d mongo:4.4.1 --auth</span><br><span class="line">docker exec -it mongo mongo		#进入容器</span><br><span class="line">use admin</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createUser(&#123;</span></span><br><span class="line">... user: &quot;KimTou&quot;,</span><br><span class="line">... pwd: &quot;Cjt13058191889&quot;,</span><br><span class="line">... roles: [&#123; role:&quot;root&quot;,db:&quot;admin&quot; &#125;] &#125;);</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.auth(<span class="string">&quot;KimTou&quot;</span>,<span class="string">&quot;Cjt13058191889&quot;</span>)	<span class="comment"># 测试</span></span></span><br></pre></td></tr></table></figure>
-
+<h1 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h1><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker pull mongo:4.4.1</span><br><span class="line">docker run -p 27017:27017 --name mongo -v /home/mongo/db:/data/db -d mongo:4.4.1 --auth</span><br><span class="line">docker exec -it mongo mongo		#进入容器</span><br><span class="line">use admin</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createUser(&#123;</span></span><br><span class="line">... user: &quot;KimTou&quot;,</span><br><span class="line">... pwd: &quot;123456&quot;,</span><br><span class="line">... roles: [&#123; role:&quot;root&quot;,db:&quot;admin&quot; &#125;] &#125;);</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.auth(<span class="string">&quot;KimTou&quot;</span>,<span class="string">&quot;123456&quot;</span>)	<span class="comment"># 测试</span></span></span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
