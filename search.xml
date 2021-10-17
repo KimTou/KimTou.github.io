@@ -2011,4 +2011,304 @@
         <tag>Linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>MongoDB学习总结</title>
+    <url>/2021/10/17/MongoDB%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<h1 id="安装下载"><a href="#安装下载" class="headerlink" title="安装下载"></a>安装下载</h1><p>下载地址：<a href="https://www.mongodb.com/try/download/community">https://www.mongodb.com/try/download/community</a></p>
+<img src="https://gitee.com/KIMTOU/img/raw/master/20211017235512.png" style="zoom:50%;" />
+
+<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><p>在data目录下创建db文件夹，在mongodb的bin目录下打开cmd输入命令 <code>mongod -dbpath 所在位置</code></p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">D:<span class="symbol">\E</span>nvironment<span class="symbol">\M</span>ongoDB<span class="symbol">\b</span>in&gt;mongod -dbpath D:<span class="symbol">\E</span>nvironment<span class="symbol">\M</span>ongoDB<span class="symbol">\d</span>ata<span class="symbol">\d</span>b</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="初识"><a href="#初识" class="headerlink" title="初识"></a>初识</h1><h4 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h4><p>1、cmd输入命令 <code>net start mongodb</code></p>
+<p>2、启动mongo.exe</p>
+<h4 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h4><p>show dbs ：显示当前所有数据库</p>
+<p>use 数据库 ：进入到指定数据库（不管有没有该数据库，都可以进入，若插入了文档，便会创建该数据库）</p>
+<p>db：当前所处数据库</p>
+<p>show collections：显示数据库中有多少个集合</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211017233927.png" alt="image-20211017233911818"></p>
+<h1 id="增删改查"><a href="#增删改查" class="headerlink" title="增删改查"></a>增删改查</h1><h2 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h2><h4 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a><strong>创建数据库</strong></h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">use DATABASE_NAME</span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果数据库不存在，则创建数据库，否则切换到指定数据库</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 或者插入时创建数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line">admin   0.000GB</span><br><span class="line">config  0.000GB</span><br><span class="line">local   0.000GB</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.test.insert(&#123;<span class="string">&quot;name&quot;</span>:<span class="string">&quot;Kim&quot;</span>&#125;)</span></span><br><span class="line">WriteResult(&#123; &quot;nInserted&quot; : 1 &#125;)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line">admin   0.000GB</span><br><span class="line">config  0.000GB</span><br><span class="line">local   0.000GB</span><br><span class="line">test    0.000GB</span><br></pre></td></tr></table></figure>
+
+<h4 id="删除数据库"><a href="#删除数据库" class="headerlink" title="删除数据库"></a>删除数据库</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">db.dropDatabase()</span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除当前数据库，默认为 <span class="built_in">test</span>，你可以使用 db 命令查看当前数据库名。</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="集合操作"><a href="#集合操作" class="headerlink" title="集合操作"></a>集合操作</h2><h4 id="创建集合"><a href="#创建集合" class="headerlink" title="创建集合"></a><strong>创建集合</strong></h4><p>语法格式：</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">db.create<span class="constructor">Collection(<span class="params">name</span>, <span class="params">options</span>)</span></span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li>name: 要创建的集合名称</li>
+<li>options: 可选参数, 指定有关内存大小及索引的选项</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建goods集合</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createCollection(<span class="string">&quot;goods&quot;</span>)</span></span><br><span class="line">&#123; &quot;ok&quot; : 1 &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>使用options</li>
+</ul>
+<p>创建固定集合  <code>mycol</code>，整个集合空间大小 6142800 KB, 文档最大个数为 10000 个。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createCollection(<span class="string">&quot;mycol&quot;</span>, &#123; capped : <span class="literal">true</span>, autoIndexId : <span class="literal">true</span>, size :</span> </span><br><span class="line">   6142800, max : 10000 &#125; )</span><br><span class="line">&#123; &quot;ok&quot; : 1 &#125;</span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>在 MongoDB 中，你不需要创建集合。当你插入一些文档时，MongoDB 会自动创建集合。</strong></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> db.mycol2.insert(&#123;<span class="string">&quot;name&quot;</span> : <span class="string">&quot;菜鸟教程&quot;</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show collections</span></span><br><span class="line">mycol2</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="删除集合"><a href="#删除集合" class="headerlink" title="删除集合"></a>删除集合</h4><figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="keyword">db</span>.collection.<span class="keyword">drop</span>()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 举例</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show collections</span></span><br><span class="line">test</span><br><span class="line">user</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.test.drop()</span></span><br><span class="line">true</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show collections</span></span><br><span class="line">user</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="文档操作"><a href="#文档操作" class="headerlink" title="文档操作"></a>文档操作</h2><h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><p>文档的数据结构和 JSON 基本一样。</p>
+<p>所有存储在集合中的数据都是 BSON 格式。</p>
+<p>BSON 是一种类似 JSON 的二进制形式的存储格式，是 Binary JSON 的简称。</p>
+<h4 id="插入文档"><a href="#插入文档" class="headerlink" title="插入文档"></a><strong>插入文档</strong></h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">insert：插入一个或多个</span><br><span class="line"></span><br><span class="line">插入一个</span><br><span class="line">db.user.insert(&#123;name:&quot;zhangsan&quot;,age:20&#125;)	</span><br><span class="line"></span><br><span class="line">插入多个（使用中括号[]）</span><br><span class="line">db.goods.insert([&#123;name:&quot;apple&quot;,price:5&#125;,&#123;name:&quot;computer&quot;,price:6999&#125;])</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">insertOne：插入一个</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.user.insertOne(&#123;name:<span class="string">&quot;zhangsan&quot;</span>,age:32&#125;)</span></span><br><span class="line">&#123;</span><br><span class="line">        &quot;acknowledged&quot; : true,</span><br><span class="line">        &quot;insertedId&quot; : ObjectId(&quot;6039dc6c9b01016868fc8027&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">insertMany：插入多个</span><br><span class="line"></span><br><span class="line">db.goods.insertMany([&#123;name:&quot;chair&quot;,price:49&#125;,&#123;name:&quot;computer&quot;,price:6999&#125;])</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>实例</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash">db.col.insert(&#123;title: <span class="string">&#x27;MongoDB 教程&#x27;</span>,</span> </span><br><span class="line">    description: &#x27;MongoDB 是一个 Nosql 数据库&#x27;,</span><br><span class="line">    by: &#x27;菜鸟教程&#x27;,</span><br><span class="line">    url: &#x27;http://www.runoob.com&#x27;,</span><br><span class="line">    tags: [&#x27;mongodb&#x27;, &#x27;database&#x27;, &#x27;NoSQL&#x27;],</span><br><span class="line">    likes: 100</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="更新文档"><a href="#更新文档" class="headerlink" title="更新文档"></a><strong>更新文档</strong></h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> update语句基本语法</span></span><br><span class="line">db.collection.update(</span><br><span class="line">   &lt;query&gt;,</span><br><span class="line">   &lt;update&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     upsert: &lt;boolean&gt;,</span><br><span class="line">     multi: &lt;boolean&gt;,</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li><strong>query</strong> : update的查询条件，类似sql update查询内where后面的。</li>
+<li><strong>update</strong> : update的对象和一些更新的操作符（如$,$inc…）等，也可以理解为sql update查询内set后面的</li>
+<li><strong>upsert</strong>  : 可选，这个参数的意思是，如果不存在update的记录，是否插入objNew,true为插入，默认是false，不插入。</li>
+<li><strong>multi</strong>  : 可选，mongodb 默认是false,只更新找到的第一条记录，如果这个参数为true,就把按条件查出来多条记录全部更新。</li>
+<li><strong>writeConcern</strong>  :可选，抛出异常的级别。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 例如：（将标题为“MongoDB 教程”改为“MongoDB”）</span></span><br><span class="line">db.col.update(&#123;&#x27;title&#x27;:&#x27;MongoDB 教程&#x27;&#125;,&#123;$set:&#123;&#x27;title&#x27;:&#x27;MongoDB&#x27;&#125;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 以上语句只会修改第一条发现的文档，如果你要修改多条相同的文档，则需要设置 multi 参数为 <span class="literal">true</span></span></span><br><span class="line">db.col.update(&#123;&#x27;title&#x27;:&#x27;MongoDB 教程&#x27;&#125;,&#123;$set:&#123;&#x27;title&#x27;:&#x27;MongoDB&#x27;&#125;&#125;,&#123;multi:true&#125;)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>综合实例</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 将goods集合中name为<span class="string">&quot;apple&quot;</span>的修改为<span class="string">&quot;food&quot;</span>（只修改第一条发现的文档）</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.goods.find()</span></span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0237be45c9df825a5558&quot;), &quot;name&quot; : &quot;apple&quot;, &quot;price&quot; : 5 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0317be45c9df825a5559&quot;), &quot;name&quot; : &quot;chair&quot;, &quot;price&quot; : 49 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0317be45c9df825a555a&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0346be45c9df825a555b&quot;), &quot;name&quot; : &quot;apple&quot;, &quot;price&quot; : 5 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0346be45c9df825a555c&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.goods.update(&#123;name:<span class="string">&quot;apple&quot;</span>&#125;,&#123;<span class="variable">$set</span>:&#123;name:<span class="string">&quot;food&quot;</span>&#125;&#125;)</span></span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.goods.find()</span></span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0237be45c9df825a5558&quot;), &quot;name&quot; : &quot;food&quot;, &quot;price&quot; : 5 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0317be45c9df825a5559&quot;), &quot;name&quot; : &quot;chair&quot;, &quot;price&quot; : 49 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0317be45c9df825a555a&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0346be45c9df825a555b&quot;), &quot;name&quot; : &quot;apple&quot;, &quot;price&quot; : 5 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0346be45c9df825a555c&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.goods.update(&#123;name:<span class="string">&quot;apple&quot;</span>&#125;,&#123;<span class="variable">$set</span>:&#123;name:<span class="string">&quot;food&quot;</span>&#125;&#125;)</span></span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.goods.find()</span></span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0237be45c9df825a5558&quot;), &quot;name&quot; : &quot;food&quot;, &quot;price&quot; : 5 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0317be45c9df825a5559&quot;), &quot;name&quot; : &quot;chair&quot;, &quot;price&quot; : 49 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0317be45c9df825a555a&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0346be45c9df825a555b&quot;), &quot;name&quot; : &quot;food&quot;, &quot;price&quot; : 5 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0346be45c9df825a555c&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 将goods集合中所有name为<span class="string">&quot;food&quot;</span>的修改为<span class="string">&quot;apple&quot;</span>（修改多条相同的文档，则需要设置 multi 参数为 <span class="literal">true</span>）</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.goods.update(&#123;name:<span class="string">&quot;food&quot;</span>&#125;,&#123;<span class="variable">$set</span>:&#123;name:<span class="string">&quot;apple&quot;</span>&#125;&#125;,&#123;multi:<span class="literal">true</span>&#125;)</span></span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 2, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 2 &#125;)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.goods.find()</span></span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0237be45c9df825a5558&quot;), &quot;name&quot; : &quot;apple&quot;, &quot;price&quot; : 5 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0317be45c9df825a5559&quot;), &quot;name&quot; : &quot;chair&quot;, &quot;price&quot; : 49 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0317be45c9df825a555a&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0346be45c9df825a555b&quot;), &quot;name&quot; : &quot;apple&quot;, &quot;price&quot; : 5 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5fcb0346be45c9df825a555c&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="删除文档"><a href="#删除文档" class="headerlink" title="删除文档"></a><strong>删除文档</strong></h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> remove语句基本语法</span></span><br><span class="line">db.collection.remove(</span><br><span class="line">   &lt;query&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     justOne: &lt;boolean&gt;,</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li><strong>query</strong> :（可选）删除的文档的条件。</li>
+<li><strong>justOne</strong> : （可选）如果设为 true 或 1，则只删除一个文档，如果不设置该参数，或使用默认值 false，则删除所有匹配条件的文档。</li>
+<li><strong>writeConcern</strong>  :（可选）抛出异常的级别。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 将所有name为“apple”的文档删除</span></span><br><span class="line">db.goods.remove(&#123;name:&quot;apple&quot;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果你只想删除第一条找到的记录可以设置 justOne 为 1</span></span><br><span class="line">db.goods.remove(&#123;name:&quot;apple&quot;&#125;,1)</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>现在官方推荐使用 deleteOne() 和 deleteMany() 方法</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 删除goods集合下所有文档</span></span><br><span class="line">db.goods.deleteMany(&#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除name等于apple的全部文档</span></span><br><span class="line">db.goods.deleteMany(&#123;name:&quot;apple&quot;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除name等于zhangsan的一个文档</span></span><br><span class="line">db.user.deleteOne(&#123;name:&quot;zhangsan&quot;&#125;)</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h1><h4 id="查询文档"><a href="#查询文档" class="headerlink" title="查询文档"></a><strong>查询文档</strong></h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">db.collection.<span class="builtin-name">find</span>(query, projection)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>query</strong> ：可选，使用查询操作符指定查询条件</li>
+<li><strong>projection</strong> ：可选，使用投影操作符指定返回的键。查询时返回文档中所有键值， 只需省略该参数即可（默认省略）</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查询user集合中的所有文档</span></span><br><span class="line">db.user.find()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> pretty()方法以格式化的方式来显示所有文档</span></span><br><span class="line">db.col.find().pretty()</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>MongoDB 与 RDBMS Where 语句比较</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>格式</th>
+<th>范例</th>
+<th>RDBMS中的类似语句</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>等于</td>
+<td><code>&#123;&lt;key&gt;:&lt;value&gt;</code>}</td>
+<td><code>db.col.find(&#123;&quot;by&quot;:&quot;菜鸟教程&quot;&#125;).pretty()</code></td>
+<td><code>where by = &#39;菜鸟教程&#39;</code></td>
+</tr>
+<tr>
+<td>小于</td>
+<td><code>&#123;&lt;key&gt;:&#123;$lt:&lt;value&gt;&#125;&#125;</code></td>
+<td><code>db.col.find(&#123;&quot;likes&quot;:&#123;$lt:50&#125;&#125;).pretty()</code></td>
+<td><code>where likes &lt; 50</code></td>
+</tr>
+<tr>
+<td>小于或等于</td>
+<td><code>&#123;&lt;key&gt;:&#123;$lte:&lt;value&gt;&#125;&#125;</code></td>
+<td><code>db.col.find(&#123;&quot;likes&quot;:&#123;$lte:50&#125;&#125;).pretty()</code></td>
+<td><code>where likes &lt;= 50</code></td>
+</tr>
+<tr>
+<td>大于</td>
+<td><code>&#123;&lt;key&gt;:&#123;$gt:&lt;value&gt;&#125;&#125;</code></td>
+<td><code>db.col.find(&#123;&quot;likes&quot;:&#123;$gt:50&#125;&#125;).pretty()</code></td>
+<td><code>where likes &gt; 50</code></td>
+</tr>
+<tr>
+<td>大于或等于</td>
+<td><code>&#123;&lt;key&gt;:&#123;$gte:&lt;value&gt;&#125;&#125;</code></td>
+<td><code>db.col.find(&#123;&quot;likes&quot;:&#123;$gte:50&#125;&#125;).pretty()</code></td>
+<td><code>where likes &gt;= 50</code></td>
+</tr>
+<tr>
+<td>不等于</td>
+<td><code>&#123;&lt;key&gt;:&#123;$ne:&lt;value&gt;&#125;&#125;</code></td>
+<td><code>db.col.find(&#123;&quot;likes&quot;:&#123;$ne:50&#125;&#125;).pretty()</code></td>
+<td><code>where likes != 50</code></td>
+</tr>
+</tbody></table>
+<ul>
+<li>and条件</li>
+</ul>
+<p>MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔开，即常规 SQL  的 AND 条件</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">db.col.find(&#123;key1:value1, key2:value2&#125;).pretty()</span><br><span class="line"></span><br><span class="line">db.goods.find(&#123;name:&quot;computer&quot;,price:&#123;$gte:6000&#125;&#125;).pretty()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>or条件</li>
+</ul>
+<p>MongoDB OR 条件语句使用了关键字 <strong>$or</strong></p>
+<p>查询键 <strong>by</strong> 值为 菜鸟教程 或键 <strong>title</strong> 值为 <strong>MongoDB 教程</strong> 的文档</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">db.col.find(&#123;$or:[&#123;&quot;by&quot;:&quot;菜鸟教程&quot;&#125;,&#123;&quot;title&quot;: &quot;MongoDB 教程&quot;&#125;]&#125;).pretty()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>AND 和 OR 联合使用</strong></li>
+</ul>
+<p>以下实例演示了 AND 和 OR 联合使用，类似常规 SQL 语句为： <strong>‘where likes&gt;50 AND (by = ‘菜鸟教程’ OR title = ‘MongoDB 教程’)’</strong></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">db.col.find(&#123;&quot;likes&quot;: &#123;$gt:50&#125;, $or: [&#123;&quot;by&quot;: &quot;菜鸟教程&quot;&#125;,&#123;&quot;title&quot;: &quot;MongoDB 教程&quot;&#125;]&#125;).pretty()</span><br><span class="line"></span><br><span class="line">db.goods.find(&#123;name:&quot;computer&quot;,$or:[&#123;price:&#123;$gte:6000&#125;&#125;,&#123;price:4999&#125;]&#125;).pretty()</span><br><span class="line">&#123;</span><br><span class="line">        &quot;_id&quot; : ObjectId(&quot;6039dba49b01016868fc8026&quot;),</span><br><span class="line">        &quot;name&quot; : &quot;computer&quot;,</span><br><span class="line">        &quot;price&quot; : 6999</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line">        &quot;_id&quot; : ObjectId(&quot;603a00f19b01016868fc802b&quot;),</span><br><span class="line">        &quot;name&quot; : &quot;computer&quot;,</span><br><span class="line">        &quot;price&quot; : 4999</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="模糊查询"><a href="#模糊查询" class="headerlink" title="模糊查询"></a><strong>模糊查询</strong></h4><p>查询 title 包含”教”字的文档：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">db.col.find(&#123;title:/教/&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>查询 title 字段以”教”字开头的文档：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">db.col.find(&#123;title:/^教/&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>查询 titl e字段以”教”字结尾的文档：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">db.col.find(&#123;title:/教$/&#125;)</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="分页查询"><a href="#分页查询" class="headerlink" title="分页查询"></a><strong>分页查询</strong></h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 返回指定NUMBER数量的数据记录</span></span><br><span class="line">db.COLLECTION_NAME.find().limit(NUMBER)</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h1><ul>
+<li>在 MongoDB 中使用 sort() 方法对数据进行排序，sort() 方法可以通过参数指定排序的字段，并使用 1 和 -1 来指定排序的方式，其中 1 为升序排列，而 -1 是用于降序排列</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash">db.COLLECTION_NAME.find().sort(&#123;KEY:1&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 按价格 升序 排序</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.goods.find().sort(&#123;price:1&#125;)</span></span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;6039e2589b01016868fc8029&quot;), &quot;name&quot; : &quot;box&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;603a00f19b01016868fc802a&quot;), &quot;name&quot; : &quot;chair&quot;, &quot;price&quot; : 90 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;603a00f19b01016868fc802b&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 4999 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;6039dba49b01016868fc8026&quot;), &quot;name&quot; : &quot;computer&quot;, &quot;price&quot; : 6999 &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>skip()，limilt()，sort()三个放在一起执行的时候，执行的顺序是先 sort()，然后是 skip()，最后是显示的 limit()</li>
+</ul>
+<h1 id="聚合"><a href="#聚合" class="headerlink" title="聚合"></a>聚合</h1><p>MongoDB 中聚合(aggregate)主要用于处理数据(诸如统计平均值，求和等)，并返回计算后的数据结果。</p>
+<p>有点类似 SQL 语句中的 count(*)</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">db.<span class="module-access"><span class="module"><span class="identifier">COLLECTION_NAME</span>.</span></span>aggregate(AGGREGATE_OPERATION)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> db.mycol.aggregate([&#123;<span class="variable">$group</span> : &#123;_id : <span class="string">&quot;<span class="variable">$by_user</span>&quot;</span>, num_tutorial : &#123;<span class="variable">$sum</span> : 1&#125;&#125;&#125;])</span></span><br><span class="line">&#123;</span><br><span class="line">   &quot;result&quot; : [</span><br><span class="line">      &#123;</span><br><span class="line">         &quot;_id&quot; : &quot;runoob.com&quot;,</span><br><span class="line">         &quot;num_tutorial&quot; : 2</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">         &quot;_id&quot; : &quot;Neo4j&quot;,</span><br><span class="line">         &quot;num_tutorial&quot; : 1</span><br><span class="line">      &#125;</span><br><span class="line">   ],</span><br><span class="line">   &quot;ok&quot; : 1</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>以上实例类似sql语句：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">select by_user, count(*) from mycol group by by_user</span><br></pre></td></tr></table></figure>
+
+<p>在上面的例子中，我们通过字段 by_user 字段对数据进行分组，并计算 by_user 字段相同值的总和。</p>
+<table>
+<thead>
+<tr>
+<th>表达式</th>
+<th>描述</th>
+<th>实例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$sum</td>
+<td>计算总和。</td>
+<td>db.mycol.aggregate([{$group : {_id : “$by_user”, num_tutorial : {$sum : “$likes”}}}])</td>
+</tr>
+<tr>
+<td>$avg</td>
+<td>计算平均值</td>
+<td>db.mycol.aggregate([{$group : {_id : “$by_user”, num_tutorial : {$avg : “$likes”}}}])</td>
+</tr>
+<tr>
+<td>$min</td>
+<td>获取集合中所有文档对应值得最小值。</td>
+<td>db.mycol.aggregate([{$group : {_id : “$by_user”, num_tutorial : {$min : “$likes”}}}])</td>
+</tr>
+<tr>
+<td>$max</td>
+<td>获取集合中所有文档对应值得最大值。</td>
+<td>db.mycol.aggregate([{$group : {_id : “$by_user”, num_tutorial : {$max : “$likes”}}}])</td>
+</tr>
+<tr>
+<td>$push</td>
+<td>在结果文档中插入值到一个数组中。</td>
+<td>db.mycol.aggregate([{$group : {_id : “$by_user”, url : {$push: “$url”}}}])</td>
+</tr>
+<tr>
+<td>$addToSet</td>
+<td>在结果文档中插入值到一个数组中，但不创建副本。</td>
+<td>db.mycol.aggregate([{$group : {_id : “$by_user”, url : {$addToSet : “$url”}}}])</td>
+</tr>
+<tr>
+<td>$first</td>
+<td>根据资源文档的排序获取第一个文档数据。</td>
+<td>db.mycol.aggregate([{$group : {_id : “$by_user”, first_url : {$first : “$url”}}}])</td>
+</tr>
+<tr>
+<td>$last</td>
+<td>根据资源文档的排序获取最后一个文档数据</td>
+<td>db.mycol.aggregate([{$group : {_id : “$by_user”, last_url : {$last : “$url”}}}])</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="SpringBoot集成"><a href="#SpringBoot集成" class="headerlink" title="SpringBoot集成"></a>SpringBoot集成</h1><h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--引入mongodb--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-data-mongodb<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 配置mongodb</span></span><br><span class="line"><span class="meta">spring.data.mongodb.uri</span>=<span class="string">mongodb://localhost:27017/recruit</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="实战应用"><a href="#实战应用" class="headerlink" title="实战应用"></a>实战应用</h2><h4 id="文章模块"><a href="#文章模块" class="headerlink" title="文章模块"></a>文章模块</h4><ul>
+<li><strong>dao层</strong></li>
+</ul>
+<p>普通的增删改查方法可以直接调用mongoTemplate的默认方法，自定义方法则需在接口主动声明。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ArticleRepository</span> <span class="keyword">extends</span> <span class="title">MongoRepository</span>&lt;<span class="title">Article</span>, <span class="title">String</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 根据模块名查找文章</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> moduleName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">List&lt;Article&gt; <span class="title">findByModuleName</span><span class="params">(String moduleName)</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>service层</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArticleServiceImpl</span> <span class="keyword">implements</span> <span class="title">ArticleService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> ArticleRepository articleRepository;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> MongoTemplate mongoTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取默认文章（4个）</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> ResultInfo&lt;List&lt;Article&gt;&gt; findDefaultArticle() &#123;</span><br><span class="line">        Query query = <span class="keyword">new</span> Query();</span><br><span class="line">        Sort sort = Sort.by(<span class="string">&quot;gmtCreate&quot;</span>).descending();</span><br><span class="line">        PageRequest pageRequest = PageRequest.of(<span class="number">0</span>, <span class="number">4</span>);</span><br><span class="line">        query.with(sort);</span><br><span class="line">        query.with(pageRequest);</span><br><span class="line">        List&lt;Article&gt; articleList = mongoTemplate.find(query, Article.class);</span><br><span class="line">        <span class="keyword">return</span> ResultInfo.success(CodeEnum.SUCCESS, articleList);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 根据模块名查找文章</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> moduleName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> ResultInfo&lt;List&lt;Article&gt;&gt; findByModuleName(String moduleName) &#123;</span><br><span class="line">        List&lt;Article&gt; articles = articleRepository.findByModuleName(moduleName);</span><br><span class="line">        <span class="keyword">return</span> ResultInfo.success(CodeEnum.SUCCESS, articles);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 根据文章标题模糊查询</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> articleTitle</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> ResultInfo&lt;List&lt;Article&gt;&gt; findByArticleTitle(String articleTitle) &#123;</span><br><span class="line">        Pattern pattern = </span><br><span class="line">            Pattern.compile(<span class="string">&quot;^.*&quot;</span> + articleTitle + <span class="string">&quot;.*$&quot;</span>, Pattern.CASE_INSENSITIVE);</span><br><span class="line">        Query query = <span class="keyword">new</span> Query();</span><br><span class="line">        query.addCriteria(Criteria.where(<span class="string">&quot;articleTitle&quot;</span>).regex(pattern));</span><br><span class="line">        Sort sort = Sort.by(<span class="string">&quot;gmtCreate&quot;</span>).descending();</span><br><span class="line">        query.with(sort);</span><br><span class="line">        List&lt;Article&gt; articles = mongoTemplate.find(query, Article.class);</span><br><span class="line">        <span class="keyword">return</span> ResultInfo.success(CodeEnum.SUCCESS, articles);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="题目模块"><a href="#题目模块" class="headerlink" title="题目模块"></a>题目模块</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Validated</span></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionServiceImpl</span> <span class="keyword">implements</span> <span class="title">QuestionService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> QuestionRepository questionRepository;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> MongoTemplate mongoTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 新增一道题目</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> question</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">saveOne</span><span class="params">(Question question)</span> </span>&#123;</span><br><span class="line">        questionRepository.save(question);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 自由模式随机查找一道题</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ResultInfo&lt;Question&gt; <span class="title">getOneQuestion</span><span class="params">()</span></span>&#123;</span><br><span class="line">        List&lt;Question&gt; questions = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="comment">// Aggregation.sample()可随机抽选指定数量的数据</span></span><br><span class="line">        TypedAggregation&lt;Question&gt; aggregation = </span><br><span class="line">            Aggregation.newAggregation(Question.class, Aggregation.sample(<span class="number">1</span>));</span><br><span class="line">        AggregationResults&lt;Question&gt; results = </span><br><span class="line">            mongoTemplate.aggregate(aggregation, Question.class);</span><br><span class="line">        results.forEach(result-&gt;&#123;</span><br><span class="line">            questions.add(result);</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">if</span>(questions.isEmpty())&#123;</span><br><span class="line">            <span class="keyword">return</span> ResultInfo.error(CodeEnum.PARAM_NOT_IDEAL, <span class="keyword">null</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> ResultInfo.success(CodeEnum.SUCCESS, questions.get(<span class="number">0</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 自由模式根据模块名随机查找一道题</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> moduleName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ResultInfo&lt;Question&gt; <span class="title">getOneQuestionByName</span><span class="params">(<span class="meta">@NotBlank</span> String moduleName)</span></span>&#123;</span><br><span class="line">        List&lt;Question&gt; questions = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        MatchOperation match = </span><br><span class="line">            Aggregation.match(Criteria.where(<span class="string">&quot;moduleName&quot;</span>).is(moduleName));</span><br><span class="line">        TypedAggregation&lt;Question&gt; aggregation = </span><br><span class="line">            Aggregation.newAggregation(Question.class, match, Aggregation.sample(<span class="number">1</span>));</span><br><span class="line">        AggregationResults&lt;Question&gt; results = </span><br><span class="line">            mongoTemplate.aggregate(aggregation, Question.class);</span><br><span class="line">        results.forEach(result-&gt;&#123;</span><br><span class="line">            questions.add(result);</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">if</span>(questions.size() == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> ResultInfo.error(CodeEnum.PARAM_NOT_IDEAL, <span class="keyword">null</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> ResultInfo.success(CodeEnum.SUCCESS, questions.get(<span class="number">0</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 闯关模式根据模块名随机查找10道题</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> moduleName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> ResultInfo&lt;List&lt;Question&gt;&gt; getQuestionsByName(<span class="meta">@NotBlank</span> String moduleName)&#123;</span><br><span class="line">        List&lt;Question&gt; questions = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        MatchOperation match = </span><br><span class="line">            Aggregation.match(Criteria.where(<span class="string">&quot;moduleName&quot;</span>).is(moduleName));</span><br><span class="line">        TypedAggregation&lt;Question&gt; aggregation = </span><br><span class="line">            Aggregation.newAggregation(Question.class, match, Aggregation.sample(<span class="number">10</span>));</span><br><span class="line">        AggregationResults&lt;Question&gt; results = </span><br><span class="line">            mongoTemplate.aggregate(aggregation, Question.class);</span><br><span class="line">        results.forEach(result-&gt;&#123;</span><br><span class="line">            questions.add(result);</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">return</span> ResultInfo.success(CodeEnum.SUCCESS, questions);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h1><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker pull mongo:4.4.1</span><br><span class="line">docker run -p 27017:27017 --name mongo -v /home/mongo/db:/data/db -d mongo:4.4.1 --auth</span><br><span class="line">docker exec -it mongo mongo		#进入容器</span><br><span class="line">use admin</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createUser(&#123;</span></span><br><span class="line">... user: &quot;KimTou&quot;,</span><br><span class="line">... pwd: &quot;Cjt13058191889&quot;,</span><br><span class="line">... roles: [&#123; role:&quot;root&quot;,db:&quot;admin&quot; &#125;] &#125;);</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.auth(<span class="string">&quot;KimTou&quot;</span>,<span class="string">&quot;Cjt13058191889&quot;</span>)	<span class="comment"># 测试</span></span></span><br></pre></td></tr></table></figure>
+
+
+]]></content>
+      <categories>
+        <category>MongoDB</category>
+      </categories>
+      <tags>
+        <tag>MongoDB</tag>
+      </tags>
+  </entry>
 </search>
