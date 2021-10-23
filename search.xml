@@ -263,7 +263,6 @@
 
 ]]></content>
       <categories>
-        <category>MySQL</category>
         <category>Linux</category>
       </categories>
       <tags>
@@ -1421,11 +1420,13 @@
 <h2 id="接口默认方法"><a href="#接口默认方法" class="headerlink" title="接口默认方法"></a>接口默认方法</h2><p>从 Java 8 开始接口<code>interface</code>的方法可以使用 <code>default</code> 或 <code>static</code> 修饰，这样就可以有方法体，且实现类不必进行重写。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">write</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;111&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;222&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-
+<br>
 
 <h2 id="函数式接口"><a href="#函数式接口" class="headerlink" title="函数式接口"></a>函数式接口</h2><p><strong>函数式接口（Functional Interface）就是有且仅有一个抽象方法，但是可以有多个非抽象方法的接口。函数式接口可以被隐式转换为 lambda 表达式。</strong></p>
 <p>像我们经常使用的 <strong><code>Runnable</code>、<code>Callable</code>、<code>Comparator</code></strong> 就是函数式接口。</p>
 <p>一般我们可以给函数式接口添加 <code>@FunctionalInterface</code> 注解，当然是不是函数式接口与加不加这个注解无关，只要符合函数式接口定义，即只包含一个抽象方法，虚拟机就会自动判断该接口为函数式接口。使用<code>@FunctionalInterface</code> 注解只是在编译时起到强制规范定义的作用。</p>
+<br>
+
 <h4 id="实战运用"><a href="#实战运用" class="headerlink" title="实战运用"></a>实战运用</h4><p>当我们在做项目时，如果遇到接口需要前端传递时间日期参数，此时我们只需配置一个日期转换类，即可实现自动将前端传递过来的时间戳字符串转换为 <code>Date</code> 类。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DateConfig</span> <span class="keyword">implements</span> <span class="title">Converter</span>&lt;<span class="title">String</span>, <span class="title">Date</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Date <span class="title">convert</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Date(Long.parseLong(str));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -1435,9 +1436,11 @@
 <p>之后我们的接口便可以直接使用 Date 类来接收时间类型参数。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@ApiOperation(value = &quot;查询审计&quot;, tags = &quot;审计管理&quot;)</span></span><br><span class="line"><span class="meta">@GetMapping(&quot;/findAudit&quot;)</span></span><br><span class="line"><span class="keyword">public</span> Result&lt;List&lt;AuditResVo&gt;&gt; findAudit(Date createTimeStart, Date createTimeEnd)&#123;</span><br><span class="line">    List&lt;AuditResVo&gt; auditList = auditService.getAuditList(createTimeStart, createTimeEnd);</span><br><span class="line">    <span class="keyword">return</span> Result.success(auditList);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<br>
 
+<h2 id="方法引用"><a href="#方法引用" class="headerlink" title="方法引用"></a>方法引用</h2><br>
 
-<h2 id="方法引用"><a href="#方法引用" class="headerlink" title="方法引用"></a>方法引用</h2><h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><p>lambada表达式是一个可传递的代码块，可以在以后执行一次或多次。Lambda允许把函数作为一个方法的参数。</p>
+<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><p>lambada表达式是一个可传递的代码块，可以在以后执行一次或多次。Lambda允许把函数作为一个方法的参数。</p>
 <p>例如我们平时给集合或数组排序，都会使用<code>Collections.sort </code>或 <code>Arrays.sort</code> 进行排序，此时需要向 sort 方法传入一个 Comparator 对象：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;String&gt; strList = Arrays.asList(<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>, <span class="string">&quot;three&quot;</span>);</span><br><span class="line">Collections.sort(strList, <span class="keyword">new</span> Comparator&lt;String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(String str1, String str2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> str2.length() - str1.length();	<span class="comment">//将集合按照字符串长度降序排序</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
@@ -1469,7 +1472,7 @@
 <p>Stream流中的 <code>filter</code> 过滤需要通过一个 <code>predicate</code> 接口来过滤并只保留符合条件的元素，此时配合lambada表达式会非常方便。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Student student1 = <span class="keyword">new</span> Student(<span class="number">1</span>, <span class="string">&quot;小明&quot;</span>);</span><br><span class="line">Student student2 = <span class="keyword">new</span> Student(<span class="number">6</span>, <span class="string">&quot;小李&quot;</span>);</span><br><span class="line">Student student3 = <span class="keyword">new</span> Student(<span class="number">12</span>, <span class="string">&quot;小月&quot;</span>);</span><br><span class="line">List&lt;Student&gt; studentList = Arrays.asList(student1, student2, student3);</span><br><span class="line">List&lt;Student&gt; collect = studentList.stream()</span><br><span class="line">    		.filter(student -&gt; student.getNo() &lt; <span class="number">10</span>).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
 
-
+<br>
 
 <h2 id="Stream-API"><a href="#Stream-API" class="headerlink" title="Stream API"></a>Stream API</h2><h3 id="什么是Stream"><a href="#什么是Stream" class="headerlink" title="什么是Stream"></a>什么是Stream</h3><blockquote>
 <p>Stream（流）是一个来自数据源的元素队列，它可以支持聚合操作，极大简化了集合的操作。</p>
@@ -1478,6 +1481,8 @@
 <li>聚合操作：对Stream对象进行处理后使得Stream对象返回指定规则数据的操作称之为聚合操作，比如filter、map、limit、sorted等都是聚合操作。</li>
 </ul>
 </blockquote>
+<br>
+
 <h3 id="Stream聚合操作"><a href="#Stream聚合操作" class="headerlink" title="Stream聚合操作"></a>Stream聚合操作</h3><p>这里使用一个实体类（User）作为示例：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Long userId;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String userName;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> Integer age;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String address;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -1542,13 +1547,15 @@
 </ul>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;User&gt; collect = userList.stream()</span><br><span class="line">        .sorted((userA, userB) -&gt; &#123;</span><br><span class="line">            <span class="keyword">return</span> userB.getAge().compareTo(userA.getAge());</span><br><span class="line">        &#125;)</span><br><span class="line">        .collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
 
-
+<br>
 
 <h2 id="Optional类"><a href="#Optional类" class="headerlink" title="Optional类"></a>Optional类</h2><p>Optional类是 Java 8 提供的用于解决 <strong>空指针异常 <code>NullPointerException</code></strong> 的工具，它能帮助我们减少各种 <code>null</code> 检查的代码，使程序变得更加简洁。</p>
 <h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><p>从下面源码可以发现，Optional类维护了一个变量value，初始时其值为null。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Optional</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 全局EMPTY对象</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Optional&lt;?&gt; EMPTY = <span class="keyword">new</span> Optional&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Optional维护的值</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> T value;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 初始值为null</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Optional</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.value = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 返回Optional的Empty空对象</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span>&lt;T&gt; Optional&lt;T&gt; <span class="title">empty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Optional&lt;T&gt; t = (Optional&lt;T&gt;) EMPTY;</span><br><span class="line">        <span class="keyword">return</span> t;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 私有构造方法，给Optional对象的value赋值</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Optional</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.value = Objects.requireNonNull(value);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Objects.requireNonNull方法</span></span><br><span class="line"><span class="comment">     * 可以发现使用of方法若value为null，则抛出NullPointerException异常</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">requireNonNull</span><span class="params">(T obj)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (obj == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建指定value值的Optional对象并返回</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Optional&lt;T&gt; <span class="title">of</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Optional&lt;&gt;(value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果value为null则返回EMPTY，否则返回of(value)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Optional&lt;T&gt; <span class="title">ofNullable</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value == <span class="keyword">null</span> ? empty() : of(value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果value值为空，则抛出异常</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException(<span class="string">&quot;No value present&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
 <p>通过源码我们可以看到， <code>of()</code> 以及 <code>ofNullable()</code> 这两个方法都可以创建Optional对象并返回，那么它们有上面不同呢？主要在于<strong>使用<code>of()</code>方法传入的 value 值为 null 时，则会直接抛出 <code>NullPointerException</code> 空指针异常；而<code>ofNullable()</code>方法不会报空指针异常，而是返回 <code>EMPTY</code></strong> （一个 value 为 null 值的Optional对象）。如果需要把 <code>NullPointerException</code> 暴漏出来就用 <code>of</code>，否则就用 <code>ofNullable</code>。</p>
+<br>
+
 <h3 id="of与ofNullable测试"><a href="#of与ofNullable测试" class="headerlink" title="of与ofNullable测试"></a>of与ofNullable测试</h3><p>我们先使用<code>of()</code>方法进行测试，当value不为null，使用<code>get()</code>方法能够正常获取。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str1 = <span class="string">&quot;hello&quot;</span>;</span><br><span class="line">String str2 = <span class="keyword">null</span>;</span><br><span class="line">Optional&lt;String&gt; optional = Optional.of(str1);</span><br><span class="line">String str = optional1.get();</span><br><span class="line">System.out.println(str);</span><br></pre></td></tr></table></figure>
 
@@ -1558,11 +1565,11 @@
 <p>我们再使用<code>ofNullable()</code>方法进行测试，当传入value为null值时，<code>ofNullable()</code>方法并不会抛出异常，而是在<code>get()</code>时抛出NoSuchElementException异常。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str1 = <span class="string">&quot;hello&quot;</span>;</span><br><span class="line">String str2 = <span class="keyword">null</span>;</span><br><span class="line">Optional&lt;String&gt; optional = Optional.ofNullable(str2);<span class="comment">//未抛出异常</span></span><br><span class="line">String str = optional.get();<span class="comment">//抛出异常</span></span><br><span class="line">System.out.println(str);</span><br></pre></td></tr></table></figure>
 
-
+<br>
 
 <h3 id="其他实用方法"><a href="#其他实用方法" class="headerlink" title="其他实用方法"></a>其他实用方法</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isPresent</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> value != <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 如果Optional内部维护的value不为null，则执行consumer</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">ifPresent</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> T&gt; consumer)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (value != <span class="keyword">null</span>)</span><br><span class="line">        consumer.accept(value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 如果Optional内部维护的value不为null则将其返回，否则返回other其他值</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">orElse</span><span class="params">(T other)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> value != <span class="keyword">null</span> ? value : other;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-
+<br>
 
 <h3 id="map与flatMap"><a href="#map与flatMap" class="headerlink" title="map与flatMap"></a>map与flatMap</h3><p><strong>源码分析</strong></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 如果value为null，返回EMPTY，否则返回Optional封装的参数值</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span>&lt;U&gt; Optional&lt;U&gt; <span class="title">map</span><span class="params">(Function&lt;? <span class="keyword">super</span> T, ? extends U&gt; mapper)</span> </span>&#123;</span><br><span class="line">    Objects.requireNonNull(mapper);</span><br><span class="line">    <span class="keyword">if</span> (!isPresent())</span><br><span class="line">        <span class="keyword">return</span> empty();</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Optional.ofNullable(mapper.apply(value));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 如果value为null，返回EMPTY，否则返回Optional封装的参数值，如果参数值返回null会抛 NullPointerException</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span>&lt;U&gt; Optional&lt;U&gt; <span class="title">flatMap</span><span class="params">(Function&lt;? <span class="keyword">super</span> T, Optional&lt;U&gt;&gt; mapper)</span> </span>&#123;</span><br><span class="line">    Objects.requireNonNull(mapper);</span><br><span class="line">    <span class="keyword">if</span> (!isPresent())</span><br><span class="line">        <span class="keyword">return</span> empty();</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Objects.requireNonNull(mapper.apply(value));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1572,6 +1579,8 @@
 <li>参数不一样</li>
 <li><code>flatMap()</code> 参数返回值如果是 null 会抛 <code>NullPointerException</code>，而 <code>map()</code> 返回<code>EMPTY</code></li>
 </ul>
+<br>
+
 <h3 id="小试身手"><a href="#小试身手" class="headerlink" title="小试身手"></a>小试身手</h3><p>下面代码严格的逻辑判断避免了程序发生空指针异常，但也导致了代码冗杂。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">getName</span><span class="params">(School school)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (school != <span class="keyword">null</span>) &#123;</span><br><span class="line">        Student student = school.getStudent();</span><br><span class="line">        <span class="keyword">if</span> (student != <span class="keyword">null</span>) &#123;</span><br><span class="line">            String name = student.getName();</span><br><span class="line">            System.out.println(name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -1581,7 +1590,7 @@
 <p>若方法需要返回name，则可以改写为：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getName</span><span class="params">(School school)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Optional.ofNullable(school).map(School::getStudent).map(Student::getName)</span><br><span class="line">            .orElse(<span class="string">&quot;发现null值&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-
+<br>
 
 <blockquote>
 <p>参考资料</p>
@@ -2545,6 +2554,171 @@
       </categories>
       <tags>
         <tag>深入理解JVM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>字符串常量池与包装类详解</title>
+    <url>/2021/10/23/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%B8%8E%E5%8C%85%E8%A3%85%E7%B1%BB%E8%AF%A6%E8%A7%A3/</url>
+    <content><![CDATA[<h1 id="字符串常量池"><a href="#字符串常量池" class="headerlink" title="字符串常量池"></a>字符串常量池</h1><h3 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h3><p><strong>JVM为了提升性能和减少内存开销，避免重复创建字符串，其维护了一块特殊的内存空间，即字符串常量池。</strong>当需要使用字符串时，先去检查字符串常量池是否存在该字符串，若存在，则直接返回该字符串的引用地址；若不存在，则在字符串常量池中创建字符串对象，并返回对象的引用地址。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String a = <span class="string">&quot;abc&quot;</span>;	<span class="comment">// 放至常量池</span></span><br><span class="line">String b = <span class="string">&quot;abc&quot;</span>;	<span class="comment">// 从常量池中取出</span></span><br><span class="line">System.out.println(a == b);	<span class="comment">// trzue</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：在 JDK7 之前，字符串常量池位置在永久代（方法区）中，此时字符串常量池存放的是对象及其引用。到 JDK7 时，字符串常量池被移动至堆中，此时字符串常量池只存放引用，字符串对象在堆中。</strong></p>
+<br>
+
+<h3 id="所处内存区域"><a href="#所处内存区域" class="headerlink" title="所处内存区域"></a>所处内存区域</h3><ul>
+<li><p><strong>在 JDK 1.7 之前，运行时常量池（包括字符串常量池）存放在方法区，此时HotSpot虚拟机对方法区的实现为永久代。</strong></p>
+</li>
+<li><p><strong>在 JDK 1.7 时，字符串常量池被从方法区转移至 Java 堆中，注意并不是运行时常量池，而是字符串常量池被单独转移到堆，运行时常量池剩下的东西还是方法区中，也就是HotSpot的永久代</strong>。</p>
+</li>
+<li><p><strong>在 JDK 1.8 时，方法区（HotSpot 的永久代）被彻底移除了（JDK 7 就已经开始了），使用在本地内存中实现的元空间来代替。此时字符串常量池还在堆中，只不过方法区的实现从永久代变为了元空间，并将 JDK 1.7 中永久代剩余的内容（运行时常量池、类型信息）全部移到元空间</strong>。</p>
+</li>
+</ul>
+<br>
+
+<h3 id="String-类型的变量和常量做“-”运算时发生了什么？"><a href="#String-类型的变量和常量做“-”运算时发生了什么？" class="headerlink" title="String 类型的变量和常量做“+”运算时发生了什么？"></a>String 类型的变量和常量做“+”运算时发生了什么？</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str1 = <span class="string">&quot;str&quot;</span>;</span><br><span class="line">String str2 = <span class="string">&quot;ing&quot;</span>;</span><br><span class="line">String str3 = <span class="string">&quot;str&quot;</span> + <span class="string">&quot;ing&quot;</span>;	<span class="comment">//常量池中的对象</span></span><br><span class="line">String str4 = str1 + str2; 		<span class="comment">//在堆上创建的新的对象</span></span><br><span class="line">String str5 = <span class="string">&quot;string&quot;</span>;			<span class="comment">//常量池中的对象</span></span><br><span class="line">System.out.println(str3 == str4);<span class="comment">//false</span></span><br><span class="line">System.out.println(str3 == str5);<span class="comment">//true</span></span><br><span class="line">System.out.println(str4 == str5);<span class="comment">//false</span></span><br></pre></td></tr></table></figure>
+
+<p>对于编译期可以确定值的字符串，也就是常量字符串 ，jvm 会将其存入字符串常量池。</p>
+<p>并且，字符串常量拼接得到的字符串常量在编译阶段就已经被存放字符串常量池，这个得益于编译器的优化。</p>
+<blockquote>
+<p>在编译过程中，Javac 编译器（下文中统称为编译器）会进行一个叫做 <strong>常量折叠(Constant Folding)</strong> 的代码优化。</p>
+<p>常量折叠会把常量表达式的值求出来作为常量嵌在最终生成的代码中，这是 Javac 编译器会对源代码做的极少量优化措施之一(代码优化几乎都在即时编译器中进行)。</p>
+<p>对于 <code>String str3 = &quot;str&quot; + &quot;ing&quot;;</code> 编译器会给你优化成 <code>String str3 = &quot;string&quot;;</code> 。</p>
+<p>并不是所有的常量都会进行折叠，只有编译器在程序编译期就可以确定值的常量才可以：</p>
+<ol>
+<li>基本数据类型(byte、boolean、short、char、int、float、long、double)以及字符串常量</li>
+<li><code>final</code> 修饰的基本数据类型和字符串变量</li>
+<li>字符串通过 “+” 拼接得到的字符串、基本数据类型之间算数运算（加减乘除）、基本数据类型的位运算（&lt;&lt;、&gt;&gt;、&gt;&gt;&gt; ）</li>
+</ol>
+<p>而引用的值在程序编译期无法确定的，编译器无法对其进行优化。</p>
+</blockquote>
+<p>因此，<code>str1</code> 、 <code>str2</code> 、 <code>str3</code> 都属于字符串常量池中的对象。</p>
+<p>对象引用和 “+” 的字符串拼接方式，实际上是通过 <code>StringBuilder</code> 调用 <code>append()</code> 方法实现的，拼接完成之后调用 <code>toString()</code> 得到一个 <code>String</code> 对象 。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str4 = <span class="keyword">new</span> StringBuilder().append(str1).append(str2).toString();</span><br></pre></td></tr></table></figure>
+
+<p>因此，<code>str4</code> 并不是字符串常量池中存在的对象，属于堆上的新对象。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023175419.png"></p>
+<p>不过，字符串使用 <code>final</code> 关键字声明之后，可以让编译器当做常量来处理。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> String str1 = <span class="string">&quot;str&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> String str2 = <span class="string">&quot;ing&quot;</span>;</span><br><span class="line"><span class="comment">// 下面两个表达式其实是等价的</span></span><br><span class="line">String c = <span class="string">&quot;str&quot;</span> + <span class="string">&quot;ing&quot;</span>;	<span class="comment">// 常量池中的对象</span></span><br><span class="line">String d = str1 + str2; 	<span class="comment">// 常量池中的对象</span></span><br><span class="line">System.out.println(c == d);	<span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>被 <code>final</code> 关键字修改之后的 <code>String</code> 会被编译器当做常量来处理，编译器在程序编译期就可以确定它的值，其效果就想到于访问常量。</strong></p>
+<p>可以通过查看字节码文件验证：</p>
+<img src="https://gitee.com/KIMTOU/img/raw/master/20211023175522.PNG" style="zoom:67%;" />
+
+<p>但如果编译器在运行时才能知道其确切值的话，就无法对其优化，即只要其中有一个是变量，结果就在堆中。</p>
+<br>
+
+<h3 id="new-String-会创建几个对象"><a href="#new-String-会创建几个对象" class="headerlink" title="new String()会创建几个对象"></a>new String()会创建几个对象</h3><ul>
+<li>首先来看一个例子：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str1 = <span class="string">&quot;abc&quot;</span>;</span><br><span class="line">String str2 = <span class="keyword">new</span> String(<span class="string">&quot;abc&quot;</span>);</span><br><span class="line">String str3 = <span class="keyword">new</span> String(<span class="string">&quot;abc&quot;</span>);</span><br><span class="line">System.out.println(str1 == str2);	<span class="comment">//false</span></span><br><span class="line">System.out.println(str2 == str3);	<span class="comment">//false</span></span><br></pre></td></tr></table></figure>
+
+<p>代码运行之后输出均为false，原因是：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从字符串常量池中拿对象</span></span><br><span class="line">String str1 = <span class="string">&quot;abc&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>此时 JVM 会先检查字符串常量池有没有”abc”，若存在，则str1直接指向常量池中的”abc”；若不存在，则在常量池中创建一个，然后 str1 指向字符串常量池中的对象。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 直接在堆内存中创建新的对象</span></span><br><span class="line">String str2 = <span class="keyword">new</span> String(<span class="string">&quot;abc&quot;</span>);</span><br><span class="line">String str3 = <span class="keyword">new</span> String(<span class="string">&quot;abc&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用 <code>new String()</code> 会在堆中创建一个字符串对象，然后检查字符串常量池中是否存在字符串值相同的字符串对象，若没有，则在字符串常量池中也创建一个值相同的字符串对象，最后返回堆中该字符串对象的地址</strong>。</p>
+<p>故使用 <code>new String()</code> 会创建1或2个对象。</p>
+<ul>
+<li>那换一个例子：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str = <span class="keyword">new</span> String(<span class="string">&quot;a&quot;</span>) + <span class="keyword">new</span> String(<span class="string">&quot;b&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>此时创建了6个对象：</p>
+<p>1、new StringBuilder（因为出现连接操作，且连接的是变量）</p>
+<p>2、堆中的”a”</p>
+<p>3、常量池中的”a”</p>
+<p>4、堆中的”b”</p>
+<p>5、常量池中的”b”</p>
+<p>6、堆中的”ab”（通过<code>toString()</code>方法在堆中创建，但不会在字符串常量池中创建）</p>
+<br>
+
+<h3 id="关于intern"><a href="#关于intern" class="headerlink" title="关于intern()"></a>关于intern()</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String s = <span class="keyword">new</span> String(<span class="string">&quot;1&quot;</span>);</span><br><span class="line">s.intern();		<span class="comment">// 本质上这行代码没啥用，因为字符串常量池已经存在&quot;1&quot;了（由于new String）</span></span><br><span class="line">String s2 = <span class="string">&quot;1&quot;</span>;</span><br><span class="line">System.out.println(s == s2);	<span class="comment">// jdk6:false  jdk7/8:false</span></span><br><span class="line"></span><br><span class="line">String s3 = <span class="keyword">new</span> String(<span class="string">&quot;1&quot;</span>) + <span class="keyword">new</span> String(<span class="string">&quot;1&quot;</span>);</span><br><span class="line">s3.intern();</span><br><span class="line">String s4 = <span class="string">&quot;11&quot;</span>;</span><br><span class="line">System.out.println(s3 == s4);	<span class="comment">// jdk6:false  jdk7/8:true</span></span><br></pre></td></tr></table></figure>
+
+<p>在JDK1.6和 JDK1.7以后intern函数有不同的处理：</p>
+<p>在JDK1.6中，intern的处理是：先判断字符串常量是否在字符串常量池中，如果存在直接返回该常量地址，如果没有找到，则在字符串常量池创建该常量并返回该对象地址；</p>
+<p>在JDK1.7中，intern的处理是：先判断字符串常量是否在字符串常量池中，如果存在直接返回该常量地址；<strong>如果没有找到，说明该字符串常量在堆中，则处理是把堆区该对象的引用加入到字符串常量池中</strong>，之后拿到的是该字符串常量的引用，实际对象存储在堆中。</p>
+<blockquote>
+<p>使用intern方法，当常量池不存在字符串常量时：</p>
+<p>JDK 1.7之前（不包括1.7）intern方法会<strong>在常量池创建对象，并返回对象的引用</strong>；JDK 1.7及以后，字符串常量池被从方法区拿到了堆中，使用intern方法时 <strong>JVM 不会在常量池中创建该对象，而是将堆中这个对象的引用直接放到常量池中</strong>，减少不必要的内存开销。</p>
+</blockquote>
+<br>
+
+<h1 id="包装类以及对应的常量池"><a href="#包装类以及对应的常量池" class="headerlink" title="包装类以及对应的常量池"></a>包装类以及对应的常量池</h1><h3 id="包装类型是什么？基本类型和包装类型有什么区别？"><a href="#包装类型是什么？基本类型和包装类型有什么区别？" class="headerlink" title="包装类型是什么？基本类型和包装类型有什么区别？"></a>包装类型是什么？基本类型和包装类型有什么区别？</h3><p>Java 为每一个基本数据类型都引入了对应的包装类型（wrapper class），int 的包装类就是 Integer，从 Java 5 开始引入了自动装箱/拆箱机制，<strong>把基本类型转换成包装类型的过程叫做装箱（boxing）；反之，把包装类型转换成基本类型的过程叫做拆箱（unboxing）</strong>，使得二者可以相互转换。</p>
+<p>Java 为每个原始类型提供了包装类型：</p>
+<ul>
+<li><p>原始类型: boolean，char，byte，short，int，long，float，double</p>
+</li>
+<li><p>包装类型：Boolean，Character，Byte，Short，Integer，Long，Float，Double</p>
+</li>
+</ul>
+<p>基本类型和包装类型的区别主要有以下几点：</p>
+<p>1、<strong>包装类型可以为 null，而基本类型不可以</strong>。它使得包装类型可以应用于 POJO 中，而基本类型则不行。那为什么 POJO 的属性必须要用包装类型呢？《阿里巴巴 Java 开发手册》上有详细的说明， 数据库的查询结果可能是 null，如果使用基本类型的话，因为要自动拆箱（将包装类型转为基本类型，比如说把 Integer 对象转换成 int 值），就会抛出 NullPointerException 的异常。</p>
+<p>2、包装类型可用于泛型，而基本类型不可以。泛型不能使用基本类型，因为使用基本类型时会编译出错。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;<span class="keyword">int</span>&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;(); <span class="comment">// 提示 Syntax error, insert &quot;Dimensions&quot; to complete ReferenceType</span></span><br><span class="line">List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br></pre></td></tr></table></figure>
+
+<p>因为泛型在编译时会进行类型擦除，最后只保留原始类型，而原始类型只能是 Object 类及其子类——基本类型是个特例。</p>
+<p>3、基本类型比包装类型更高效。基本类型在栈中直接存储的具体数值，而包装类型则存储的是堆中的引用。 很显然，相比较于基本类型而言，包装类型需要占用更多的内存空间。</p>
+<br>
+
+<h3 id="什么是自动装箱、自动拆箱"><a href="#什么是自动装箱、自动拆箱" class="headerlink" title="什么是自动装箱、自动拆箱"></a>什么是自动装箱、自动拆箱</h3><p><strong>自动装箱：将基本数据类型转化为包装类对象</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer i = <span class="number">9</span>;	==&gt;&gt;	Integer i = Integer.valueOf(<span class="number">9</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>9是属于基本数据类型的，原则上它是不能直接赋值给一个对象Integer的。引入了自动装箱/拆箱机制，就可以进行这样的声明，自动将基本数据类型转化为对应的封装类型，成为一个对象以后就可以调用对象所声明的所有的方法。</p>
+</blockquote>
+<p><strong>自动拆箱：将包装类对象转化为基本数据类型</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer i = <span class="number">9</span>;</span><br><span class="line"><span class="keyword">int</span> j = i;	===&gt;&gt;	通过使用 Integer.intValue()	</span><br><span class="line"></span><br><span class="line"><span class="comment">// ===================</span></span><br><span class="line"></span><br><span class="line">Integer i = <span class="number">9</span>;</span><br><span class="line">System.out.print(i++);</span><br></pre></td></tr></table></figure>
+
+<p>因为<strong>对象时不能直接进行运算的，而是要转化为基本数据类型后才能进行加减乘除</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer i1 = <span class="number">40</span>;</span><br><span class="line">Integer i2 = <span class="number">40</span>;</span><br><span class="line">Integer i3 = <span class="number">0</span>;</span><br><span class="line">Integer i4 = <span class="keyword">new</span> Integer(<span class="number">40</span>);</span><br><span class="line">Integer i5 = <span class="keyword">new</span> Integer(<span class="number">40</span>);</span><br><span class="line">Integer i6 = <span class="keyword">new</span> Integer(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(i1 == i2);<span class="comment">// true</span></span><br><span class="line">System.out.println(i1 == i2 + i3);<span class="comment">//true</span></span><br><span class="line">System.out.println(i1 == i4);<span class="comment">// false</span></span><br><span class="line">System.out.println(i4 == i5);<span class="comment">// false</span></span><br><span class="line">System.out.println(i4 == i5 + i6);<span class="comment">// true</span></span><br><span class="line">System.out.println(<span class="number">40</span> == i5 + i6);<span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><code>i1</code> , <code>i2 </code>, <code>i3</code> 都是常量池中的对象，<code>i4</code> , <code>i5</code> , <code>i6</code> 是堆中的对象。</p>
+<p><code>i4 == i5 + i6</code> 为什么是 true 呢？因为， <code>i5</code> 和 <code>i6</code> 会进行自动拆箱操作，进行数值相加，即 <code>i4 == 40</code> 。 <code>Integer</code> 对象无法与数值进行直接比较，所以 <code>i4</code> 自动拆箱转为 int 值 40，最终这条语句转为 <code>40 == 40</code> 进行数值比较。</p>
+<br>
+
+<h2 id="包装类常量池"><a href="#包装类常量池" class="headerlink" title="包装类常量池"></a>包装类常量池</h2><blockquote>
+<p><code>Byte</code>, <code>Short</code>, <code>Integer</code>, <code>Long</code> 这 4 种包装类默认创建了数值 <strong>[-128, 127]</strong> 的相应类型的缓存数据，<code>Character</code> 创建了数值在 <strong>[0, 127]</strong> 范围的缓存数据，<code>Boolean</code> 直接返回 <code>True</code> or <code>False</code>。</p>
+<p>两种浮点数类型的包装类 <code>Float</code>, <code>Double</code> 并没有实现常量池技术。</p>
+</blockquote>
+<h4 id="Integer"><a href="#Integer" class="headerlink" title="Integer"></a>Integer</h4><ul>
+<li><strong>Integer缓存范围： [-128, 127]</strong></li>
+</ul>
+<p>Integer的equals方法被重写过，比较的是内部value的值；</p>
+<p><strong>使用 == 如果在[-128, 127]会被cache缓存，超过这个则比较的是对象是否相同。</strong></p>
+<p>Integer源码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Integer <span class="title">valueOf</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)</span><br><span class="line">        <span class="keyword">return</span> IntegerCache.cache[i + (-IntegerCache.low)];</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Integer(i);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">IntegerCache</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> low = -<span class="number">128</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> high;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> Integer cache[];	<span class="comment">// cache数组已存储好 [-128, 127]的Integer对象</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> h = <span class="number">127</span>;</span><br><span class="line">        <span class="comment">// ......</span></span><br><span class="line">        high = h;</span><br><span class="line">        cache = <span class="keyword">new</span> Integer[(high - low) + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">int</span> j = low;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> k = <span class="number">0</span>; k &lt; cache.length; k++)</span><br><span class="line">            cache[k] = <span class="keyword">new</span> Integer(j++);	<span class="comment">// 创建[-128, 127]的Integer对象</span></span><br><span class="line">        <span class="comment">// ......</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="判断Integer值是否相同时，推荐使用equals方法或自动拆箱"><a href="#判断Integer值是否相同时，推荐使用equals方法或自动拆箱" class="headerlink" title="判断Integer值是否相同时，推荐使用equals方法或自动拆箱"></a>判断Integer值是否相同时，推荐使用equals方法或自动拆箱</h4><p><strong>1、使用equals方法</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer x = <span class="number">128</span>;</span><br><span class="line">Integer y = <span class="number">128</span>;</span><br><span class="line">System.out.println(x == y);	<span class="comment">//结果为false</span></span><br></pre></td></tr></table></figure>
+
+<p>因为128超过了缓存区，故x、y实际上都创建了值为128的Integer对象，地址肯定不一样</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer x = <span class="number">128</span>;</span><br><span class="line">Integer y = <span class="number">128</span>;</span><br><span class="line">System.out.println(x.equals(y));<span class="comment">//结果为true</span></span><br></pre></td></tr></table></figure>
+
+<p>equals方法直接比较Integer对象的value属性值</p>
+<p><strong>2、自动拆箱</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Integer x = <span class="number">128</span>;</span><br><span class="line">Integer y = <span class="number">128</span>;</span><br><span class="line"><span class="keyword">int</span> z = y;</span><br><span class="line">System.out.println(x == z);	<span class="comment">//结果为true</span></span><br></pre></td></tr></table></figure>
+
+<p>先把运算比较的两个变量其中一个用int类型代替，==比较时x便自动拆箱转化为int</p>
+<br>
+
+<h1 id="补充：Java中的常量池"><a href="#补充：Java中的常量池" class="headerlink" title="补充：Java中的常量池"></a>补充：Java中的常量池</h1><h4 id="常量池分类"><a href="#常量池分类" class="headerlink" title="常量池分类"></a>常量池分类</h4><p>Java中常量池可分为三种：<code>全局字符串常量池</code>，<code>class文件常量池</code>，<code>运行时常量池</code>。其中<code>字符出常量池</code>就是<code>全局字符串常量池</code>。</p>
+<p>关于这些常量池的详细解释可参考：<a href="http://tangxman.github.io/2015/07/27/the-difference-of-java-string-pool/">Java中几种常量池的区分</a></p>
+<br>
+
+<blockquote>
+<p>参考资料</p>
+</blockquote>
+<p><a href="https://github.com/Snailclimb/JavaGuide/blob/master/docs/java/jvm/Java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.md#%E5%9B%9B-%E9%87%8D%E7%82%B9%E8%A1%A5%E5%85%85%E5%86%85%E5%AE%B9">JavaGuide/Java内存区域.md at master · Snailclimb/JavaGuide (github.com)</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
       </tags>
   </entry>
 </search>
