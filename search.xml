@@ -2550,16 +2550,16 @@
 <p><a href="https://github.com/Snailclimb/JavaGuide/tree/master/docs/java/jvm">https://github.com/Snailclimb/JavaGuide</a></p>
 ]]></content>
       <categories>
-        <category>深入理解JVM</category>
+        <category>JVM</category>
       </categories>
       <tags>
-        <tag>深入理解JVM</tag>
+        <tag>JVM</tag>
       </tags>
   </entry>
   <entry>
     <title>字符串常量池与包装类详解</title>
     <url>/2021/10/23/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%B8%8E%E5%8C%85%E8%A3%85%E7%B1%BB%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<h1 id="字符串常量池"><a href="#字符串常量池" class="headerlink" title="字符串常量池"></a>字符串常量池</h1><h3 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h3><p><strong>JVM为了提升性能和减少内存开销，避免重复创建字符串，其维护了一块特殊的内存空间，即字符串常量池。</strong>当需要使用字符串时，先去检查字符串常量池是否存在该字符串，若存在，则直接返回该字符串的引用地址；若不存在，则在字符串常量池中创建字符串对象，并返回对象的引用地址。</p>
+    <content><![CDATA[<h1 id="字符串常量池"><a href="#字符串常量池" class="headerlink" title="字符串常量池"></a>字符串常量池</h1><h3 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h3><p><strong>JVM为了提升性能和减少内存开销，避免重复创建字符串，其维护了一块特殊的内存空间，即字符串常量池</strong>。当需要使用字符串时，先去检查字符串常量池是否存在该字符串，若存在，则直接返回该字符串的引用地址；若不存在，则在字符串常量池中创建字符串对象，并返回对象的引用地址。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String a = <span class="string">&quot;abc&quot;</span>;	<span class="comment">// 放至常量池</span></span><br><span class="line">String b = <span class="string">&quot;abc&quot;</span>;	<span class="comment">// 从常量池中取出</span></span><br><span class="line">System.out.println(a == b);	<span class="comment">// trzue</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>注意：在 JDK7 之前，字符串常量池位置在永久代（方法区）中，此时字符串常量池存放的是对象及其引用。到 JDK7 时，字符串常量池被移动至堆中，此时字符串常量池只存放引用，字符串对象在堆中。</strong></p>
@@ -2719,6 +2719,322 @@
       </categories>
       <tags>
         <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>深入理解Java虚拟机——垃圾收集器与内存分配策略</title>
+    <url>/2021/10/24/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E2%80%94%E2%80%94%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</url>
+    <content><![CDATA[<h2 id="对象已死？"><a href="#对象已死？" class="headerlink" title="对象已死？"></a>对象已死？</h2><h4 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h4><p><strong>给对象中添加一个引用计数器，每当有一个地方引用它，计数器值就加 1；当引用失效时，计数器值就减 1；任何时刻计数器为 0 的对象就是不可能再被使用的。</strong></p>
+<p>引用计数算法实现原理简单，判定效率高，但目前主流的虚拟机中都没有选择这个算法来管理内存，其主要原因是有很多例外情况要考虑，<strong>比如它很难解决对象之间相互循环引用的问题</strong>。所谓对象之间的相互引用问题，即对象 objA 和 objB 都有字段 instance ，且令 objA.instance = objB 及 objB.instance = objA ，除此之外，这两个对象之间再无任何引用。然后将 objA 与 objB 都置为 null，实际上着两个对象已经不可能再被访问，但是他们因为互相引用对方，导致它们的引用计数器都不为 0，于是引用计数算法无法通知 GC 回收器回收他们。</p>
+<h4 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h4><p>这个算法的基本思路就是通过一系列称为 “GC Roots” 的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为 “引用链” ，如果某个对象到 GC Roots 间没有任何引用链相连，或者用图论的话来说就是<strong>从 GC Roots 到这个对象不可达时，则证明此对象是不可能再被使用的</strong>。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194352.png"></p>
+<p>可作为 GC Roots 的对象包括以下几种:</p>
+<ul>
+<li>虚拟机栈（栈帧中的本地变量表）中引用的对象，譬如当前正在运行方法所使用到的参数、局部变量等。</li>
+<li>方法区中类静态属性引用的对象，譬如 Java 类的引用类型静态变量。</li>
+<li>方法区中常量引用的对象，譬如字符串常量池（String Table）里的引用。</li>
+<li>本地方法栈中 JNI（即Native 方法）引用的对象</li>
+<li>所有被同步锁（synchronized关键字）持有的对象</li>
+</ul>
+<br>
+
+<h4 id="再谈引用"><a href="#再谈引用" class="headerlink" title="再谈引用"></a>再谈引用</h4><p>无论是通过引用计数算法判断对象的引用数量，还是通过可达性分析算法判断对象是否引用链可达，判定对象是否存活都和 “引用” 有关。</p>
+<p>引用分为<strong>强引用、软引用、弱引用、虚引用</strong> 4 种，引用强度依次减弱。</p>
+<h5 id="强引用："><a href="#强引用：" class="headerlink" title="强引用："></a>强引用：</h5><p>指在代码之中普遍存在的引用赋值，即使用 <code>new</code> 对象创建强引用。无论任何情况下，<strong>只要强引用关系还存在，垃圾收集器就永远不会对被引用的对象进行回收</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Object obj = <span class="keyword">new</span> Object();</span><br></pre></td></tr></table></figure>
+
+<h5 id="软引用："><a href="#软引用：" class="headerlink" title="软引用："></a>软引用：</h5><p>用来描述一些还有用但非必须的对象，<strong>即只有在内存不够的情况下才会被回收</strong>。可使用 <code>SoftReference</code> 类来创建软引用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Object obj = <span class="keyword">new</span> Object();</span><br><span class="line">SoftReference&lt;Object&gt; sf = <span class="keyword">new</span> SoftReference&lt;&gt;(obj);</span><br><span class="line">obj = <span class="keyword">null</span>;	<span class="comment">// 使对象只被软引用关联</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="弱引用："><a href="#弱引用：" class="headerlink" title="弱引用："></a>弱引用：</h5><p>也是用来描述那些非必须对象，<strong>但被弱引用关联的对象不管内存是否足够都一定会被回收，也就是说它只能存活到下一次垃圾回收发生为止</strong>，比起软引用，只具有弱引用的对象拥有更短暂的生命周期。可以使用 <code>WeakReference</code> 类来创建弱引用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Object obj = <span class="keyword">new</span> Object();</span><br><span class="line">WeakReference&lt;Object&gt; wf = <span class="keyword">new</span> WeakReference&lt;&gt;(obj);</span><br><span class="line">obj = <span class="keyword">null</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>软引用和弱引用都可以和一个引用队列（ReferenceQueue）联合使用，如果软/弱引用所引用的对象被垃圾回收，JAVA 虚拟机就会把这个软/弱引用加入到与之关联的引用队列中。</p>
+<p>虚引用必须和引用队列（ReferenceQueue）联合使用</p>
+</blockquote>
+<h5 id="虚引用："><a href="#虚引用：" class="headerlink" title="虚引用："></a>虚引用：</h5><p>又称为“幽灵引用”或者“幻影引用”，一个对象是否有虚引用的存在，完全不会对其生存时间造成影响，也无法通过虚引用来取得一个对象实例。<strong>为一个对象设置虚引用的唯一目的是能在这个对象被回收时收到一个系统通知</strong>。可以使用 <code>PhantomReference</code> 来创建虚引用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Object obj = <span class="keyword">new</span> Object();</span><br><span class="line">PhantomReference&lt;Object&gt; pf = <span class="keyword">new</span> PhantomReference&lt;&gt;(obj, <span class="keyword">null</span>);</span><br><span class="line">obj = <span class="keyword">null</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在程序设计中一般很少使用弱引用与虚引用，使用软引用的情况较多，这是因为<strong>软引用可以加速 JVM 对垃圾内存的回收速度，可以维护系统的运行安全，防止内存溢出（OutOfMemory）等问题的产生</strong>。</p>
+</blockquote>
+<br>
+
+<h4 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h4><p>《 Java虚拟机规范 》中并没有强制要求虚拟机必须实现方法区（HotSpot中的元空间或永久代）的垃圾收集，而且方法区中进行垃圾收集的“性价比”比较低。</p>
+<p><strong>方法区的垃圾收集主要回收两部分内容：废弃常量和不再使用的类（即无用的类）</strong>。回收废弃常量与回收 Java 堆中的对象非常类似。如果没有任何地方引用这些常量便会被系统清理。</p>
+<p>判断一个常量是否 “废弃” 相对简单，而要判定一个类是否属于 “不再被使用的类” 的条件就比较苛刻。需要同时满足下面三个条件：</p>
+<ul>
+<li>该类的所有实例都已经被回收，也就是 Java 堆中不存在该类及派生子类的任何实例。</li>
+<li>加载该类的类加载器已经被回收了。</li>
+<li>该类对应的 java.lang.Class 对象没有在被任何地方被引用，无法在任何地方通过反射访问该类的方法。</li>
+</ul>
+<br>
+
+<h2 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h2><h4 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记 - 清除算法"></a>标记 - 清除算法</h4><p><strong>首先标记出所有需要回收的对象，在标记完成后，统一回收掉所有被标记的对象</strong>（也可以反过来）。标记过程就是对象是否属于垃圾的判定过程（即引用计数与可达性分析算法）。</p>
+<img src="https://gitee.com/KIMTOU/img/raw/master/20211024194350.png" style="zoom:80%;" />
+
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>执行效率不稳定：如果 Java 堆中包含大量可回收对象，这时必须进行大量标记和清除动作，导致标记和清除两个过程的效率都不高。同时需要扫描两次。</li>
+<li>空间问题：标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能会导致以后再程序运行过程中需要分配较大的对象时，无法找到足够的连续内存而不得不提前触发另一次垃圾收集动作。</li>
+</ul>
+<blockquote>
+<p>通过可达性分析算法从Root根节点出发递归遍历可达对象，进行标记。然后一一遍历内存，将可回收的对象进行清除。</p>
+</blockquote>
+<br>
+
+<h4 id="标记-复制算法"><a href="#标记-复制算法" class="headerlink" title="标记 - 复制算法"></a>标记 - 复制算法</h4><p>为了解决标记 - 清除算法面对大量可回收对象时执行效率低问题而诞生。<strong>将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另一块上面，然后再把已使用过的内存空间一次清理掉</strong>。这样使得每次都是对整个半区进行内存回收，内存分配时也就不用考虑空间碎片的复杂情况，只要移动堆顶指针，按顺序分配内存即可，且只需要扫描一次，实现简单，运行高效。</p>
+<p>缺点是：</p>
+<ul>
+<li>将可用内存缩小为了原来的一半，空间浪费未免太多了一点。</li>
+<li>移动时，需要复制对象，并调整对象引用。</li>
+</ul>
+<img src="https://gitee.com/KIMTOU/img/raw/master/20211024194354.png" style="zoom:80%;" />
+
+<blockquote>
+<p>为什么说执行效率更高？</p>
+<p>从Root根节点递归遍历可达对象时，遍历到时不进行标记，直接复制到另一块内存上。而且也不需要一一遍历进行清除，直接整个清理掉就行。</p>
+</blockquote>
+<p>现在的商业虚拟机都采用这种收集算法来回收新生代，IBM公司的专门研究表明，新生代中的对象98%是“朝生夕死”的，所以并不需要按照1:1的比例来划分新生代的内存空间，<strong>而是将内存分为一块较大的Eden空间和两块较小的Survivor空间，每次分配内存只使用Eden和其中一块Survivor</strong>。</p>
+<p><strong>发生垃圾收集时，将Eden和Survivor中仍然存活的对象一次性地复制到另外一块Survivor空间上，然后直接清理掉Eden和刚才用过的那块Survivor空间。</strong></p>
+<p>HotSpot虚拟机默认Eden和Survivor的大小比例是8:1，也就是每次新生代中可用内存空间为整个新生代容量的90%（Eden的80% + 一个Survivor的10%），只有10%的新生代内存会被“浪费”。</p>
+<p>当然，98%的对象可被回收仅仅是普通场景下测得的数据，任何人都没办法保证每次回收都只有不多于10%的对象存活，<strong>因此当Survivor空间不足以容纳依次Minor GC之后存活的对象时，就需要依赖其他内存（指老年代）进行分配担保（Handle Promotion）</strong>。</p>
+<br>
+
+<h4 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记 - 整理算法"></a>标记 - 整理算法</h4><p><strong>复制收集算法在对象存活率较高时就要进行较多的复制操作</strong>，效率将会变低。更关键的是，如果不想浪费50%的空间，就需要有额外的空间进行分配担保，以应对被使用的内存中所有对象都100%存活的极端情况，所以在老年代一般不能直接选用这种算法。</p>
+<p>针对老年代对象的存亡特征，提出了标记 - 整理算法。标记过程仍然与 “标记 - 清除” 算法一样，但后续步骤不是直接对可回收对象进行清理，<strong>而是让所有存活的对象都向内存空间一端移动，然后直接清理掉边界以外的内存</strong>。</p>
+<img src="https://gitee.com/KIMTOU/img/raw/master/20211024194358.png" style="zoom:80%;" />
+
+<ul>
+<li><p>优点：不会产生内存碎片</p>
+</li>
+<li><p>不足：需要扫描两次；需要移动大量对象，处理效率比较低。</p>
+</li>
+</ul>
+<blockquote>
+<p>标记 - 清除算法内存不连续，只能使用空闲列表来为对象分配内存；复制和整理算法都可用使用指针碰撞。</p>
+</blockquote>
+<hr>
+<h4 id="分代收集理论"><a href="#分代收集理论" class="headerlink" title="分代收集理论"></a>分代收集理论</h4><p>弱分代假说（Weak Generational Hypothesis）：绝大多数对象都是朝生夕灭的。<br>强分代假说（Strong Generational Hypothesis）：熬过越多次垃圾收集过程的对象就越难以消亡。<br>跨代引用假说（Intergenerational Reference Hypothesis）：跨代引用相对于同代引用来说仅占极少数。</p>
+<h4 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h4><p>当前虚拟机的垃圾收集都采用分代收集算法，这种算法只是根据对象存活周期的不同将内存分为几块。一般将 Java 堆分为新生代和老年代，这样我们就可以根据各个年代的特点选择合适的垃圾收集算法。</p>
+<p><strong>比如在新生代中，每次收集都会有大量对象死去，所以可以选择 ”标记-复制“ 算法，只需要付出少量对象的复制成本就可以完成每次垃圾收集。而老年代的对象存活几率是比较高的，而且没有额外的空间对它进行分配担保，所以我们必须选择 “标记-清除” 或 “标记-整理” 算法进行垃圾收集。</strong></p>
+<hr>
+<h4 id="GC目标"><a href="#GC目标" class="headerlink" title="GC目标"></a>GC目标</h4><ul>
+<li><p>部分收集（ Partial GC ）：指目标不是完整收集整个Java堆的垃圾收集，其中分为：</p>
+<ul>
+<li><strong>新生代收集（ Minor GC / Young GC ）：指目标只是新生代的垃圾收集。</strong>因为新生代对象存活时间很短，因此 Minor GC 会频繁执行，执行的速度一般也会比较快。</li>
+<li>老年代收集（ Major GC / Old GC ）：指目标只是老年代的垃圾收集（目前只有CMS收集器有单独收集老年代的行为）。</li>
+<li>混合收集（ Mixed GC ）：指目标是收集整个新生代以及部分老年代的垃圾收集（目前只有C1收集器）。</li>
+</ul>
+</li>
+<li><p><strong>整堆收集（ Full GC ）：收集整个 Java 堆和方法区的垃圾收集。</strong>回收老年代和新生代，老年代对象其存活时间长，因此 Full GC 很少执行，执行速度会比 Minor GC 慢很多。</p>
+</li>
+</ul>
+<br>
+
+<h2 id="堆的内存细分"><a href="#堆的内存细分" class="headerlink" title="堆的内存细分"></a>堆的内存细分</h2><p>Java 的自动内存管理主要是针对对象内存的回收和对象内存的分配。</p>
+<p>垃圾收集主要是针对<strong>堆和方法区</strong>进行。程序计数器、虚拟机栈和本地方法栈这三个区域属于线程私有的，只存在于线程的生命周期内，线程结束之后就会消失，因此不需要对这三个区域进行垃圾回收。</p>
+<p>Java 堆是垃圾收集器管理的主要区域，因此也被称作<strong>GC 堆（Garbage Collected Heap）</strong>。从垃圾回收的角度，由于现在收集器基本都采用分代垃圾收集算法，所以 Java 堆还可以细分为：新生代和老年代：再细致一点有：Eden 空间、From Survivor、To Survivor 空间等。<strong>进一步划分的目的是更好地回收内存，或者更快地分配内存。</strong></p>
+<ul>
+<li><strong>堆空间的基本结构：</strong></li>
+</ul>
+<p>其中Eden 区、From Survivor0(“From”) 区、To Survivor1(“To”) 区都属于新生代，Old Memory 区属于老年代</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194401.png" alt="堆空间的基本结构"></p>
+<p>大部分情况，对象都会首先在 Eden 区域分配，在一次新生代垃圾回收后<strong>（当Eden区满时触发YGC/Minor GC），如果对象还存活，则会进入 s0 或者 s1，即将Eden区以及From区还存活的对象转移至To，并且对象的年龄还会加 1 (Eden 区转移至Survivor 区后对象的初始年龄变为 1)，当它的年龄增加到一定程度（默认为大于 15 岁），就会被晋升到老年代中</strong>。对象晋升到老年代的年龄阈值，可以通过参数 <code>-XX:MaxTenuringThreshold</code> 来设置默认值，这个值会在虚拟机运行过程中进行调整，可以通过<code>-XX:+PrintTenuringDistribution</code>来打印出当次GC后的Threshold。</p>
+<p>经过这次 GC 后，Eden 区和”From”区已经被清空。这个时候，”From”和”To”会交换他们的角色，也就是新的”To”就是上次 GC 前的“From”，新的”From”就是上次 GC 前的”To”。不管怎样，<strong>都会保证名为 To 的 Survivor 区域是空的</strong>。Minor GC 会一直重复这样的过程，在这个过程中，有可能当次Minor GC后，Survivor 的”From”区域空间不够用，有一些还达不到进入老年代条件的实例放不下，则放不下的部分会提前进入老年代。</p>
+<br>
+
+<h2 id="垃圾收集器"><a href="#垃圾收集器" class="headerlink" title="垃圾收集器"></a>垃圾收集器</h2><p><strong>如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。</strong></p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194403.png"></p>
+<p>以上是 HotSpot 虚拟机中的 7 种垃圾收集器，连线表示垃圾收集器之间可以搭配使用。</p>
+<p>在谈论垃圾收集器的上下文语境中，可用理解为：</p>
+<ul>
+<li>并行（Parallel）：并行描述的是多个垃圾收集器线程之间的关系，说明同一时间有多个这样的线程在协同工作，通常默认此时用户线程是处于等待状态。</li>
+<li>并发（Concurrent）：并发描述的是垃圾收集器线程与用户线程之间的关系，说明同一时间垃圾收集器线程与用户线程都在运行。</li>
+</ul>
+<br>
+
+<h3 id="Serial-收集器"><a href="#Serial-收集器" class="headerlink" title="Serial 收集器"></a>Serial 收集器</h3><p>Serial（串行）收集器是一个单线程工作的收集器，它的 <strong>“单线程”</strong> 的意义不仅仅说明它只会使用一个处理器或一条垃圾收集线程去完成垃圾收集工作，更重要的是强调在它进行垃圾收集时，必须暂停其他所有的工作线程（ <strong>“Stop The World”</strong> ），直到它收集结束。是虚拟机运行在客户端模式下的默认新生代收集器。</p>
+<ul>
+<li>作用域：新生代</li>
+<li>垃圾收集算法：复制算法</li>
+<li>线程数：单线程</li>
+<li>特点：进行垃圾收集时，由于是单线程，需要Stop The World，即将其他所有用户线程停止，直到收集结束。但简单高效（避免线程切换的开销），内存消耗小。</li>
+</ul>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194406.jpg"></p>
+<p>​                                                            Serial / Serial Old 收集器运行示意图</p>
+<br>
+
+<h3 id="ParNew-收集器"><a href="#ParNew-收集器" class="headerlink" title="ParNew 收集器"></a>ParNew 收集器</h3><p>ParNew 收集器其实就是 Serial 收集器的多线程版本，除了使用多线程进行垃圾收集外，其余行为（控制参数、收集算法、回收策略等等）和 Serial 收集器完全一样。</p>
+<ul>
+<li>作用域：新生代</li>
+<li>垃圾收集算法：复制算法</li>
+<li>线程数：多线程</li>
+<li>特点：多线程，在多核CPU情况下垃圾收集效率较高，Stop The World的时间较短。</li>
+</ul>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194409.jpg"></p>
+<p>​                                                            ParNew / Serial Old 收集器运行示意图</p>
+<br>
+
+<h3 id="Parallel-Scavenge-收集器"><a href="#Parallel-Scavenge-收集器" class="headerlink" title="Parallel Scavenge 收集器"></a>Parallel Scavenge 收集器</h3><p>Parallel Scavenge 收集器也是使用<strong>标记-复制算法</strong>的<strong>多线程</strong>收集器，它看上去几乎和 ParNew 都一样。 那么它有什么特别之处呢？</p>
+<p><strong>CMS 等垃圾收集器的关注点是尽可能缩短垃圾收集时用户线程的停顿时间，而 Parallel Scavenge 收集器的目标是达到一个可控制的吞吐量。所谓吞吐量就是 CPU 用于运行用户代码的时间与 CPU 总消耗时间的比值。</strong>停顿时间越短就越适合需要与用户交互的程序，良好的响应速度能提升用户体验；而高吞吐量则可以高效率地利用 CPU 资源，尽快完成程序的运算任务，适合在后台运算而不需要太多交互的分析任务。</p>
+<p>垃圾收集停顿时间缩短是以牺牲吞吐量和新生代空间为代价换取的：新生代空间变小，垃圾回收变得频繁，停顿事件下降，但也导致吞吐量下降。</p>
+<ul>
+<li>作用域：新生代</li>
+<li>垃圾收集算法：复制算法</li>
+<li>线程数：多线程</li>
+<li>特点：目标是提高吞吐量，能够在较短的时间内完成指定任务，适合不需太多交互的后台运算</li>
+</ul>
+<p>Parallel Scavenge 收集器提供了很多参数供用户找到最合适的停顿时间或最大吞吐量：<br><code>-XX:MaxGCPauseMillis </code>用于控制最大垃圾收集停顿时间<br><code>-XX:GCTimeRatio </code>用于直接设置吞吐量的大小</p>
+<p>如果对于收集器运作不太了解，手工优化存在困难的时候，<strong>可以通过一个开关参数打开 GC 自适应的调节策略</strong>（GC Ergonomics），就不需要手工指定新生代的大小（-Xmn）、Eden 和 Survivor 区的比例、晋升老年代对象年龄等细节参数了。虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数以提供最合适的停顿时间或者最大的吞吐量。</p>
+<p><strong>JDK1.8 默认使用的是 Parallel Scavenge + Parallel Old</strong>，如果指定了-XX:+UseParallelGC 参数，则默认指定了-XX:+UseParallelOldGC，可以使用-XX:-UseParallelOldGC 来禁用该功能</p>
+<br>
+
+<h3 id="Serial-Old-收集器"><a href="#Serial-Old-收集器" class="headerlink" title="Serial Old 收集器"></a>Serial Old 收集器</h3><p><strong>Serial 收集器的老年代版本，它同样是一个单线程收集器</strong>。</p>
+<ul>
+<li>作用域：老年代</li>
+<li>垃圾收集算法：标记 - 整理算法</li>
+<li>线程数：单线程</li>
+<li>特点：与 Serial 收集器相同</li>
+</ul>
+<p>它主要有两大用途：</p>
+<ul>
+<li>在 JDK 1.5 以及之前版本（Parallel Old 诞生以前）中与 Parallel Scavenge 收集器搭配使用。</li>
+<li>作为 CMS 收集器的后备预案，在并发收集发生 Concurrent Mode Failure 时使用。</li>
+</ul>
+<br>
+
+<h3 id="Parallel-Old-收集器"><a href="#Parallel-Old-收集器" class="headerlink" title="Parallel Old 收集器"></a>Parallel Old 收集器</h3><p><strong>Parallel Old 收集器是 Parallel Scavenge 收集器的老年代版本，支持多线程并行收集，基于标记 - 整理算法</strong>。</p>
+<ul>
+<li>作用域：老年代</li>
+<li>垃圾收集算法：标记 - 整理算法</li>
+<li>线程数：多线程</li>
+<li>特点：目标是提高吞吐量</li>
+</ul>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194413.jpg"></p>
+<p>​                                                Parallel Scavenge/ Parallel Old 收集器运行示意图</p>
+<br>
+
+<h3 id="CMS-收集器"><a href="#CMS-收集器" class="headerlink" title="CMS 收集器"></a>CMS 收集器</h3><p><strong>CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器。它非常符合在注重用户交互体验的应用上使用。</strong>CMS 收集器是 HotSpot 虚拟机第一款真正意义上的并发收集器，它第一次实现了让垃圾收集线程与用户线程（基本上）同时工作。</p>
+<ul>
+<li>作用域：老年代</li>
+<li>垃圾收集算法：标记 - 清除算法</li>
+<li>线程数：并发线程</li>
+<li>特点：以缩短停顿时间为目标</li>
+</ul>
+<p>从名字中的<strong>Mark Sweep</strong>可以看出，CMS 收集器是基于 <strong>“标记-清除”算法</strong>实现的，它的运作过程相比于前面几种垃圾收集器来说更加复杂一些。整个过程分为四个步骤：</p>
+<ul>
+<li><strong>初始标记： 仅仅只是标记一下 GC Roots 能直接关联到的对象</strong>，速度很快。</li>
+<li><strong>并发标记：并发标记阶段从GC Roots的直接关联对象开始遍历整个对象图的过程，这个过程耗时较长但是不需要停顿用户线程，可以与垃圾收集线程一起并发运行</strong>。</li>
+<li><strong>重新标记： 重新标记阶段是为了修正并发标记期间因用户程序继续运行而导致标记产生变动的那一部分对象的标记记录</strong>。这个阶段的停顿时间一般会比初始标记阶段的时间稍长，但也远比并发标记阶段的时间短。</li>
+<li><strong>并发清除： 清理删除掉标记阶段判断的已经死亡的对象</strong>，对未标记的区域做清扫。由于不需要移动存活对象，所以这个阶段也是可以与用户线程并发执行的。</li>
+</ul>
+<p>其中初始标记、重新标记这两个步骤仍然需要 “ Stop The World ”，但速度很快。由于在整个过程中耗时最长的并发标记和并发清除阶段中，垃圾收集器线程都可以与用户线程一起工作，所以从总体上 CMS 收集器的内存回收过程是与用户线程一起并发执行的。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194416.jpg"></p>
+<p>​                                                Concurrent Mark Sweep 收集器运行示意图</p>
+<p>CMS 是一款非常优秀的垃圾收集器，有着<strong>并发收集（2，4阶段）、低延迟（1，3阶段）</strong>的优点。但还远没有完美的程度，至少有三个明显缺点：</p>
+<ul>
+<li>CMS 对处理器资源非常敏感，在并发阶段，虽然不会造成用户线程停顿，但是却会因为占用一部分线程而导致应用程序变慢，降低总吞吐量。</li>
+<li><strong>CMS 无法处理 “浮动垃圾” ，有可能出现 Concurrent Mode Failure 失败进而导致另一次完全 Stop The World 的 Full GC 产生</strong>。同样也是由于在垃圾收集阶段用户线程还需要持续运行，那就还需要预留足够内存空间提供给用户线程使用，因此CMS收集器不能像其他收集器那样等待老年代几乎完全被填满了再进行收集，而是当堆内存使用率达到某一阈值时，便开始进行回收。若预留的内存无法满足需要，则会出现一次“并发失败”（Concurrent Mode Failure）。</li>
+</ul>
+<blockquote>
+<p>什么是浮动垃圾？由于并发标记和并发清理阶段，用户线程还是在继续运行的，程序自然就还会伴随有新的垃圾对象不断产生，而且这一部分垃圾对象出现在标记过程结束之后，CMS 无法在当次收集中处理掉这些垃圾，所以只能等到下一次垃圾回收时再进行清理。这一部分垃圾就称为浮动垃圾。</p>
+</blockquote>
+<ul>
+<li>由于使用 “标记-清除” 算法，会导致大量空间碎片产生，可能无法找到足够大连续空间来分配当前对象，不得不提前触发一次 Full GC</li>
+</ul>
+<blockquote>
+<p>但CMS只能使用标记-清除算法，因为当并发清除时，如果用整理算法，对象的移动会使得地址被修改，用户线程则无法正确使用该对象。整理算法更适合 “Stop The World” 的场景下使用。</p>
+<p>当然也可通过设置参数设置几次GC之后进行碎片整理。</p>
+</blockquote>
+<br>
+
+<h3 id="G1-收集器"><a href="#G1-收集器" class="headerlink" title="G1 收集器"></a>G1 收集器</h3><p><strong>G1 (Garbage-First) 是一款面向服务端应用的垃圾收集器，主要针对配备多核CPU及大容量内存的机器，以极高概率满足 GC 停顿时间要求的同时，还兼具高吞吐量的性能特征</strong>。被视为 JDK1.7 中 HotSpot 虚拟机的一个重要进化特征，在 JDK 9 时正式取代 Parallel Scavenge + Parallel Old 组合成为默认垃圾收集器。</p>
+<p>G1出现之前的垃圾收集器，包括CMS在内，垃圾收集的目标范围要么是整个新生代（Minor GC），要么就是整个老年代（Major GC），再要么就是整个 Java 堆（Full GC）。而 G1 跳出了这个框架，它可以面向堆内存的任何部分来组成<strong>回收集(Collection Set，CSet)<strong>，</strong>衡量标准不再是它属于哪个分代，而是哪块内存中存放的垃圾数量最多</strong>，回收收益最大，这就是 G1 收集器的 <strong>Mixed GC</strong> 模式。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194419.PNG"></p>
+<p>G1 是基于 Region 的堆内存布局来进行回收的，G1不再坚持固定大小以及固定数量的分代区域划分，<strong>而是把连续的 Java 堆划分为多个大小相等的独立区域 Region，每一个 Region 都可以根据需要，扮演新生代的 Eden 空间、Survivor 空间或者老年代空间</strong>，收集器能够对不同角色的 Region 采用不同的策略去处理。</p>
+<p><strong>Region 中还有一类特殊的 Humongous 区域，专门用来存储大对象</strong>。G1 认为只要大小超过了一个 Region 容量一半的对象即可判定为大对象。对于超过了整个 Region 容量的超级大对象，将会存放在 N 个连续的 Humongous Region 中，G1 大多数行为都会把 Humongous Region 作为老年代的一部分来看待。</p>
+<h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ul>
+<li><strong>并行与并发</strong>：<ul>
+<li>并行性：G1 能充分利用 CPU、多核环境下的硬件优势，使用多个GC线程同时工作来缩短用户线程 STW 停顿时间。</li>
+<li>并发性：部分其他收集器原本需要停顿 Java 线程执行的 GC 动作，G1 收集器仍然可以通过并发的方式让 Java 程序继续执行。</li>
+</ul>
+</li>
+<li><strong>分代收集</strong>：虽然 G1 可以不需要其他收集器配合就能独立管理整个 GC 堆，但是还是保留了分代的概念。它会区分新生代和老年代，新生代依旧有Eden去、Survivor区，但从堆结构上看，它不要求整个Eden区、新生代或老年代都是连续的，也不再坚持固定大小和固定数量。</li>
+<li><strong>空间整合</strong>：与 CMS 的“标记-清理”算法不同，G1 从整体来看是基于“标记-整理”算法实现的收集器；从局部上来看是基于“标记-复制”算法实现的，即内存回收是以Region为基本单位，Region之间使用复制算法。这两种算法都能避免内存碎片。</li>
+<li><strong>可预测的停顿</strong>：这是 G1 相对于 CMS 的另一个大优势，降低停顿时间是 G1 和 CMS 共同的关注点，但 G1 除了追求低停顿外，还能建立可预测的停顿时间模型，能让使用者明确指定在一个长度为 M 毫秒的时间片段内，消耗在 GC 上的时间不得超过 N 毫秒。</li>
+</ul>
+<blockquote>
+<p>G1收集器之所以能建立可预测的停顿时间模型，是因为它可以有计划地避免在整个Java堆中进行全区域的垃圾收集。<strong>G1跟踪各个Region里面的垃圾堆积的价值大小</strong>（价值即回收所获得的空间大小以及回收所需时间的经验值），<strong>在后台维护一个优先级列表</strong>，每次根据允许的收集停顿时间（使用参数 -XX:MaxGCPauseMillis 指定，默认值200毫秒），<strong>优先处理回收价值最大的那些Region</strong>。这种<strong>使用Region划分内存空间以及具有优先级的区域回收方式</strong>，保证了G1收集器在有限的时间内获取尽可能高的收集效率。</p>
+</blockquote>
+<p><strong>优点（与CMS相比）：</strong></p>
+<ul>
+<li><p>不会产生内存空间碎片（有利于程序长时间运行）</p>
+</li>
+<li><p>可以指定最大停顿时间</p>
+</li>
+<li><p>分 Region 的内存布局</p>
+</li>
+<li><p>按收益动态确定回收集</p>
+</li>
+</ul>
+<p><strong>缺点（与CMS相比）：</strong></p>
+<ul>
+<li>占用额外的内存空间（每个Region都维护一份卡表）</li>
+<li>额外执行负载高（G1与CMS都使用写前屏障更新维护卡表，但G1使用的原始快照需要使用写前屏障来跟踪并发时指针变化情况，负担增大）</li>
+</ul>
+<h4 id="运行过程"><a href="#运行过程" class="headerlink" title="运行过程"></a>运行过程</h4><p>G1收集器的运作过程大致可划分为以下四个步骤：</p>
+<ul>
+<li><strong>初始标记：仅仅只是标记一下 GC Roots 能直接关联到的对象，并修改 TAMS 指针的值</strong>，让下一阶段用户线程并发运行时，能够在可用的 Region 中分配对象。这个阶段需要暂停用户线程，但是时间很短。而且这个停顿是借用 Minor GC 的时候同步完成的，所以在这个阶段实际没有额外的停顿。</li>
+<li><strong>并发标记：从 GC Root 开始对堆中对象进行可达性分析，递归扫描整个堆里的对象图，找出要回收的对象</strong>。当对象图扫描完成后，还要重新处理 SATB 记录下的在并发时有引用变动的对象。</li>
+<li><strong>最终标记：对用户线程做另一个短暂的暂停，用于处理并发阶段结束后仍遗留下来的最后那少量的 SATB 记录</strong>（原始快照，用来记录并发标记中某些对象）。</li>
+<li><strong>筛选回收：负责更新 Region 的统计数据，对各个 Region 的回收价值和成本进行排序，根据用户所期望的停顿时间来制定回收计划</strong>，可以自由选择任意多个 Region 构成回收集，然后<strong>把决定要回收的那一部分 Region 的存活对象复制到空的 Region 中，再清理掉整个旧 Region 的全部空间</strong>。这里的操作涉及存活对象的移动，所以必须要暂停用户线程，由多条收集器线程并行完成。</li>
+</ul>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194422.jpg"></p>
+<p>​                                                            G1 收集器运行示意图</p>
+<h4 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h4><p><strong>1、将Java堆分成多个独立Region后，Region里面存在的跨Region引用对象怎么解决？</strong></p>
+<p>出现该情况可能是老年代Region引用新生代Region等，为了避免进行Minor GC回收新生代时还要扫描老年代对象，解决方案是<strong>使用记忆集避免全堆作为GC Roots扫描</strong>。</p>
+<p><strong>每个Region都有一个对应的记忆集，每次Reference类型数据写操作时，都会产生一个写屏障暂时中断操作</strong>；然后检查将要写入的引用指向的对象是否和该Reference类型数据在不同的Region（其他收集器：检查老年代对象是否引用了新生代对象）；如果不同，通过卡表把相关引用信息记录到引用指向对象的所在Region对应的记忆集中；</p>
+<p>当进行垃圾收集时，在GC根节点的枚举范围加入记忆集；就可以保证不进行全局扫描，也不会有遗漏。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194424.png"></p>
+<p><strong>2、G1 使用原始快照（SATB）算法来保证收集线程与于户线程互不干扰地运行，即用户线程改变对象引用关系时，必须保证其不能打破原本的对象图结构</strong>。</p>
+<p>3、垃圾收集对用户线程的影响还体现在回收过程中新创建对象的内存分配上，程序要继续运行就肯定会持续有新对象被创建，<strong>G1为每个Region设计了两个名为TAMS（Top at Mark Start） 的指针，把Region中的一部分空间划分出来用于并发过程中的新对象分配</strong>，并发回收时新分配的对象地址都必须要在这两个指针位置以上。<br>G1会默认这个地址上的对象是存活的，如果内存回收跟不上内存分配的速度，那么G1收集器也会被迫冻结用户的线程，导致Full GC而产生长时间 Stop The World</p>
+<br>
+
+<h2 id="内存分配策略"><a href="#内存分配策略" class="headerlink" title="内存分配策略"></a>内存分配策略</h2><h4 id="1、对象优先在-Eden-分配"><a href="#1、对象优先在-Eden-分配" class="headerlink" title="1、对象优先在 Eden 分配"></a>1、对象优先在 Eden 分配</h4><p>大多数情况下，对象在新生代 Eden 区分配，当 Eden 区没有足够空间进行分配时，虚拟机发起一次 Minor GC。</p>
+<h4 id="2、大对象直接进入老年代"><a href="#2、大对象直接进入老年代" class="headerlink" title="2、大对象直接进入老年代"></a>2、大对象直接进入老年代</h4><p>大对象是指需要大量连续内存空间的对象（最典型的大对象是那种很长的字符串以及元素数量大的数组）。</p>
+<h4 id="3、长期存活的对象将进入老年代"><a href="#3、长期存活的对象将进入老年代" class="headerlink" title="3、长期存活的对象将进入老年代"></a>3、长期存活的对象将进入老年代</h4><p>虚拟机给每个对象定义了一个对象年龄计数器，存储在对象头中。如果对象在 Eden 出生并经过第一次 Minor GC 后仍然能够存活，并且能被 Survivor 容纳的话，将被移动到 Survivor 空间中，并将对象年龄设为 1 岁。对象在 Survivor 区中每熬过一次 MinorGC，年龄就增加 1 岁，当它的年龄增加到一定程度（默认为 15 ），就会被晋升到老年代中。对象晋升到老年代的年龄阈值，可以通过参数 <code>-XX:MaxTenuringThreshold</code> 设置。</p>
+<h4 id="4、动态对象年龄判定"><a href="#4、动态对象年龄判定" class="headerlink" title="4、动态对象年龄判定"></a>4、动态对象年龄判定</h4><p>虚拟机并不是永远要求对象的年龄必须达到 <code>-XX:MaxTenuringThreshold</code> 才能晋升老年代，如果在 Survivor 空间中低于或等于某年龄的所有对象大小的总和大于 Survivor 空间的一半，则年龄大于或等于该年龄的对象就可以直接进入老年代，无须等到 <code>-XX:MaxTenuringThreshold</code> 中要求的年龄。</p>
+<ul>
+<li><strong>动态年龄计算策略：</strong></li>
+</ul>
+<p>Hotspot 遍历所有对象时，按照相同年龄从小到大对其所占用的大小进行累积，当累积的某个年龄大小超过了 survivor 区的一半时，取这个年龄和 MaxTenuringThreshold 中更小的一个值，作为新的晋升年龄阈值。</p>
+<ul>
+<li><strong>动态年龄计算的代码如下：</strong></li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">uint <span class="title">ageTable::compute_tenuring_threshold</span><span class="params">(<span class="keyword">size_t</span> survivor_capacity)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//survivor_capacity是survivor空间的大小</span></span><br><span class="line">    <span class="keyword">size_t</span> desired_survivor_size = (<span class="keyword">size_t</span>)((((<span class="keyword">double</span>) survivor_capacity)*TargetSurvivorRatio)/<span class="number">100</span>);</span><br><span class="line">    <span class="keyword">size_t</span> total = <span class="number">0</span>;</span><br><span class="line">    uint age = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (age &lt; table_size) &#123;</span><br><span class="line">        total += sizes[age];<span class="comment">//sizes数组是每个年龄段对象大小</span></span><br><span class="line">        <span class="keyword">if</span> (total &gt; desired_survivor_size) <span class="keyword">break</span>;</span><br><span class="line">        age++;</span><br><span class="line">    &#125;</span><br><span class="line">    uint result = age &lt; MaxTenuringThreshold ? age : MaxTenuringThreshold;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="5、空间分配担保"><a href="#5、空间分配担保" class="headerlink" title="5、空间分配担保"></a>5、空间分配担保</h4><p><strong>在发生 Minor GC 之前，虚拟机必须先检查老年代最大可用的连续空间是否大于新生代所有对象总空间，如果条件成立的话，那这一次 Minor GC 可以确保是安全的</strong>。</p>
+<blockquote>
+<p>为什么说这次 Minor GC 是确保安全的呢？因为我们知道新生代使用复制收集算法，且只使用其中一个 Survivor 空间作为轮换备份，因此当出现大量对象在 Minor GC 后仍然存活的情况（最极端的情况就是内存回收后新生代中所有对象都存活），可能出现 Survivor 空间不够存下这些对象，需要老年代进行分配担保，把 Survivor 无法容纳的对象直接送入老年代。而老年代担保的前提是本身还有容纳这些对象的剩余空间，但有多少对象会再这次回收中活下来在实际完成内存回收之前是无法明确知道的，只能取之前的平均大小作为经验值。</p>
+<p><strong>即空间分配担保是为了确保在 Minor GC 之前老年代本身还有容纳新生代所有对象的剩余空间。</strong></p>
+</blockquote>
+<p>如果不成立的话，虚拟机会先查看 HandlePromotionFailure 参数的值是否允许担保失败。如果允许，那会继续检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小，如果大于，将尝试着进行一次 Minor GC，尽管这次 Minor GC 是有风险的；如果小于，或者 HandlePromotionFailure 设置不允许冒险，那么就要改为进行一次 Full GC。</p>
+<p>在 JDK 6 Update 24 之后，-XX:HandlePromotionFailure 参数不会再影响到虚拟机的空间分配担保策略，实际虚拟机中已经不会再使用它。<strong>JDK 6 Update 24 之后的规则变为只要老年代的连续空间大于新生代对象总大小或者历次晋升的平均大小，就会进行 Minor GC，否则将进行 Full GC</strong>。</p>
+<br>
+
+<blockquote>
+<p>参考资料</p>
+</blockquote>
+<p><strong>《深入理解Java虚拟机  第3版》——周志明</strong></p>
+<p><a href="https://github.com/Snailclimb/JavaGuide/blob/master/docs/java/jvm/JVM%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6.md">https://github.com/Snailclimb/JavaGuide</a></p>
+<p>[<a href="https://github.com/CyC2018]">https://github.com/CyC2018]</a>(<a href="https://github.com/CyC2018/CS-Notes/blob/master/notes/Java">https://github.com/CyC2018/CS-Notes/blob/master/notes/Java</a> 虚拟机.md)</p>
+]]></content>
+      <categories>
+        <category>JVM</category>
+      </categories>
+      <tags>
+        <tag>JVM</tag>
       </tags>
   </entry>
 </search>
