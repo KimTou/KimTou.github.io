@@ -3842,4 +3842,71 @@
         <tag>分布式</tag>
       </tags>
   </entry>
+  <entry>
+    <title>ThreadLocal原理以及内存泄漏问题</title>
+    <url>/2021/11/27/ThreadLocal%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h4 id="什么是ThreadLocal？有哪些应用场景？"><a href="#什么是ThreadLocal？有哪些应用场景？" class="headerlink" title="什么是ThreadLocal？有哪些应用场景？"></a>什么是ThreadLocal？有哪些应用场景？</h4><p><strong><code>ThreadLocal</code>类可以让每个线程绑定自己的值，也就是拥有自己的专属本地变量</strong>。</p>
+<p><code>ThreadLocal</code>为变量在每个线程中都创建了一个副本，那么每个线程可以访问自己内部的副本变量，并且不会和其他线程的变量冲突，实现了线程间的数据隔离，避免了线程安全问题。</p>
+<p><strong><code>ThreadLocal</code>的应用场景主要有以下几个方面</strong>：</p>
+<ul>
+<li>保存线程上下文信息，避免参数的显示传递，在需要的地方可以直接获取</li>
+<li>线程间数据隔离 </li>
+<li>进行事务操作时存储线程事务信息，因为事务和线程绑定在一起（Spring在事务开始时会给当前线程绑定一个Jdbc Connection对象，放在ThreadLocal中存储，这样在整个事务执行过程中都是使用该线程绑定的connection来执行数据库操作，实现了事务的隔离性）</li>
+<li>数据库连接（经典的使用场景是为每个线程分配一个JDBC Connection连接对象，这样可以保证每个线程的都在各自的Connection上进行数据库的操作，不会出现A线程关了B线程正在使用的Connection）</li>
+<li>session会话等线程级别的操作（Session 的特性很适合 ThreadLocal ，因为 Session 之前当前会话周期内有效，会话结束便销毁）</li>
+</ul>
+<br>
+
+<h4 id="ThreadLocal-原理"><a href="#ThreadLocal-原理" class="headerlink" title="ThreadLocal 原理"></a>ThreadLocal 原理</h4><p>从<code>Thread</code>类的源代码可以看出<code>Thread</code> 类中有一个 <code>threadLocals</code> 和一个 <code>inheritableThreadLocals</code> 变量，它们都是 <code>ThreadLocalMap</code> 类型的变量，实际上当前线程调用 <code>ThreadLocal</code> 类的 <code>set</code>或<code>get</code>方法时，我们调用的是当前线程的<code>ThreadLocalMap</code>类对应的 <code>get()</code>、<code>set()</code>方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Thread</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * ThreadLocal 能为线程设置线程私有变量 就是通过下面这个threadLocals变量完成的，</span></span><br><span class="line"><span class="comment">	 * ThreadLocal的get/set方法就是通过操作 各个线程的 threadLocals 变量实现的。</span></span><br><span class="line"><span class="comment">	 * 1、线程A持有一个 ThreadLocalMap 变量；</span></span><br><span class="line"><span class="comment">	 * 2、线程A调用一个类的 ThreadLocal变量 tlA 的 get/set方法；</span></span><br><span class="line"><span class="comment">	 * 3、tlA（ThreadLocal）的 get/set方法 获取当前线程A，</span></span><br><span class="line"><span class="comment">	 				调用 线程A 的 ThreadLocalMap变量 的get/put方法；</span></span><br><span class="line"><span class="comment">	 * 4、其它线程 调用 tlA（ThreadLocal）的 get/set方法 同理。</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">    <span class="comment">//与此线程有关的ThreadLocal值。由ThreadLocal类维护</span></span><br><span class="line">    ThreadLocal.ThreadLocalMap threadLocals = <span class="keyword">null</span>;</span><br><span class="line">    ThreadLocal.ThreadLocalMap inheritableThreadLocals = <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>ThreadLocal 是线程本地存储，每个线程中都具备一个<code>ThreadLocalMap</code>，<code>ThreadLocalMap</code>可以存储以<code>ThreadLocal</code>为 key ，Object 对象为 value 的键值对</strong>。<code>ThreadLocalMap</code>是<code>ThreadLocal</code>的内部类，可以理解为一个Map容器，其维护了一个 Entry 数组，由一个个key-value对象<code>Entry</code>构成。</p>
+<p><strong>由于每一条线程都含有线程私有的ThreadLocalMap容器，这些容器间相互独立不影响，因此不会存在线程安全的问题，从而无需使用同步机制来保证多条线程访问容器的互斥性</strong>。</p>
+<ul>
+<li>使用set方法时：<code>ThrealLocal</code> 类中可以通过<code>Thread.currentThread()</code>获取到当前线程对象后，直接通过<code>getMap(Thread t)</code>可以访问到该线程的<code>ThreadLocalMap</code>对象，再以当前的ThreadLocal对象为key，将值存入ThreadLocalMap对象中。</li>
+</ul>
+<ul>
+<li>get方法执行过程类似，首先ThreadLocal获取当前线程对象，然后获取当前线程的ThreadLocalMap对象，再以当前的ThreadLocal对象为key，获取对应的value。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    <span class="keyword">if</span> (map != <span class="keyword">null</span>)</span><br><span class="line">        map.set(<span class="keyword">this</span>, value); <span class="comment">//key为当前ThreadLocal对象，value为set的值</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        createMap(t, value);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">ThreadLocalMap <span class="title">getMap</span><span class="params">(Thread t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> t.threadLocals;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    <span class="keyword">if</span> (map != <span class="keyword">null</span>) &#123;</span><br><span class="line">        ThreadLocalMap.Entry e = map.getEntry(<span class="keyword">this</span>); <span class="comment">//key为当前ThreadLocal对象，获取绑定的值</span></span><br><span class="line">        <span class="keyword">if</span> (e != <span class="keyword">null</span>) &#123;</span><br><span class="line">            T result = (T)e.value;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> setInitialValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="ThreadLocal-内存泄漏问题"><a href="#ThreadLocal-内存泄漏问题" class="headerlink" title="ThreadLocal 内存泄漏问题"></a>ThreadLocal 内存泄漏问题</h4><blockquote>
+<p><strong>内存泄露 <strong>：</strong>指的是为程序在申请内存后，无法释放已申请的内存空间</strong>。一次内存泄露危害可以忽略，但内存泄露堆积后果很严重，无论多少内存迟早会被占光。简单来说，不再会被使用的对象或者变量占用的内存不能被回收，就是内存泄露。</p>
+<p>与OOM的区别：内存泄漏是内存占用无法释放，而OOM是内存不够，内存泄漏会导致OOM。</p>
+</blockquote>
+<p><strong><code>ThreadLocalMap</code> 中使用的 key 为 <code>ThreadLocal</code> 的弱引用，而 value 是强引用</strong>。所以，如果 <code>ThreadLocal</code> 没有被外部强引用的情况下，在垃圾回收的时候，key 会被清理掉，而 value 不会被清理掉。这样一来，<code>ThreadLocalMap</code> 中就会出现 key 为 null 的 Entry，而value还存在着强引用。假如我们不做任何措施的话，value 永远无法被 GC 回收，这个时候就可能会产生内存泄露。<code>ThreadLocalMap</code> 实现中已经考虑了这种情况，在调用 <code>set()</code>、<code>get()</code>、<code>remove()</code> 方法的时候，会清理掉 key 为 null 的记录。使用完 <code>ThreadLocal</code>方法后最好手动调用<code>remove()</code>方法。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211127232429.png"></p>
+<p>看到Entry继承自 <code>WeakReferencr&lt;ThreadLocal&lt;?&gt;&gt;</code>，就是一个 key-value 形式的对象。它的 key 就是 ThreadLocal 对象，并且是一个弱引用，如果没有指向 key 的强引用后，该 key 就会被垃圾回收器回收；Entry 的 value 就是存储 Object 对象，是强引用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadLocalMap</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Entry</span> <span class="keyword">extends</span> <span class="title">WeakReference</span>&lt;<span class="title">ThreadLocal</span>&lt;?&gt;&gt; </span>&#123;</span><br><span class="line">        <span class="comment">/** The value associated with this ThreadLocal. */</span></span><br><span class="line">        Object value;</span><br><span class="line"></span><br><span class="line">        Entry(ThreadLocal&lt;?&gt; k, Object v) &#123;</span><br><span class="line">            <span class="keyword">super</span>(k);</span><br><span class="line">            value = v;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>强引用：</strong></p>
+<p>指在代码之中普遍存在的引用赋值，即使用 <code>new</code> 对象创建强引用。无论任何情况下，<strong>只要强引用关系还存在，垃圾收集器就永远不会对被引用的对象进行回收</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Object obj = <span class="keyword">new</span> Object();</span><br></pre></td></tr></table></figure>
+
+<p>如果想要取消强引用和某个对象之间的关联，<strong>可以显示将引用赋值为null，或者超过了引用的作用域时</strong>，如方法结束，就可以当作垃圾回收，这样JVM就可以在合适的时间对其回收。</p>
+<p><strong>弱引用：</strong></p>
+<p>也是用来描述那些非必须对象，<strong>但被弱引用关联的对象不管内存是否足够都一定会被回收，也就是说它只能存活到下一次垃圾回收发生为止</strong>，比起软引用，只具有弱引用的对象拥有更短暂的生命周期。可以使用 <code>WeakReference</code> 类来创建弱引用。</p>
+</blockquote>
+<br>
+
+<h4 id="为什么要将key设计成ThreadLocal的弱引用？"><a href="#为什么要将key设计成ThreadLocal的弱引用？" class="headerlink" title="为什么要将key设计成ThreadLocal的弱引用？"></a>为什么要将key设计成ThreadLocal的弱引用？</h4><p><strong>如果<code>key</code>是强引用，同样会发生内存泄漏的</strong>。引用ThreadLocal的对象被回收了，但是ThreadLocalMap还持有ThreadLocal的强引用，如果没有手动删除，ThreadLocal不会被回收，导致Entry内存泄漏。</p>
+<p>如果是弱引用的话，引用ThreadLocal的对象被回收了，由于ThreadLocalMap持有ThreadLocal的弱引用，即使没有手动删除，ThreadLocal也会被回收，此时的key为null，但在下一次调用ThreadLocalMap的set()、get()、remove()方法时，会清除 key 为 null 的 value 值，避免内存泄漏。</p>
+<p>因此，ThreadLocal内存泄漏的根本原因是：由于ThreadLocalMap的生命周期跟Thread一样长，如果没有手动删除对应key就会导致内存泄漏，而不是因为弱引用。</p>
+<p>所以两种方案比较下来，还是<code>ThreadLoacl</code>的<code>key</code>为弱引用好一些。</p>
+<p><strong>ThreadLocal的正确使用方法：</strong></p>
+<ul>
+<li>当ThreadLocal作为局部变量时，<strong>每次使用完（方法结束）都调用其 remove() 方法清除数据</strong>（生命周期不需要和项目的生存周期一样长的）。</li>
+<li><strong>将ThreadLocal变量定义成为private static</strong>，这样就一直存在ThreadLocal的强引用，ThreadLocal就不会轻易被回收，可以保证任何时候都能通过ThreadLocal的弱引用访问到Entry的value值，进而清除掉无用的value。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>并发编程</category>
+      </categories>
+      <tags>
+        <tag>并发编程</tag>
+      </tags>
+  </entry>
 </search>
