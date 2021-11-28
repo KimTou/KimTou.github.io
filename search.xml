@@ -4846,6 +4846,9 @@
 <h3 id="Redis-3-2-以前的-SDS-实现"><a href="#Redis-3-2-以前的-SDS-实现" class="headerlink" title="Redis 3.2 以前的 SDS 实现"></a>Redis 3.2 以前的 SDS 实现</h3><p>每个 sds.h / sdshdr 结构表示一个 SDS 值，在 Redis 3.2 版本以前，SDS 的结构如下：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sdshdr</span> &#123;</span></span><br><span class="line">    <span class="comment">// 记录 buf 数组中已使用字节的数量</span></span><br><span class="line">    <span class="comment">// 等于 SDS 所保存字符串的长度</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> len;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 记录 buf 数组中剩余可用字节数量</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="built_in">free</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 字节数组，用于保存字符串</span></span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
+<blockquote>
+<p>想深入了解 SDS 的读者可以看我之前写的文章：<a href="https://blog.tojintao.cn/2021/11/28/%E5%9F%BA%E4%BA%8ERedis3-0%E4%B8%8E6-0%E7%89%88%E6%9C%AC%E6%BA%90%E7%A0%81%E7%9C%8BSDS%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/">基于Redis3.0与6.0版本源码看SDS内存优化 | KimTou (tojintao.cn)</a></p>
+</blockquote>
 <p>我们可以看到，<strong>字段 <code>len</code> 和 <code>free</code> 都是 unsigned int 类型，各占 4 字节</strong>，紧接着存放字符串。</p>
 <p>但其实以上的设计并不是最优，**4 字节的 len，可表示的字符串长度为 <code>2^32-1</code>**，在实际应用中，存放于 Redis 中的字符串往往没有这么长，没有必要每个字符串都让 len 和 free 为 4 字节。</p>
 <br>
@@ -4876,7 +4879,7 @@
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisObject</span> &#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>;</span><br><span class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>;</span><br><span class="line">    <span class="keyword">unsigned</span> lru:REDIS_LRU_BITS;</span><br><span class="line">    <span class="keyword">int</span> refcount;</span><br><span class="line">    <span class="keyword">void</span> *ptr;</span><br><span class="line">&#125; robj;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sdshdr</span> &#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> len;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="built_in">free</span>;</span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>embstr 编码的字符串是一块连续的内存区域，由 redisObject 和 sdshdr 组成。</p>
-<p><img src="D:\技术书籍与笔记图片\文章图片\博客\string_embstr.png"></p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128232457.png"></p>
 <p><strong>其中 redisObject 占 16 个字节，当 buf 数组内的字符串长度是 39 时，sdshdr 的大小为 4+4+39+1=48，那一个字节是 ‘\0’，加起来刚好 64</strong>。</p>
 <blockquote>
 <p>从2.4版本开始，Redis 开始使用 jemalloc 内存分配器。这个比 glibc 的 malloc 要好不少，还省内存。在这里可以简单理解，jemalloc 会分配8，16，32，64等字节的内存。</p>
