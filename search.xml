@@ -4019,7 +4019,7 @@
   </entry>
   <entry>
     <title>并发编程的艺术——Java内存模型（指令重排序、happens-before）</title>
-    <url>/2021/11/28/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E8%89%BA%E6%9C%AF%E2%80%94%E2%80%94Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/</url>
+    <url>/2021/11/28/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E8%89%BA%E6%9C%AF%E2%80%94%E2%80%94Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%88%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F%E3%80%81happens-before%EF%BC%89/</url>
     <content><![CDATA[<h3 id="什么是-Java-内存模型"><a href="#什么是-Java-内存模型" class="headerlink" title="什么是 Java 内存模型"></a>什么是 Java 内存模型</h3><p><strong>Java 内存模型<code>Java Memory Model</code>是一种抽象的概念，并不真实存在，它描述了一组规则或规范，通过这组规范定义了程序中共享变量（包括实例字段、静态字段和数组元素）的访问方式</strong>。在 Java 中，所有实例字段、静态字段和数组元素（称为共享变量）都存储在堆内存中，堆内存在线程之间共享。栈中的变量（局部变量、方法定义参数、异常处理器参数）不会在线程之间共享，也就不会有内存可见性的问题，也不受内存模型的影响。</p>
 <p><strong>Java 线程之间的通信由 Java 内存模型（JMM）控制，JMM 决定了一个线程对共享变量的写入何时对另一个线程可见</strong>。</p>
 <h4 id="Java-内存模型的组成部分"><a href="#Java-内存模型的组成部分" class="headerlink" title="Java 内存模型的组成部分"></a>Java 内存模型的组成部分</h4><p>JMM 定义了线程和主内存之间的抽象关系：</p>
@@ -4096,80 +4096,6 @@
       <tags>
         <tag>并发编程</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>并发编程的艺术——Java内存模型</title>
-    <url>/2021/11/28/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E8%89%BA%E6%9C%AF%E2%80%94%E2%80%94Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%88%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F%E3%80%81happens-before%EF%BC%89/</url>
-    <content><![CDATA[<h4 id="什么是-Java-内存模型"><a href="#什么是-Java-内存模型" class="headerlink" title="什么是 Java 内存模型"></a>什么是 Java 内存模型</h4><p><strong>Java 内存模型<code>Java Memory Model</code>是一种抽象的概念，并不真实存在，它描述了一组规则或规范，通过这组规范定义了程序中共享变量（包括实例字段、静态字段和数组元素）的访问方式</strong>。在 Java 中，所有实例字段、静态字段和数组元素（称为共享变量）都存储在堆内存中，堆内存在线程之间共享。栈中的变量（局部变量、方法定义参数、异常处理器参数）不会在线程之间共享，也就不会有内存可见性的问题，也不受内存模型的影响。</p>
-<p><strong>Java 线程之间的通信由 Java 内存模型（JMM）控制，JMM 决定了一个线程对共享变量的写入何时对另一个线程可见</strong>。</p>
-<h4 id="Java-内存模型的组成部分"><a href="#Java-内存模型的组成部分" class="headerlink" title="Java 内存模型的组成部分"></a>Java 内存模型的组成部分</h4><p>JMM 定义了线程和主内存之间的抽象关系：</p>
-<p><strong>线程之间的共享变量存储在主内存（Main Memoery）中，每个线程都有一个私有的本地内存（Local Memoery），存储了该线程以读 / 写共享变量的副本</strong>。线程对共享变量的所有操作都必须在本地内存中进行，而不能直接对主内存进行操作。并且每个线程不能访问其他线程的工作内存。<strong>JMM 通过控制主内存与每个线程的本地内存之间的交互，来提供内存可见性保证</strong>。</p>
-<img src="D:\技术书籍与笔记图片\笔记图片\并发\JMM抽象示意图.jpg" style="zoom: 50%;" />
-
-<blockquote>
-<p>本地内存是 JMM 的一个抽象概念，并不真实存在。它涵盖了缓存、写缓冲区、寄存器等。</p>
-</blockquote>
-<p>Java 中的 <code>volatile</code> 关键字可以保证多线程操作共享变量的可见性以及禁止指令重排序，<code>synchronized</code> 关键字不仅保证可见性，同时也保证了原子性（互斥性）。在更底层，JMM 通过内存屏障来实现内存的可见性以及禁止重排序。</p>
-<br>
-
-<h4 id="JMM-与-Java-内存区域划分的区别与联系"><a href="#JMM-与-Java-内存区域划分的区别与联系" class="headerlink" title="JMM 与 Java 内存区域划分的区别与联系"></a>JMM 与 Java 内存区域划分的区别与联系</h4><ul>
-<li><p>区别：</p>
-<p>两者是不同的概念层次。<strong>JMM 是抽象的，它描述了一组规则，通过这个规则来控制各个变量的访问方式，围绕原子性、有序性、可见性等展开的</strong>。而 Java 运行时内存的划分是具体的，是 JVM 运行 Java 程序时，必要的内存划分。</p>
-</li>
-<li><p>联系：</p>
-<p><strong>都存在私有数据区域和共享数据区域</strong>。一般来说，JMM 中的主内存属于共享数据区域，它是包含了堆和方法区；同样，JMM 中的本地内存属于私有数据区域，包含了程序计数器、本地方法栈、虚拟机栈。</p>
-</li>
-</ul>
-<blockquote>
-<p><a href="http://concurrent.redspider.group/article/02/6.html">Java内存模型基础知识</a></p>
-</blockquote>
-<br>
-
-<h3 id="指令重排序"><a href="#指令重排序" class="headerlink" title="指令重排序"></a>指令重排序</h3><p>在执行程序时，为了提高性能，编译器和处理器常常会对指令序列进行重新排序。即只要程序的最终结果与它顺序化情况的结果相等，那么指令的执行顺序可以与代码顺序不一致。</p>
-<p>指令重排一般分为以下三种：</p>
-<ul>
-<li><strong>编译器优化重排序</strong>：编译器在<strong>不改变单线程程序语义</strong>的前提下，可以重新安排语句的执行顺序。</li>
-<li><strong>指令级并行重排序</strong>：现代处理器采用了指令级并行技术来将多条指令重叠执行。如果<strong>不存在数据依赖性</strong>(即后一个执行的语句无需依赖前面执行的语句的结果)，处理器可以改变语句对应的机器指令的执行顺序。</li>
-<li><strong>内存系统重排序</strong>：由于处理器使用缓存和读写缓冲区，这使得加载(load)和存储(store)操作看上去可能是在乱序执行。</li>
-</ul>
-<p>编译器优化重排序属于编译器重排序，指令并行重排序和内存系统重排序属于处理器重排序。</p>
-<p><strong>指令重排序可以保证单个线程串行语义一致，但是没有义务保证多线程间的语义也一致</strong>。这些重排序可能会导致多线程程序出现内存可见性问题。</p>
-<h4 id="指令重排序必须满足什么条件"><a href="#指令重排序必须满足什么条件" class="headerlink" title="指令重排序必须满足什么条件"></a>指令重排序必须满足什么条件</h4><ul>
-<li><strong>as-if-serial语义：即无论怎么重排序，都不能够改变单线程程序运行的结果</strong>。</li>
-<li><strong>遵守数据依赖性：即无论怎么重排序，都不能够改变存在数据依赖性的两个操作的执行顺序</strong>。</li>
-</ul>
-<h5 id="as-if-serial-语义"><a href="#as-if-serial-语义" class="headerlink" title="as-if-serial 语义"></a>as-if-serial 语义</h5><p>无论编译器和处理器如何进行重排序，单线程程序的执行结果不能被改变。</p>
-<h5 id="数据依赖性"><a href="#数据依赖性" class="headerlink" title="数据依赖性"></a>数据依赖性</h5><p><strong>如果两个操作访问同一个变量，且这两个操作中有一个为写操作，此时这两个操作之间就存在数据依赖性</strong>。只要重排序这两个操作的执行顺序，程序的执行结果就会被改变。编译器和处理器在重排序时，会遵守数据依赖性，编译器和处理器不会改变存在数据依赖关系的两个操作的执行顺序，因为这种重排序会改变执行结果。</p>
-<p>数据依赖性仅针对单个处理器中执行的指令序列和单个线程中执行的操作。多线程之间的数据依赖性不被编译器和处理器考虑。</p>
-<hr>
-<br>
-
-<h3 id="happens-before"><a href="#happens-before" class="headerlink" title="happens-before"></a>happens-before</h3><p><strong>happens-before 关系的定义如下</strong>：</p>
-<ol>
-<li>如果一个操作 happens-before 另一个操作，那么第一个操作的执行结果将对第二个操作可见，并且第一个操作的执行顺序排在第二个操作之前。</li>
-<li><strong>两个操作之间存在happens-before关系，并不意味着Java平台的具体实现必须要按照happens-before关系指定的顺序来执行。如果重排序之后的执行结果，与按happens-before关系来执行的结果一致，那么JMM也允许这样的重排序。</strong></li>
-</ol>
-<p><strong>在 JMM 中，如果一个操作执行的结果需要对另一个操作可见，那么这两个操作之间必须要存在 happens-before 关系</strong>。如果操作A的执行结果不需要对操作B可见，而且重排序之后的执行结果与按happens-before关系来执行的结果一致，那么 JMM 允许这种重排序。</p>
-<p>happens-before 关系本质上和 as-if-serial 语义是一回事：</p>
-<ul>
-<li>as-if-serial 语义保证单线程内程序的执行结果不被重排序改变，happens-before 关系保证正确同步的多线程程序的执行结果不被重排序改变。</li>
-<li>happens-before 和 as-if-serial 的作用都是在不改变程序执行结果的前提下，提高程序执行的并行度。</li>
-</ul>
-<h4 id="happens-before规则（先行发生原则）"><a href="#happens-before规则（先行发生原则）" class="headerlink" title="happens-before规则（先行发生原则）"></a>happens-before规则（先行发生原则）</h4><ul>
-<li>程序顺序规则：一个线程中的每一个操作，happens-before于该线程中的任意后续操作（按照代码顺序）。</li>
-<li>监视器锁规则：对一个锁的解锁，happens-before于随后对这个锁的加锁。即一个unlock操作先行发生于后面对同一个锁的lock操作。</li>
-<li>volatile变量规则：对一个volatile域的写，happens-before于任意后续对这个volatile域的读。</li>
-<li>传递性：如果A happens-before B，且 B happens-before C，那么 A happens-before C。</li>
-<li>start() 规则：如果线程A执行操作ThreadB.start() 启动线程B，那么A线程的ThreadB.start() 操作happens-before于线程B中的任意操作。</li>
-<li>join() 规则：如果线程A执行操作ThreadB.join() 并成功返回，那么线程B中的任意操作happens-before于线程A从ThreadB.join()操作成功返回。</li>
-</ul>
-<br>
-
-<blockquote>
-<p>参考资料</p>
-</blockquote>
-<p><strong>《Java 并发编程的艺术》</strong></p>
-]]></content>
   </entry>
   <entry>
     <title>深入理解volatile底层原理</title>
