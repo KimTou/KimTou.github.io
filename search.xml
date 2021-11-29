@@ -4899,7 +4899,7 @@
   </entry>
   <entry>
     <title>Docker搭建MySQL+Redis+Nginx+MongoDB环境</title>
-    <url>/2021/11/29/Docker%E6%90%AD%E5%BB%BAMySQL-Redis-Nginx-MongoDB%E7%8E%AF%E5%A2%83/</url>
+    <url>/2021/04/30/Docker%E6%90%AD%E5%BB%BAMySQL-Redis-Nginx-MongoDB%E7%8E%AF%E5%A2%83/</url>
     <content><![CDATA[<h2 id="安装Docker"><a href="#安装Docker" class="headerlink" title="安装Docker"></a>安装Docker</h2><ul>
 <li><a href="https://docs.docker.com/engine/install/centos/">docker官方文档链接</a></li>
 </ul>
