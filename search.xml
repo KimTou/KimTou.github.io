@@ -4752,4 +4752,235 @@
         <tag>Redis</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Centos部署SpringBoot项目（JDK+MySQL+Redis）</title>
+    <url>/2021/04/30/Centos%E9%83%A8%E7%BD%B2SpringBoot%E9%A1%B9%E7%9B%AE%EF%BC%88JDK-MySQL-Redis%EF%BC%89/</url>
+    <content><![CDATA[<h2 id="安装jdk"><a href="#安装jdk" class="headerlink" title="安装jdk"></a>安装jdk</h2><ul>
+<li>将压缩包上传至 /usr/java ，并进行解压</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/java</span><br><span class="line">tar <span class="literal">-zxvf</span> jdk<span class="literal">-8u281</span><span class="literal">-linux</span><span class="literal">-x64</span>.tar.gz </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>设置环境变量</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">vim /etc/profile</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在文件中添加如下代码</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">export JAVA_HOME=/usr/java/jdk1.<span class="number">8.0</span>_281</span><br><span class="line">export JRE_HOME=<span class="variable">$JAVA_HOME</span>/jre</span><br><span class="line">export CLASSPATH=.:<span class="variable">$JAVA_HOME</span>/lib/dt.jar:<span class="variable">$JAVA_HOME</span>/lib/tools.jar:<span class="variable">$JRE_HOME</span>/lib</span><br><span class="line">export PATH=<span class="variable">$PATH:</span><span class="variable">$JAVA_HOME</span>/bin</span><br></pre></td></tr></table></figure>
+<ul>
+<li>保存后使用source使配置环境生效</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查看环境是否配置成功<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">java <span class="literal">-version</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<br>
+
+<h2 id="安装MySQL"><a href="#安装MySQL" class="headerlink" title="安装MySQL"></a>安装MySQL</h2><ul>
+<li>下载MySQL官方的Yum Repository的配置文件</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">wget</span> <span class="literal">-i</span> <span class="literal">-c</span> http://dev.mysql.com/get/mysql57<span class="literal">-community</span><span class="literal">-release</span><span class="literal">-el7</span><span class="literal">-10</span>.noarch.rpm</span><br></pre></td></tr></table></figure>
+<ul>
+<li>安装MySQL官方的Yum Repository</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">yum <span class="literal">-y</span> install mysql57<span class="literal">-community</span><span class="literal">-release</span><span class="literal">-el7</span><span class="literal">-10</span>.noarch.rpm</span><br></pre></td></tr></table></figure>
+<hr>
+<p><strong>以上方法可能会出现下载速度很慢的问题，可以切换至阿里云的yum源</strong></p>
+<ul>
+<li>备份</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mv</span> /etc/yum.repos.d/CentOS<span class="literal">-Base</span>.repo /etc/yum.repos.d/CentOS<span class="literal">-Base</span>.repo.backup</span><br></pre></td></tr></table></figure>
+<ul>
+<li>下载阿里云yum文件</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">wget</span> <span class="literal">-O</span> /etc/yum.repos.d/CentOS<span class="literal">-Base</span>.repo http://mirrors.aliyun.com/repo/Centos<span class="literal">-7</span>.repo</span><br></pre></td></tr></table></figure>
+<ul>
+<li>清缓存</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">yum clean all</span><br><span class="line">yum makecache</span><br></pre></td></tr></table></figure>
+<ul>
+<li>下载</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">yum <span class="literal">-y</span> install mysql57<span class="literal">-community</span><span class="literal">-release</span><span class="literal">-el7</span><span class="literal">-10</span>.noarch.rpm</span><br></pre></td></tr></table></figure>
+
+<hr>
+<ul>
+<li>启动mysql</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">systemctl <span class="built_in">start</span> mysqld</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>若发现报错，如：Failed to start mysqld.service: Unit not found.<br>则安装mariadb：</strong></li>
+<li>卸载mysql</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">rpm <span class="literal">-qa</span> | grep mysql</span><br><span class="line"><span class="comment"># mysql-community-common-5.7.33-1.el7.x86_64</span></span><br><span class="line">yum <span class="literal">-y</span> remove mysql<span class="literal">-community</span><span class="literal">-common</span><span class="literal">-5</span>.<span class="number">7.33</span><span class="literal">-1</span>.el7.x86_64</span><br></pre></td></tr></table></figure>
+<ul>
+<li>安装mariadb（mysql的一个分支）<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">yum install <span class="literal">-y</span> mariadb<span class="literal">-server</span></span><br><span class="line">systemctl <span class="built_in">start</span> mariadb.service</span><br><span class="line">systemctl enable mariadb.service</span><br></pre></td></tr></table></figure></li>
+<li>查看安装完成</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/bin</span><br><span class="line">mysqladmin -<span class="literal">-version</span></span><br><span class="line"><span class="comment"># mysqladmin  Ver 9.0 Distrib 5.5.68-MariaDB, for Linux on x86_64</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>安装成功后进行修改密码</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">mysql_secure_installation</span><br></pre></td></tr></table></figure>
+<ul>
+<li>登录mysql</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">mysql <span class="literal">-u</span> root <span class="literal">-p</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>允许远程登录<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># XXXX为密码</span></span><br><span class="line">MariaDB [(<span class="type">none</span>)]&gt; GRANT ALL PRIVILEGES ON *.* TO <span class="string">&#x27;root&#x27;</span><span class="string">@&#x27;%&#x27; IDENTIFIED BY &#x27;XXXXX&#x27; WITH GRANT OPTION;</span></span><br><span class="line"><span class="string">MariaDB [(none)]&gt; flush privileges;</span></span><br></pre></td></tr></table></figure></li>
+<li>接下来便可以使用Navicat等数据库工具进行远程连接<br></li>
+</ul>
+<h2 id="安装Redis"><a href="#安装Redis" class="headerlink" title="安装Redis"></a>安装Redis</h2><ul>
+<li>下载redis压缩包</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/local/redis</span><br><span class="line"><span class="built_in">wget</span> http://download.redis.io/releases/redis<span class="literal">-6</span>.<span class="number">0.8</span>.tar.gz</span><br></pre></td></tr></table></figure>
+<ul>
+<li>解压</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">tar <span class="literal">-zxvf</span> redis<span class="literal">-6</span>.<span class="number">0.8</span>.tar.gz</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>由于Redis是由C语言编写的，所以需要安装gcc环境（使用gcc -v查看）</li>
+<li>发现当前版本默认为4.8.5，而redis6.0只支持5.3版本以上的，所以我们需要升级gcc版本</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 升级gcc版本</span></span><br><span class="line">yum <span class="literal">-y</span> install centos<span class="literal">-release</span><span class="literal">-scl</span></span><br><span class="line">yum <span class="literal">-y</span> install devtool<span class="built_in">set-9</span><span class="literal">-gcc</span> devtool<span class="built_in">set-9</span><span class="literal">-gcc</span><span class="literal">-c</span>++ devtool<span class="built_in">set-9</span><span class="literal">-binutils</span></span><br><span class="line"><span class="comment">#版本切换</span></span><br><span class="line">scl enable devtool<span class="built_in">set-9</span> bash</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;source /opt/rh/devtoolset-9/enable&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"><span class="comment">#查看版本</span></span><br><span class="line">gcc <span class="literal">-v</span>  </span><br></pre></td></tr></table></figure>
+<ul>
+<li>进入到redis的安装目录下进行编译</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<h4 id="启动redis"><a href="#启动redis" class="headerlink" title="启动redis"></a>启动redis</h4><p>方式一：前台启动（切换至 <strong>/usr/local/bin</strong> 目录下）</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">./redis<span class="literal">-server</span></span><br></pre></td></tr></table></figure>
+<hr>
+<p>方式二：后台启动</p>
+<ul>
+<li>先将 <strong>redis.conf</strong> 拷贝到当前目录下<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cp</span> /usr/local/redis/redis<span class="literal">-6</span>.<span class="number">0.8</span>/redis.conf /usr/local/bin</span><br></pre></td></tr></table></figure></li>
+<li>修改配置文件<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">vim redis.conf</span><br><span class="line"><span class="comment"># 修改 daemonize no为 yes ，开启后台启动</span></span><br><span class="line">daemonize yes</span><br><span class="line"><span class="comment"># requirepass foobared  修改你的密码</span></span><br><span class="line">requirepass xxxx</span><br></pre></td></tr></table></figure></li>
+<li>启动</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">./redis<span class="literal">-server</span> redis.conf</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查看redis进程</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">ps</span> <span class="literal">-ef</span> |grep redis</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>进行连接测试</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">redis<span class="literal">-cli</span></span><br><span class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; ping</span><br><span class="line">(error) NOAUTH Authentication required.</span><br><span class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; auth <span class="string">&quot;xxxx&quot;</span></span><br><span class="line">OK</span><br><span class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; ping</span><br><span class="line">PONG</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>开启远程连接（在 redis.conf 中注释掉以下内容 ）</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># bind 127.0.0.1</span></span><br></pre></td></tr></table></figure>
+<hr>
+<br>
+
+<h2 id="部署SpringBoot项目"><a href="#部署SpringBoot项目" class="headerlink" title="部署SpringBoot项目"></a>部署SpringBoot项目</h2><p>1、将项目的jar包上传至Linux服务器上（目录可为 /home/webapp ）</p>
+<p>2、在jar包目录下编写启动脚本（ vim start.sh ）</p>
+<p>脚本内容如下：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line">nohup java <span class="literal">-jar</span> club<span class="literal">-recruit</span><span class="literal">-0</span>.<span class="number">0.1</span><span class="literal">-SNAPSHOT</span>.jar &amp;</span><br></pre></td></tr></table></figure>
+<p>3、修改脚本权限</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">chmod <span class="number">777</span> start.sh</span><br></pre></td></tr></table></figure>
+<p>4、以后使用如下命令启动即可</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">./start.sh</span><br></pre></td></tr></table></figure>
+<ul>
+<li>如果想要停止这个应用，可使用如下命令查看端口占用的进程号并结束进程</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">netstat <span class="literal">-anp</span> | grep 端口号</span><br><span class="line"><span class="built_in">kill</span> sid</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Docker搭建MySQL+Redis+Nginx+MongoDB环境</title>
+    <url>/2021/11/29/Docker%E6%90%AD%E5%BB%BAMySQL-Redis-Nginx-MongoDB%E7%8E%AF%E5%A2%83/</url>
+    <content><![CDATA[<h2 id="安装Docker"><a href="#安装Docker" class="headerlink" title="安装Docker"></a>安装Docker</h2><ul>
+<li><a href="https://docs.docker.com/engine/install/centos/">docker官方文档链接</a></li>
+</ul>
+<p>1、卸载旧版本docker</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">yum remove docker \</span><br><span class="line">                  docker<span class="literal">-client</span> \</span><br><span class="line">                  docker<span class="literal">-client</span><span class="literal">-latest</span> \</span><br><span class="line">                  docker<span class="literal">-common</span> \</span><br><span class="line">                  docker<span class="literal">-latest</span> \</span><br><span class="line">                  docker<span class="literal">-latest</span><span class="literal">-logrotate</span> \</span><br><span class="line">                  docker<span class="literal">-logrotate</span> \</span><br><span class="line">                  docker<span class="literal">-engine</span></span><br></pre></td></tr></table></figure>
+<p>2、安装需要的安装包（提供实用程序）</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">yum install <span class="literal">-y</span> yum<span class="literal">-utils</span></span><br></pre></td></tr></table></figure>
+<p>3、设置镜像的仓库</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># yum-config-manager \</span></span><br><span class="line"><span class="comment">#     --add-repo \</span></span><br><span class="line"><span class="comment">#     https://download.docker.com/linux/centos/docker-ce.repo		# 默认国外（慢）</span></span><br><span class="line">    </span><br><span class="line"><span class="comment"># 使用阿里云镜像</span></span><br><span class="line">yum<span class="literal">-config</span><span class="literal">-manager</span> \</span><br><span class="line">    -<span class="literal">-add</span><span class="literal">-repo</span> \</span><br><span class="line">    http://mirrors.aliyun.com/docker<span class="literal">-ce</span>/linux/centos/docker<span class="literal">-ce</span>.repo</span><br></pre></td></tr></table></figure>
+<p>4、安装最新版本的Docker 引擎和容器</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 可以先更新yum软件包索引</span></span><br><span class="line">yum makecache fast</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装docker</span></span><br><span class="line">yum install docker<span class="literal">-ce</span> docker<span class="literal">-ce</span><span class="literal">-cli</span> containerd.io</span><br></pre></td></tr></table></figure>
+<p>5、启动docker</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">systemctl <span class="built_in">start</span> docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看是否安装成功</span></span><br><span class="line">docker version</span><br></pre></td></tr></table></figure>
+<br>
+
+<hr>
+<h2 id="安装MySQL"><a href="#安装MySQL" class="headerlink" title="安装MySQL"></a>安装MySQL</h2><p>1、拉取镜像</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker pull mysql:<span class="number">5.7</span></span><br></pre></td></tr></table></figure>
+
+<p>2、后台方式启动MySQL</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker run <span class="literal">-d</span> <span class="literal">-p</span> <span class="number">3306</span>:<span class="number">3306</span> <span class="literal">-v</span> /home/mysql/conf/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf <span class="literal">-v</span> /home/mysql/<span class="keyword">data</span>:/var/lib/mysql <span class="literal">-e</span> MYSQL_ROOT_PASSWORD=<span class="number">123456</span> -<span class="literal">-name</span> mysql01 mysql:<span class="number">5.7</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>-e MYSQL_ROOT_PASSWORD=xxxx  ：设置mysql密码。</li>
+<li>-v /home/mysql/data:/var/lib/mysql ：挂载mysql数据文件到主机，当mysql容器删除后，数据依旧保存在主机。</li>
+</ul>
+<br>
+备注：如何修改MySQL密码
+
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker exec <span class="literal">-it</span> 容器id /bin/bash</span><br><span class="line">mysql <span class="literal">-u</span> root <span class="literal">-p</span>	</span><br><span class="line">update mysql.user <span class="built_in">set</span> authentication_string=PASSWORD(<span class="string">&#x27;xxxx&#x27;</span>), plugin=<span class="string">&#x27;mysql_native_password&#x27;</span> <span class="built_in">where</span> user=<span class="string">&#x27;root&#x27;</span>;</span><br><span class="line">flush privileges;	<span class="comment"># 刷新权限</span></span><br></pre></td></tr></table></figure>
+
+<br>
+
+<hr>
+<h2 id="安装Redis"><a href="#安装Redis" class="headerlink" title="安装Redis"></a>安装Redis</h2><p>1、创建redis配置文件：<a href="http://download.redis.io/redis-stable/redis.conf">下载地址</a></p>
+<p>2、修改配置文件</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">bind <span class="number">127.0</span>.<span class="number">0.1</span> -::<span class="number">1</span>       注释掉这一行，允许远程连接</span><br><span class="line">protected<span class="literal">-mode</span> no         将yes改为no，允许远程连接</span><br><span class="line">daemonize no		      以非守护进程的方式运行，默认为no</span><br><span class="line">requirepass yourpassword  设置密码</span><br></pre></td></tr></table></figure>
+<p>3、将配置文件上传至服务器</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">mkdir /home/redis</span><br><span class="line"></span><br><span class="line">上传 redis.conf 至 /home/redis 目录下</span><br></pre></td></tr></table></figure>
+
+
+<p>4、拉取redis镜像</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker pull redis</span><br></pre></td></tr></table></figure>
+<p>5、运行Redis</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker run <span class="literal">-p</span> <span class="number">6379</span>:<span class="number">6379</span> <span class="literal">-v</span> /home/redis/redis.conf:/etc/redis/redis.conf <span class="literal">-v</span> /home/redis/<span class="keyword">data</span>:/<span class="keyword">data</span> <span class="literal">-d</span> redis redis<span class="literal">-server</span> /etc/redis/redis.conf</span><br></pre></td></tr></table></figure>
+<br>
+
+<hr>
+<h2 id="安装nginx"><a href="#安装nginx" class="headerlink" title="安装nginx"></a>安装nginx</h2><p>1、拉取镜像</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker pull nginx</span><br></pre></td></tr></table></figure>
+<p>2、启动测试的testnginx</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker run <span class="literal">-d</span> <span class="literal">-p</span> <span class="number">80</span>:<span class="number">80</span> -<span class="literal">-name</span> testnginx nginx</span><br></pre></td></tr></table></figure>
+<p>3、创建三个本机存储文件目录</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">mkdir <span class="literal">-p</span> /home/nginx/www /home/nginx/logs /home/nginx/conf</span><br></pre></td></tr></table></figure>
+<ul>
+<li>www：存储网站网页的目录</li>
+<li>logs：存储nginx日志的目录</li>
+<li>conf：存储nginx配置文件的目录</li>
+</ul>
+<p>4、将用来测试的testnginx容器的配置文件拷贝到本机</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker <span class="built_in">cp</span> testnginx:/etc/nginx/nginx.conf /home/nginx/conf</span><br></pre></td></tr></table></figure>
+<p>5、删除测试容器testnginx</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker stop testnginx</span><br><span class="line">docker <span class="built_in">rm</span> testnginx</span><br></pre></td></tr></table></figure>
+<p>6、启动nginx</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker run <span class="literal">-d</span> <span class="literal">-p</span> <span class="number">80</span>:<span class="number">80</span> <span class="literal">-v</span> /home/nginx/www:/usr/share/nginx/html <span class="literal">-v</span> /home/nginx/conf/nginx.conf:/etc/nginx/nginx.conf <span class="literal">-v</span> /home/nginx/logs:/var/log/nginx -<span class="literal">-name</span> mynginx nginx </span><br></pre></td></tr></table></figure>
+<p>7、浏览器测试访问</p>
+<hr>
+<h2 id="安装MongoDB"><a href="#安装MongoDB" class="headerlink" title="安装MongoDB"></a>安装MongoDB</h2><p>1、拉取镜像</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker pull mongo:<span class="number">4.4</span>.<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>2、启动</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker run <span class="literal">-p</span> <span class="number">27017</span>:<span class="number">27017</span> -<span class="literal">-name</span> mongo <span class="literal">-v</span> /home/mongo/db:/<span class="keyword">data</span>/db <span class="literal">-d</span> mongo:<span class="number">4.4</span>.<span class="number">1</span> -<span class="literal">-auth</span></span><br></pre></td></tr></table></figure>
+<p>3、进入容器</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">docker exec <span class="literal">-it</span> mongo mongo</span><br></pre></td></tr></table></figure>
+<p>4、添加管理员用户</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use admin		<span class="comment">#切换数据库</span></span><br><span class="line">&gt; db.createUser(&#123;		</span><br><span class="line">... user: <span class="string">&quot;KimTou&quot;</span>,</span><br><span class="line">... <span class="built_in">pwd</span>: <span class="string">&quot;xxxx你的密码&quot;</span>,</span><br><span class="line">... roles: [&#123; <span class="type">role</span>:<span class="string">&quot;root&quot;</span>,<span class="type">db</span>:<span class="string">&quot;admin&quot;</span> &#125;] &#125;);</span><br><span class="line">&gt; db.auth(<span class="string">&quot;KimTou&quot;</span>,<span class="string">&quot;xxxx你的密码&quot;</span>)	<span class="comment"># 测试</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>docker</tag>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
 </search>
