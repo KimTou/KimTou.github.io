@@ -1,0 +1,425 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Redis设计与实现——对象 | KimTou</title><meta name="keywords" content="Redis"><meta name="author" content="chenjintao"><meta name="copyright" content="chenjintao"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Redis设计与实现——对象">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis设计与实现——对象">
+<meta property="og:url" content="https://blog.tojintao.cn/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/index.html">
+<meta property="og:site_name" content="KimTou">
+<meta property="og:description" content="Redis设计与实现——对象">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png">
+<meta property="article:published_time" content="2021-12-05T11:32:44.000Z">
+<meta property="article:modified_time" content="2021-12-05T11:35:29.646Z">
+<meta property="article:author" content="chenjintao">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png"><link rel="shortcut icon" href="/images/T.png"><link rel="canonical" href="https://blog.tojintao.cn/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Redis设计与实现——对象',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-12-05 19:35:29'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/images/KT.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">43</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://gitee.com/KIMTOU/img/raw/master/20211205193452.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">KimTou</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Redis设计与实现——对象</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-12-05T11:32:44.000Z" title="发表于 2021-12-05 19:32:44">2021-12-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-12-05T11:35:29.646Z" title="更新于 2021-12-05 19:35:29">2021-12-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Redis/">Redis</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Redis设计与实现——对象"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>Redis 的底层数据结构主要包括简单动态字符串（SDS）、双端链表、字典、跳跃表、整数集合、压缩列表。Redis 并没有直接使用这些数据结构来实现键值对数据库，而是<strong>基于这些数据结构创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象这五种类型的对象</strong>，每一种对象类型都至少采用了两种编码，不同的编码使用的底层数据结构也不同。通过这五种不同类型的对象，Redis 可以在执行命令之前，根据对象的类型来判断一个对象是否可以执行给定的命令。使用对象的另一个好处是，我们可以<strong>针对不同的使用场景，为对象设置多种不同的数据结构实现，从而优化对象在不同场景下的使用效率</strong>。</p>
+<p>除此之外，Redis 的对象系统还实现了<strong>基于引用计数技术的内存回收机制</strong>：当程序不再使用某个对象的时候，这个对象所占用的内存就会被自动释放；另外，Redis 还通过引用计数技术实现了对象共享机制，这一机制可以在适当的条件下，通过让多个数据库键共享同一个对象来节约内存。</p>
+<h3 id="对象的类型与编码"><a href="#对象的类型与编码" class="headerlink" title="对象的类型与编码"></a>对象的类型与编码</h3><p>Redis 使用对象来表示数据库中的键和值，每次当我们在 Redis 的数据库中新创建一个键值对时，我们至少会创建两个对象，一个对象用作键值对的键（键对象），另一个对象用作键值对的值（值对象），其中键总是一个字符串对象， 而值则可以是字符串对象、列表对象、哈希对象、集合对象或者有序集合对象的其中一种。</p>
+<blockquote>
+<p>因此当我们对一个数据库键执行 TYPE 命令时，命令返回的结果为数据库键对应的值对象的类型，而不是键对象的类型。</p>
+</blockquote>
+<p><strong>Redis 中的每个对象都由一个 <code>redisObject</code> 结构表示</strong>，该结构中和保存数据有关的三个属性分别是 <code>type</code> 属性、 <code>encoding</code> 属性和 <code>ptr</code> 属性：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisObject</span> &#123;</span></span><br><span class="line">    <span class="comment">// 类型</span></span><br><span class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 编码</span></span><br><span class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 指向底层数据结构的指针</span></span><br><span class="line">    <span class="keyword">void</span> *ptr;</span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>type</code> 属性记录了对象的类型，对于 Redis 来说，键对象总是字符串类型，值对象可以是任意支持的类型</strong>。因此，当我们说<code>Redis</code>键采用哪种对象类型的时候，指的是对应的值采用哪种对象类型。</p>
+<table>
+<thead>
+<tr>
+<th>类型常量</th>
+<th>对象类型名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>REDIS_STRING</td>
+<td>字符串对象</td>
+</tr>
+<tr>
+<td>REDIS_LIST</td>
+<td>列表对象</td>
+</tr>
+<tr>
+<td>REDIS_HASH</td>
+<td>哈希对象</td>
+</tr>
+<tr>
+<td>REDIS_SET</td>
+<td>集合对象</td>
+</tr>
+<tr>
+<td>REDIS_ZSET</td>
+<td>有序集合对象</td>
+</tr>
+</tbody></table>
+<p><strong><code>ptr</code> 指针指向了对象的底层数据结构，而这些数据结构由 <code>encoding</code> 属性决定。<code>encoding</code> 属性记录了对象所使用的编码， 也即是说这个对象使用了什么数据结构作为对象的底层实现</strong>，这个属性的值可以是表中列出的常量的其中一个。</p>
+<table>
+<thead>
+<tr>
+<th>编码常量</th>
+<th>编码对应的底层数据结构</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>REDIS_ENCODING_INT</td>
+<td>long 类型的整数</td>
+</tr>
+<tr>
+<td>REDIS_ENCODING_EMBSTR</td>
+<td>embstr 编码的简单动态字符串</td>
+</tr>
+<tr>
+<td>REDIS_ENCODING_RAW</td>
+<td>简单动态字符串</td>
+</tr>
+<tr>
+<td>REDIS_ENCODING_HT</td>
+<td>字典</td>
+</tr>
+<tr>
+<td>REDIS_ENCODING_LINKEDLIST</td>
+<td>双端链表</td>
+</tr>
+<tr>
+<td>REDIS_ENCODING_ZIPLIST</td>
+<td>压缩列表</td>
+</tr>
+<tr>
+<td>REDIS_ENCODING_INTSET</td>
+<td>整数集合</td>
+</tr>
+<tr>
+<td>REDIS_ENCODING_SKIPLIST</td>
+<td>跳跃表和字典</td>
+</tr>
+</tbody></table>
+<p>每种类型的对象都至少使用了两种不同的编码，下表列出了每种类型的对象可以使用的编码。</p>
+<table>
+<thead>
+<tr>
+<th align="left">类型</th>
+<th align="left">编码</th>
+<th align="left">对象</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">REDIS_STRING</td>
+<td align="left">REDIS_ENCODING_INT</td>
+<td align="left">使用整数值实现的字符串对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_STRING</td>
+<td align="left">REDIS_ENCODING_EMBSTR</td>
+<td align="left">使用 embstr 编码的简单动态字符串实现的字符串对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_STRING</td>
+<td align="left">REDIS_ENCODING_RAW</td>
+<td align="left">使用简单动态字符串实现的字符串对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_LIST</td>
+<td align="left">REDIS_ENCODING_ZIPLIST</td>
+<td align="left">使用压缩列表实现的列表对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_LIST</td>
+<td align="left">REDIS_ENCODING_LINKEDLIST</td>
+<td align="left">使用双端链表实现的列表对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_HASH</td>
+<td align="left">REDIS_ENCODING_ZIPLIST</td>
+<td align="left">使用压缩列表实现的哈希对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_HASH</td>
+<td align="left">REDIS_ENCODING_HT</td>
+<td align="left">使用字典实现的哈希对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_SET</td>
+<td align="left">REDIS_ENCODING_INTSET</td>
+<td align="left">使用整数集合实现的集合对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_SET</td>
+<td align="left">REDIS_ENCODING_HT</td>
+<td align="left">使用字典实现的集合对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_ZSET</td>
+<td align="left">REDIS_ENCODING_ZIPLIST</td>
+<td align="left">使用压缩列表实现的有序集合对象。</td>
+</tr>
+<tr>
+<td align="left">REDIS_ZSET</td>
+<td align="left">REDIS_ENCODING_SKIPLIST</td>
+<td align="left">使用跳跃表和字典实现的有序集合对象。</td>
+</tr>
+</tbody></table>
+<p><strong>通过<code>encoding</code>属性来设定对象所使用的编码，而不是为特定类型的对象关联一种固定的编码，是为了实现同一对象类型，支持不同的底层实现</strong>。这样就能根据不同场景，使用不同的底层数据结构，进而极大提升 Redis 的灵活性和效率。</p>
+<br>
+
+<h3 id="字符串对象"><a href="#字符串对象" class="headerlink" title="字符串对象"></a>字符串对象</h3><p><strong>字符串对象的编码可以是 <code>int</code> 、 <code>raw</code> 或者 <code>embstr</code></strong> 。</p>
+<ul>
+<li><p><strong>如果一个字符串对象保存的是整数值，并且这个整数值可以用 <code>long</code> 类型来表示</strong>，那么字符串对象会将整数值保存在 <code>ptr</code> 属性里面（将 <code>void*</code> 转换成 <code>long</code> ），<strong>并将字符串对象的编码设置为 <code>int</code></strong> 。</p>
+</li>
+<li><p>如果字符串对象保存的是一个<strong>长度小于等于 39 字节的字符串</strong>，则编码类型为 <code>embstr</code> ，底层数据结构为 <code>embstr</code> 编码的 SDS 。</p>
+</li>
+<li><p>如果字符串对象保存的是一个<strong>长度大于 39 字节的字符串</strong>，则编码类型为 <code>raw</code> ，底层数据结构为 SDS 。</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>注意 3.2 版本长度边界变为 45</strong></p>
+</blockquote>
+<p><strong><code>embstr</code> 编码是专门用于保存短字符串的一种优化编码方式</strong>，这种编码和 <code>raw</code> 编码一样，都使用 <code>redisObject</code> 结构和 <code>sdshdr</code> 结构来表示字符串对象，<strong>区别是 <code>raw</code> 编码会调用两次内存分配函数来分别创建 <code>redisObject</code> 结构和 <code>sdshdr</code> 结构，而 <code>embstr</code> 编码则只调用一次内存分配一块连续的空间，空间同时包含<code>redisObject</code>结构和<code>sdshdr</code>结构</strong>。</p>
+<p><code>embstr</code> 编码的字符串对象在执行命令时，产生的效果和 <code>raw</code> 编码的字符串对象执行命令时产生的效果是相同的，但使用 <code>embstr</code> 编码的字符串对象来保存短字符串值有以下好处：</p>
+<ol>
+<li><code>embstr</code> 编码将创建字符串对象所需的内存分配次数从 <code>raw</code> 编码的两次降低为一次。</li>
+<li>释放 <code>embstr</code> 编码的字符串对象只需要调用一次内存释放函数， 而释放 <code>raw</code> 编码的字符串对象需要调用两次内存释放函数。</li>
+<li>因为 <code>embstr</code> 编码的字符串对象的所有数据都保存在一块连续的内存里面， 所以这种编码的字符串对象比起 <code>raw</code> 编码的字符串对象能够更好地利用缓存带来的优势。</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">redis&gt;</span><span class="bash"> SET story <span class="string">&quot;Long, long, long ago there lived a king ...&quot;</span></span></span><br><span class="line">OK</span><br><span class="line"><span class="meta">redis&gt;</span><span class="bash"> STRLEN story</span></span><br><span class="line">(integer) 45</span><br><span class="line"><span class="meta">redis&gt;</span><span class="bash"> OBJECT ENCODING story</span></span><br><span class="line">&quot;raw&quot;</span><br><span class="line"></span><br><span class="line"><span class="meta">redis&gt;</span><span class="bash"> SET msg <span class="string">&quot;hello&quot;</span></span></span><br><span class="line">OK</span><br><span class="line"><span class="meta">redis&gt;</span><span class="bash"> OBJECT ENCODING msg</span></span><br><span class="line">&quot;embstr&quot;</span><br><span class="line"></span><br><span class="line"><span class="meta">redis&gt;</span><span class="bash"> SET number 10086</span></span><br><span class="line">OK</span><br><span class="line"><span class="meta">redis&gt;</span><span class="bash"> OBJECT ENCODING number</span></span><br><span class="line">&quot;int&quot;</span><br></pre></td></tr></table></figure>
+
+<h4 id="编码转换"><a href="#编码转换" class="headerlink" title="编码转换"></a>编码转换</h4><p><code>int</code> 编码和 <code>embstr</code> 编码的字符串对象在条件满足的情况下，会被转换为 <code>raw</code> 编码的字符串对象。</p>
+<ul>
+<li><p>对于 <code>int</code> 编码的字符串对象来说，如果我们向对象执行了一些命令（如append），使得这个对象保存的不再是整数值， 而是一个字符串值， 那么字符串对象的编码将从 <code>int</code> 变为 <code>raw</code> 。</p>
+</li>
+<li><p>对于<code>embstr</code>编码来说，只要我们修改了字符串的值，总会变成一个 <code>raw</code> 编码的字符串对象。</p>
+</li>
+</ul>
+<blockquote>
+<p>因为 Redis 没有为 <code>embstr</code> 编码的字符串对象编写任何相应的修改程序 （只有 <code>int</code> 编码和 <code>raw</code> 编码的字符串对象有这些程序），所以 <code>embstr</code> 编码的字符串对象实际上是只读的：当我们对 <code>embstr</code> 编码的字符串对象执行任何修改命令时，程序会先将对象的编码从 <code>embstr</code> 转换成 <code>raw</code> ，然后再执行修改命令。</p>
+</blockquote>
+<br>
+
+<h3 id="列表对象"><a href="#列表对象" class="headerlink" title="列表对象"></a>列表对象</h3><p><strong>列表对象的编码可以是 <code>ziplist</code> 或者 <code>linkedlist</code></strong> 。</p>
+<p><code>ziplist</code> 编码的列表对象使用压缩列表作为底层实现， 每个压缩列表节点（entry）保存了一个列表元素。</p>
+<p>另一方面， <code>linkedlist</code> 编码的列表对象使用双端链表作为底层实现， 每个双端链表节点（node）都保存了一个字符串对象， 而每个字符串对象都保存了一个列表元素。</p>
+<p>注意， <code>linkedlist</code> 编码的列表对象在底层的双端链表结构中包含了多个字符串对象， 这种嵌套字符串对象的行为在哈希对象、集合对象和有序集合对象中都会出现， <strong>字符串对象是 Redis 五种类型的对象中唯一一种会被其他四种类型对象嵌套的对象</strong>。</p>
+<h4 id="编码转换-1"><a href="#编码转换-1" class="headerlink" title="编码转换"></a>编码转换</h4><p><strong>当列表对象保存的所有字符串元素的长度都小于 64 字节，且元素个数小于 512 个时，列表对象采用的是 <code>ziplist</code> 编码，否则使用 <code>linkedlist</code> 编码</strong>。</p>
+<blockquote>
+<p>可以通过配置文件修改默认值</p>
+</blockquote>
+<br>
+
+<h3 id="哈希对象"><a href="#哈希对象" class="headerlink" title="哈希对象"></a>哈希对象</h3><p><strong>哈希对象的编码可以是 <code>ziplist</code> 或者 <code>hashtable</code></strong> 。</p>
+<p><code>ziplist</code> 编码的哈希对象使用压缩列表作为底层实现， 每当有新的键值对要加入到哈希对象时， 程序会先将保存了键的压缩列表节点推入到压缩列表表尾， 然后再将保存了值的压缩列表节点推入到压缩列表表尾。</p>
+<p> <code>hashtable</code> 编码的哈希对象使用字典作为底层实现，字典是一种用于保存键值对的数据结构，Redis 的字典使用哈希表作为底层实现，一个哈希表里面可以有多个哈希表节点，每个哈希表节点保存的就是一个键值对。</p>
+<h4 id="编码转换-2"><a href="#编码转换-2" class="headerlink" title="编码转换"></a>编码转换</h4><p><strong>当哈希对象保存的所有键值对的键和值的字符串长度都小于64个字节，并且键值对数量小于512个时，使用<code>ziplist</code>编码，否则使用<code>hashtable</code>编码</strong>。</p>
+<blockquote>
+<p>可以通过配置文件修改默认值</p>
+</blockquote>
+<br>
+
+<h3 id="集合对象"><a href="#集合对象" class="headerlink" title="集合对象"></a>集合对象</h3><p><strong>集合对象的编码可以是 <code>intset</code> 或者 <code>hashtable</code></strong> 。</p>
+<p><code>intset</code> 编码的集合对象使用整数集合作为底层实现， 集合对象包含的所有元素都被保存在整数集合里面。</p>
+<p><code>hashtable</code> 编码的集合对象使用字典作为底层实现， 字典的每个键都是一个字符串对象， 每个字符串对象包含了一个集合元素， 而字典的值则全部被设置为 <code>NULL</code> 。</p>
+<h4 id="编码转换-3"><a href="#编码转换-3" class="headerlink" title="编码转换"></a>编码转换</h4><p><strong>当集合对象保存的所有元素都是整数值，并且元素数量不超过512个时，使用<code>intset</code>编码，否则使用<code>hashtable</code>编码</strong>。</p>
+<br>
+
+<h3 id="有序集合对象"><a href="#有序集合对象" class="headerlink" title="有序集合对象"></a>有序集合对象</h3><p><strong>有序集合的编码可以是 <code>ziplist</code> 或者 <code>skiplist</code></strong> 。</p>
+<p><code>ziplist</code> 编码的有序集合对象使用压缩列表作为底层实现， 每个集合元素使用两个紧挨在一起的压缩列表节点来保存， 第一个节点保存元素的成员（member）， 而第二个元素则保存元素的分值（score）。</p>
+<p><strong><code>skiplist</code> 编码的有序集合对象使用 <code>zset</code> 结构作为底层实现， 一个 <code>zset</code> 结构同时包含一个字典和一个跳跃表</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zset</span> &#123;</span></span><br><span class="line">    zskiplist *zsl;</span><br><span class="line">    dict *dict;</span><br><span class="line">&#125; zset;</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>zset</code> 结构中的 <code>zsl</code> 跳跃表按分值从小到大保存了所有有序集合元素</strong>， 每个跳跃表节点都保存了一个元素： 跳跃表节点的 <code>object</code> 属性保存了元素的成员， 而跳跃表节点的 <code>score</code> 属性则保存了元素的分值。 <strong>通过这个跳跃表， 程序可以对有序集合进行范围型操作</strong>， 比如 ZRANK 、 ZRANGE 等命令就是基于跳跃表 API 来实现的。</p>
+<p>除此之外， <strong><code>zset</code> 结构中的 <code>dict</code> 字典为有序集合创建了一个从成员到分值的映射</strong>， 字典中的每个键值对都保存了一个集合元素： 字典的键保存了元素的成员， 而字典的值则保存了元素的分值。 <strong>通过这个字典， 程序可以用 O(1) 复杂度查找给定成员的分值， ZSCORE 命令就是根据这一特性实现的</strong>， 而很多其他有序集合命令都在实现的内部用到了这一特性。</p>
+<p>有序集合每个元素的成员都是一个字符串对象， 而每个元素的分值都是一个 <code>double</code> 类型的浮点数。 值得一提的是， 虽然 <code>zset</code> 结构同时使用跳跃表和字典来保存有序集合元素， <strong>但这两种数据结构都会通过指针来共享相同元素的成员和分值， 所以同时使用跳跃表和字典来保存集合元素不会产生任何重复成员或者分值， 也不会因此而浪费额外的内存</strong>。</p>
+<br>
+
+<h4 id="为什么zset同时使用跳跃表和字典来实现？"><a href="#为什么zset同时使用跳跃表和字典来实现？" class="headerlink" title="为什么zset同时使用跳跃表和字典来实现？"></a>为什么zset同时使用跳跃表和字典来实现？</h4><p>在理论上来说， 有序集合可以单独使用字典或者跳跃表的其中一种数据结构来实现， 但无论单独使用字典还是跳跃表， 在性能上对比起同时使用字典和跳跃表都会有所降低。</p>
+<ul>
+<li><p><strong>如果只使用字典来实现： 虽然能以 O(1) 复杂度查找成员的分值， 但因为字典以无序的方式来保存集合元素， 所以每次在执行范围型操作 —— 比如 ZRANK 、 ZRANGE 等命令时， 程序都需要对字典保存的所有元素进行排序， 完成这种排序需要至少 O(Nlog N) 时间复杂度， 以及额外的 O(N) 内存空间</strong> （因为要创建一个数组来保存排序后的元素）。</p>
+</li>
+<li><p><strong>如果只使用跳跃表来实现：虽然跳跃表执行范围型操作有优势， 但因为没有了字典， 所以根据成员查找分值的操作复杂度将从 O(1) 上升为 O(log N)</strong> 。</p>
+</li>
+</ul>
+<p><strong>总结：为了提升性能，让有序集合的查找和范围型操作都尽可能快地执行， Redis 选择了同时使用字典和跳跃表两种数据结构来实现有序集合</strong>。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png"></p>
+<h4 id="编码转换-4"><a href="#编码转换-4" class="headerlink" title="编码转换"></a>编码转换</h4><p><strong>当有序集合保存的所有元素成员长度都小于64字节，且元素数量小于128个时，使用<code>ziplist</code>编码，否则使用<code>skiplist</code>编码</strong>。</p>
+<br>
+
+<blockquote>
+<p>参考资料</p>
+</blockquote>
+<p>《Redis 设计与实现》——黄健宏</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">chenjintao</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.tojintao.cn/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/">https://blog.tojintao.cn/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.tojintao.cn" target="_blank">KimTou</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Redis/">Redis</a></div><div class="post_share"><div class="social-share" data-image="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/"><img class="prev-cover" src="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Redis高可用的基石——主从复制</div></div></a></div><div class="next-post pull-right"><a href="/2021/11/28/%E5%9F%BA%E4%BA%8ERedis3-0%E4%B8%8E6-0%E7%89%88%E6%9C%AC%E6%BA%90%E7%A0%81%E7%9C%8BSDS%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/"><img class="next-cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128232241.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">基于Redis3.0与6.0版本源码看SDS内存优化</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/11/28/Redis设计与实现——简单动态字符串SDS/" title="Redis设计与实现——简单动态字符串SDS"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128205733.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-28</div><div class="title">Redis设计与实现——简单动态字符串SDS</div></div></a></div><div><a href="/2021/11/28/Redis设计与实现——跳跃表/" title="Redis设计与实现——跳跃表"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128210516.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-28</div><div class="title">Redis设计与实现——跳跃表</div></div></a></div><div><a href="/2021/11/28/Redis设计与实现——字典（渐进式rehash细节）/" title="Redis设计与实现——字典（渐进式rehash细节）"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128210239.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-28</div><div class="title">Redis设计与实现——字典（渐进式rehash细节）</div></div></a></div><div><a href="/2021/11/28/基于Redis3-0与6-0版本源码看SDS内存优化/" title="基于Redis3.0与6.0版本源码看SDS内存优化"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128232241.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-28</div><div class="title">基于Redis3.0与6.0版本源码看SDS内存优化</div></div></a></div><div><a href="/2021/12/05/Redis高可用的基石——主从复制/" title="Redis高可用的基石——主从复制"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-12-05</div><div class="title">Redis高可用的基石——主从复制</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/images/KT.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">chenjintao</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">43</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/KimTou"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/KimTou" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:752160655@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/KIMTOU" target="_blank" title="CSDN"><i class="fa fa-edit"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客呀 ~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%BC%96%E7%A0%81"><span class="toc-number">1.</span> <span class="toc-text">对象的类型与编码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%AF%B9%E8%B1%A1"><span class="toc-number">2.</span> <span class="toc-text">字符串对象</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2"><span class="toc-number">2.1.</span> <span class="toc-text">编码转换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%97%E8%A1%A8%E5%AF%B9%E8%B1%A1"><span class="toc-number">3.</span> <span class="toc-text">列表对象</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2-1"><span class="toc-number">3.1.</span> <span class="toc-text">编码转换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1"><span class="toc-number">4.</span> <span class="toc-text">哈希对象</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2-2"><span class="toc-number">4.1.</span> <span class="toc-text">编码转换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E5%90%88%E5%AF%B9%E8%B1%A1"><span class="toc-number">5.</span> <span class="toc-text">集合对象</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2-3"><span class="toc-number">5.1.</span> <span class="toc-text">编码转换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%E5%AF%B9%E8%B1%A1"><span class="toc-number">6.</span> <span class="toc-text">有序集合对象</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88zset%E5%90%8C%E6%97%B6%E4%BD%BF%E7%94%A8%E8%B7%B3%E8%B7%83%E8%A1%A8%E5%92%8C%E5%AD%97%E5%85%B8%E6%9D%A5%E5%AE%9E%E7%8E%B0%EF%BC%9F"><span class="toc-number">6.1.</span> <span class="toc-text">为什么zset同时使用跳跃表和字典来实现？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2-4"><span class="toc-number">6.2.</span> <span class="toc-text">编码转换</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/" title="Redis高可用的基石——主从复制"><img src="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis高可用的基石——主从复制"/></a><div class="content"><a class="title" href="/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/" title="Redis高可用的基石——主从复制">Redis高可用的基石——主从复制</a><time datetime="2021-12-05T11:51:09.000Z" title="发表于 2021-12-05 19:51:09">2021-12-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/" title="Redis设计与实现——对象"><img src="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis设计与实现——对象"/></a><div class="content"><a class="title" href="/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/" title="Redis设计与实现——对象">Redis设计与实现——对象</a><time datetime="2021-12-05T11:32:44.000Z" title="发表于 2021-12-05 19:32:44">2021-12-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/28/%E5%9F%BA%E4%BA%8ERedis3-0%E4%B8%8E6-0%E7%89%88%E6%9C%AC%E6%BA%90%E7%A0%81%E7%9C%8BSDS%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/" title="基于Redis3.0与6.0版本源码看SDS内存优化"><img src="https://gitee.com/KIMTOU/img/raw/master/20211128232241.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="基于Redis3.0与6.0版本源码看SDS内存优化"/></a><div class="content"><a class="title" href="/2021/11/28/%E5%9F%BA%E4%BA%8ERedis3-0%E4%B8%8E6-0%E7%89%88%E6%9C%AC%E6%BA%90%E7%A0%81%E7%9C%8BSDS%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/" title="基于Redis3.0与6.0版本源码看SDS内存优化">基于Redis3.0与6.0版本源码看SDS内存优化</a><time datetime="2021-11-28T13:51:38.000Z" title="发表于 2021-11-28 21:51:38">2021-11-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/28/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E8%B7%B3%E8%B7%83%E8%A1%A8/" title="Redis设计与实现——跳跃表"><img src="https://gitee.com/KIMTOU/img/raw/master/20211128210516.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis设计与实现——跳跃表"/></a><div class="content"><a class="title" href="/2021/11/28/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E8%B7%B3%E8%B7%83%E8%A1%A8/" title="Redis设计与实现——跳跃表">Redis设计与实现——跳跃表</a><time datetime="2021-11-28T13:04:47.000Z" title="发表于 2021-11-28 21:04:47">2021-11-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/28/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AD%97%E5%85%B8%EF%BC%88%E6%B8%90%E8%BF%9B%E5%BC%8Frehash%E7%BB%86%E8%8A%82%EF%BC%89/" title="Redis设计与实现——字典（渐进式rehash细节）"><img src="https://gitee.com/KIMTOU/img/raw/master/20211128210239.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis设计与实现——字典（渐进式rehash细节）"/></a><div class="content"><a class="title" href="/2021/11/28/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AD%97%E5%85%B8%EF%BC%88%E6%B8%90%E8%BF%9B%E5%BC%8Frehash%E7%BB%86%E8%8A%82%EF%BC%89/" title="Redis设计与实现——字典（渐进式rehash细节）">Redis设计与实现——字典（渐进式rehash细节）</a><time datetime="2021-11-28T13:01:09.000Z" title="发表于 2021-11-28 21:01:09">2021-11-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://gitee.com/KIMTOU/img/raw/master/20211205193452.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By chenjintao</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '5XebCWoNuAORvoRzuGHb3nY8-gzGzoHsz',
+      appKey: 'WybpoIIAsPcC9uBcr9oJUmjS',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

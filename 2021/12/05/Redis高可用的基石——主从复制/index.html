@@ -1,0 +1,241 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Redis高可用的基石——主从复制 | KimTou</title><meta name="keywords" content="Redis"><meta name="author" content="chenjintao"><meta name="copyright" content="chenjintao"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Redis高可用的基石——主从复制">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis高可用的基石——主从复制">
+<meta property="og:url" content="https://blog.tojintao.cn/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/index.html">
+<meta property="og:site_name" content="KimTou">
+<meta property="og:description" content="Redis高可用的基石——主从复制">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png">
+<meta property="article:published_time" content="2021-12-05T11:51:09.000Z">
+<meta property="article:modified_time" content="2021-12-05T11:58:54.994Z">
+<meta property="article:author" content="chenjintao">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png"><link rel="shortcut icon" href="/images/T.png"><link rel="canonical" href="https://blog.tojintao.cn/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Redis高可用的基石——主从复制',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-12-05 19:58:54'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/images/KT.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">43</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://gitee.com/KIMTOU/img/raw/master/20211205195837.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">KimTou</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Redis高可用的基石——主从复制</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-12-05T11:51:09.000Z" title="发表于 2021-12-05 19:51:09">2021-12-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-12-05T11:58:54.994Z" title="更新于 2021-12-05 19:58:54">2021-12-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Redis/">Redis</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Redis高可用的基石——主从复制"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>Redis 支持主从同步，提供 Cluster 集群部署模式，通过 Sentinel 哨兵来监控 Redis 主服务器的状态。以此来保证 Redis 的高可用，则主从复制正是高可用的基石。</p>
+<p>一主多从，主负责写，并且将数据复制到其它的 slave 节点，从节点负责读。所有的<strong>读请求全部走从节点</strong>。这样也可以很轻松实现水平扩容，<strong>支撑读高并发</strong>。从节点的数据来自主节点，实现原理就是<strong>主从复制机制</strong>。</p>
+<h2 id="主从复制过程"><a href="#主从复制过程" class="headerlink" title="主从复制过程"></a>主从复制过程</h2><p>主从复制过程大体可以分为3个阶段：<strong>连接建立阶段（即准备阶段）、数据同步阶段、命令传播阶段</strong>。</p>
+<h3 id="连接建立阶段"><a href="#连接建立阶段" class="headerlink" title="连接建立阶段"></a>连接建立阶段</h3><ol>
+<li><strong>保存主节点信息</strong></li>
+<li><strong>建立socket连接</strong>：slave 将根据指定的 IP 地址和端口，向 master 发起套接字（socket）连接，master 在接受（accept） slave 的套接字连接之后，为该套接字创建相应的客户端状态，此时连接建立完成。</li>
+<li><strong>发送ping命令</strong>：slave 向 master 发送一个 PING 命令，以检査套接字的读写状态是否正常、 master 能否正常处理命令请求。</li>
+<li><strong>身份验证</strong>：slave 向 master 发送 AUTH password 命令来进行身份验证。</li>
+<li><strong>发送从节点端口信息</strong>：在身份验证通过后后，slave 将向 master 发送自己的监听端口号，master 收到后记录在 slave 所对应的客户端状态的 slave_listening_port 属性中。</li>
+</ol>
+<br>
+
+<h3 id="数据同步阶段"><a href="#数据同步阶段" class="headerlink" title="数据同步阶段"></a>数据同步阶段</h3><p>主从复制包括全量复制，增量复制两种。一般当slave第一次启动连接master，或者认为是第一次连接，就采用<strong>全量复制</strong>，而在后续，master持续将写命令，异步复制给 slave，采用增量复制。slave 将向 master 发送 <code>PSYNC</code> 命令， master 收到该命令后判断是进行部分重同步还是完整重同步，然后根据策略进行数据的同步。</p>
+<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png"></p>
+<h4 id="全量复制（完整重同步）"><a href="#全量复制（完整重同步）" class="headerlink" title="全量复制（完整重同步）"></a>全量复制（完整重同步）</h4><p>Redis通过 <code>psync</code> 命令进行全量复制的过程如下：</p>
+<ul>
+<li>主节点收到全量复制的命令后，执行 bgsave 命令，fork 一个子进程在后台生成RDB文件，并使用一个内存缓冲区（称为复制缓冲区）记录从现在开始执行的所有写命令；</li>
+</ul>
+<ul>
+<li>主节点的bgsave执行完成后，将RDB文件发送给从节点；<strong>从节点首先清除自己的旧数据，然后载入接收的</strong>RDB文件，将数据库状态更新至主节点执行bgsave时的数据库状态，期间<strong>基于旧的数据版本</strong>对外提供服务；</li>
+<li>主节点将前述复制缓冲区中的所有写命令发送给从节点，从节点执行这些写命令，将数据库状态更新至主节点的最新状态；</li>
+</ul>
+<h4 id="增量复制（部分重同步）"><a href="#增量复制（部分重同步）" class="headerlink" title="增量复制（部分重同步）"></a>增量复制（部分重同步）</h4><ul>
+<li>复制偏移量</li>
+</ul>
+<p><strong>主节点和从节点分别维护一个复制偏移量（offset），代表的是主节点向从节点传递的字节数</strong>；主节点每次向从节点传播N个字节数据时，主节点的offset增加N；从节点每次收到主节点传来的N个字节数据时，从节点的offset增加N。</p>
+<ul>
+<li>复制积压缓冲区</li>
+</ul>
+<p>复制积压缓冲区是由主节点维护的、固定长度的、先进先出(FIFO)队列，默认大小1MB；当主节点开始有从节点时创建，其作用是备份主节点最近发送给从节点的数据。注意，无论主节点有一个还是多个从节点，都只需要一个复制积压缓冲区。</p>
+<ul>
+<li>服务器运行ID(runid)</li>
+</ul>
+<p>每个Redis节点(无论主从)，在启动时都会自动生成一个随机ID(每次启动都不一样)，由40个随机的十六进制字符组成；runid用来唯一识别一个Redis节点。</p>
+<br>
+
+<h3 id="命令传播阶段"><a href="#命令传播阶段" class="headerlink" title="命令传播阶段"></a>命令传播阶段</h3><p>当完成了数据同步之后，就会进入命令传播阶段，<strong>这时 master 只要一直将自己执行的写命令发送给 slave ，而 slave 只要一直接收并执行 master 发来的写命令</strong>，就可以保证 master 和 slave 一直保持一致了。</p>
+<blockquote>
+<p>即slave与master全量同步之后，master上的数据，如果再次发生更新，就会触发<strong>增量复制</strong>。</p>
+</blockquote>
+<p>在命令传播阶段，每隔指定的时间，<strong>主节点会向从节点发送</strong>PING命令，这个PING命令的作用，主要是为了让从节点进行超时判断。<strong>从节点会向主节点发送</strong>REPLCONF ACK命令，频率是每秒1次；命令格式为：REPLCONF ACK {offset}，其中offset指从节点保存的复制偏移量。</p>
+<br>
+
+<blockquote>
+<p>参考资料</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/k8agEub4qmhm3kX_TpETrA">这篇Redis文章，图灵看了都说好 (qq.com)</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">chenjintao</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.tojintao.cn/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/">https://blog.tojintao.cn/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.tojintao.cn" target="_blank">KimTou</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Redis/">Redis</a></div><div class="post_share"><div class="social-share" data-image="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/"><img class="next-cover" src="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Redis设计与实现——对象</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/11/28/Redis设计与实现——简单动态字符串SDS/" title="Redis设计与实现——简单动态字符串SDS"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128205733.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-28</div><div class="title">Redis设计与实现——简单动态字符串SDS</div></div></a></div><div><a href="/2021/11/28/Redis设计与实现——跳跃表/" title="Redis设计与实现——跳跃表"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128210516.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-28</div><div class="title">Redis设计与实现——跳跃表</div></div></a></div><div><a href="/2021/11/28/Redis设计与实现——字典（渐进式rehash细节）/" title="Redis设计与实现——字典（渐进式rehash细节）"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128210239.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-28</div><div class="title">Redis设计与实现——字典（渐进式rehash细节）</div></div></a></div><div><a href="/2021/11/28/基于Redis3-0与6-0版本源码看SDS内存优化/" title="基于Redis3.0与6.0版本源码看SDS内存优化"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211128232241.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-28</div><div class="title">基于Redis3.0与6.0版本源码看SDS内存优化</div></div></a></div><div><a href="/2021/12/05/Redis设计与实现——对象/" title="Redis设计与实现——对象"><img class="cover" src="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-12-05</div><div class="title">Redis设计与实现——对象</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/images/KT.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">chenjintao</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">43</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/KimTou"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/KimTou" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:752160655@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/KIMTOU" target="_blank" title="CSDN"><i class="fa fa-edit"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客呀 ~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E8%BF%87%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">主从复制过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B%E9%98%B6%E6%AE%B5"><span class="toc-number">1.1.</span> <span class="toc-text">连接建立阶段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E9%98%B6%E6%AE%B5"><span class="toc-number">1.2.</span> <span class="toc-text">数据同步阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%A8%E9%87%8F%E5%A4%8D%E5%88%B6%EF%BC%88%E5%AE%8C%E6%95%B4%E9%87%8D%E5%90%8C%E6%AD%A5%EF%BC%89"><span class="toc-number">1.2.1.</span> <span class="toc-text">全量复制（完整重同步）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A2%9E%E9%87%8F%E5%A4%8D%E5%88%B6%EF%BC%88%E9%83%A8%E5%88%86%E9%87%8D%E5%90%8C%E6%AD%A5%EF%BC%89"><span class="toc-number">1.2.2.</span> <span class="toc-text">增量复制（部分重同步）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E4%BC%A0%E6%92%AD%E9%98%B6%E6%AE%B5"><span class="toc-number">1.3.</span> <span class="toc-text">命令传播阶段</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/" title="Redis高可用的基石——主从复制"><img src="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis高可用的基石——主从复制"/></a><div class="content"><a class="title" href="/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/" title="Redis高可用的基石——主从复制">Redis高可用的基石——主从复制</a><time datetime="2021-12-05T11:51:09.000Z" title="发表于 2021-12-05 19:51:09">2021-12-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/" title="Redis设计与实现——对象"><img src="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis设计与实现——对象"/></a><div class="content"><a class="title" href="/2021/12/05/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1/" title="Redis设计与实现——对象">Redis设计与实现——对象</a><time datetime="2021-12-05T11:32:44.000Z" title="发表于 2021-12-05 19:32:44">2021-12-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/28/%E5%9F%BA%E4%BA%8ERedis3-0%E4%B8%8E6-0%E7%89%88%E6%9C%AC%E6%BA%90%E7%A0%81%E7%9C%8BSDS%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/" title="基于Redis3.0与6.0版本源码看SDS内存优化"><img src="https://gitee.com/KIMTOU/img/raw/master/20211128232241.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="基于Redis3.0与6.0版本源码看SDS内存优化"/></a><div class="content"><a class="title" href="/2021/11/28/%E5%9F%BA%E4%BA%8ERedis3-0%E4%B8%8E6-0%E7%89%88%E6%9C%AC%E6%BA%90%E7%A0%81%E7%9C%8BSDS%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/" title="基于Redis3.0与6.0版本源码看SDS内存优化">基于Redis3.0与6.0版本源码看SDS内存优化</a><time datetime="2021-11-28T13:51:38.000Z" title="发表于 2021-11-28 21:51:38">2021-11-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/28/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E8%B7%B3%E8%B7%83%E8%A1%A8/" title="Redis设计与实现——跳跃表"><img src="https://gitee.com/KIMTOU/img/raw/master/20211128210516.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis设计与实现——跳跃表"/></a><div class="content"><a class="title" href="/2021/11/28/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E8%B7%B3%E8%B7%83%E8%A1%A8/" title="Redis设计与实现——跳跃表">Redis设计与实现——跳跃表</a><time datetime="2021-11-28T13:04:47.000Z" title="发表于 2021-11-28 21:04:47">2021-11-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/28/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AD%97%E5%85%B8%EF%BC%88%E6%B8%90%E8%BF%9B%E5%BC%8Frehash%E7%BB%86%E8%8A%82%EF%BC%89/" title="Redis设计与实现——字典（渐进式rehash细节）"><img src="https://gitee.com/KIMTOU/img/raw/master/20211128210239.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis设计与实现——字典（渐进式rehash细节）"/></a><div class="content"><a class="title" href="/2021/11/28/Redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E2%80%94%E2%80%94%E5%AD%97%E5%85%B8%EF%BC%88%E6%B8%90%E8%BF%9B%E5%BC%8Frehash%E7%BB%86%E8%8A%82%EF%BC%89/" title="Redis设计与实现——字典（渐进式rehash细节）">Redis设计与实现——字典（渐进式rehash细节）</a><time datetime="2021-11-28T13:01:09.000Z" title="发表于 2021-11-28 21:01:09">2021-11-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://gitee.com/KIMTOU/img/raw/master/20211205195837.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By chenjintao</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '5XebCWoNuAORvoRzuGHb3nY8-gzGzoHsz',
+      appKey: 'WybpoIIAsPcC9uBcr9oJUmjS',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
