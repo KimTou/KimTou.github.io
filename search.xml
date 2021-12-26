@@ -3179,29 +3179,6 @@
       </tags>
   </entry>
   <entry>
-    <title>二分查找算法——Java实现</title>
-    <url>/2021/11/10/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E7%AE%97%E6%B3%95%E2%80%94%E2%80%94Java%E5%AE%9E%E7%8E%B0/</url>
-    <content><![CDATA[<h2 id="二分查找"><a href="#二分查找" class="headerlink" title="二分查找"></a>二分查找</h2><p>二分查找也称折半查找（Binary Search），它是一种效率较高的查找方法。</p>
-<p>具体的算法流程是：当表中的元素是升序排列，将表中间位置记录的关键字与查找关键字比较，如果两者相等，则查找成功，直接返回；否则利用中间位置记录将表分成前、后两个子表，如果中间位置记录的关键字大于查找关键字，则进一步查找前一子表，否则进一步查找后一子表。重复以上过程，直到找到满足条件的记录，使查找成功，或直到子表不存在为止，此时查找不成功。</p>
-<ul>
-<li>使用二分查找的场景：数组有序</li>
-</ul>
-<h4 id="非递归版"><a href="#非递归版" class="headerlink" title="非递归版"></a>非递归版</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">binarySearch</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> left = <span class="number">0</span>, right = nums.length - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (left &lt;= right) &#123;</span><br><span class="line">        <span class="keyword">int</span> mid = left + (right - left) / <span class="number">2</span>; <span class="comment">//防止溢出 </span></span><br><span class="line">        <span class="keyword">if</span> (nums[mid] == target) &#123;</span><br><span class="line">            <span class="keyword">return</span> mid;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nums[mid] &gt; target) &#123;</span><br><span class="line">            right = mid - <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="递归版"><a href="#递归版" class="headerlink" title="递归版"></a>递归版</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">binSearch</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target, <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> mid = left + (right - left) / <span class="number">2</span>; <span class="comment">//防止溢出 </span></span><br><span class="line">    <span class="keyword">if</span> (left &gt; right) &#123;</span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (nums[mid] == target) &#123;</span><br><span class="line">        <span class="keyword">return</span> mid;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nums[mid] &gt; target) &#123;</span><br><span class="line">        <span class="keyword">return</span> binSearch(nums, target, left, mid - <span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> binSearch(nums, target, mid + <span class="number">1</span>, right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>时间复杂度：O(logn)</li>
-</ul>
-]]></content>
-      <categories>
-        <category>数据结构与算法</category>
-      </categories>
-      <tags>
-        <tag>数据结构与算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>源码分析Arrays.sort中使用的排序算法</title>
     <url>/2021/11/10/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90Arrays-sort%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%9A%84%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<p>Java 主要排序方法为 <code>java.util.Arrays.sort()</code>，粗略的来讲，<strong>对于基本数据类型使用双轴快排，对于引用类型使用归并排序</strong>。接下来我们深入 <code>Arrays.sort </code> 的源码，更具体的分析其中所使用的排序算法。</p>
@@ -5229,7 +5206,7 @@
   <entry>
     <title>Redis高可用的基石——主从复制</title>
     <url>/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/</url>
-    <content><![CDATA[<p>Redis 支持主从同步，提供 Cluster 集群部署模式，通过 Sentinel 哨兵来监控 Redis 主服务器的状态。以此来保证 Redis 的高可用，则主从复制正是高可用的基石。</p>
+    <content><![CDATA[<p>Redis 支持主从同步，提供 Cluster 集群部署模式，通过 Sentinel 哨兵来监控 Redis 主节点的状态，以此来保证 Redis 的高可用，而主从复制正是高可用的基石。</p>
 <p>一主多从，主负责写，并且将数据复制到其它的 slave 节点，从节点负责读。所有的<strong>读请求全部走从节点</strong>。这样也可以很轻松实现水平扩容，<strong>支撑读高并发</strong>。从节点的数据来自主节点，实现原理就是<strong>主从复制机制</strong>。</p>
 <h2 id="主从复制过程"><a href="#主从复制过程" class="headerlink" title="主从复制过程"></a>主从复制过程</h2><p>主从复制过程大体可以分为3个阶段：<strong>连接建立阶段（即准备阶段）、数据同步阶段、命令传播阶段</strong>。</p>
 <h3 id="连接建立阶段"><a href="#连接建立阶段" class="headerlink" title="连接建立阶段"></a>连接建立阶段</h3><ol>
@@ -5282,6 +5259,38 @@
       </categories>
       <tags>
         <tag>Redis</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>查找算法——二分查找与插值查找</title>
+    <url>/2021/11/10/%E6%9F%A5%E6%89%BE%E7%AE%97%E6%B3%95%E2%80%94%E2%80%94%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E4%B8%8E%E6%8F%92%E5%80%BC%E6%9F%A5%E6%89%BE/</url>
+    <content><![CDATA[<h2 id="二分查找"><a href="#二分查找" class="headerlink" title="二分查找"></a>二分查找</h2><p>二分查找也称折半查找（Binary Search），它是一种效率较高的查找方法。</p>
+<p>具体的算法流程是：当表中的元素是升序排列，将表中间位置记录的关键字与查找关键字比较，如果两者相等，则查找成功，直接返回；否则利用中间位置记录将表分成前、后两个子表，如果中间位置记录的关键字大于查找关键字，则进一步查找前一子表，否则进一步查找后一子表。重复以上过程，直到找到满足条件的记录，使查找成功，或直到子表不存在为止，此时查找不成功。</p>
+<ul>
+<li>使用二分查找的场景：数组有序</li>
+</ul>
+<h4 id="非递归版"><a href="#非递归版" class="headerlink" title="非递归版"></a>非递归版</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">binarySearch</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> left = <span class="number">0</span>, right = nums.length - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (left &lt;= right) &#123;</span><br><span class="line">        <span class="keyword">int</span> mid = left + (right - left) / <span class="number">2</span>; <span class="comment">//防止溢出 </span></span><br><span class="line">        <span class="keyword">if</span> (nums[mid] == target) &#123;</span><br><span class="line">            <span class="keyword">return</span> mid;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nums[mid] &gt; target) &#123;</span><br><span class="line">            right = mid - <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="递归版"><a href="#递归版" class="headerlink" title="递归版"></a>递归版</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">binSearch</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target, <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> mid = left + (right - left) / <span class="number">2</span>; <span class="comment">//防止溢出 </span></span><br><span class="line">    <span class="keyword">if</span> (left &gt; right) &#123;</span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (nums[mid] == target) &#123;</span><br><span class="line">        <span class="keyword">return</span> mid;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nums[mid] &gt; target) &#123;</span><br><span class="line">        <span class="keyword">return</span> binSearch(nums, target, left, mid - <span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> binSearch(nums, target, mid + <span class="number">1</span>, right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>时间复杂度：O(logn)</li>
+</ul>
+<h2 id="插值查找"><a href="#插值查找" class="headerlink" title="插值查找"></a>插值查找</h2><p>插值查找每次从自适应mid处开始查找：</p>
+<p><code>int mid = left + (right - left) * (target - nums[left]) / (nums[right] - nums[left])</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">insertValueSearch</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target, <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (left &gt;= right || target &lt; nums[<span class="number">0</span>] || target &gt; nums[nums.length - <span class="number">1</span>]) &#123;</span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> mid = left + (right - left) * (target - nums[left]) / (nums[right] - nums[left]);</span><br><span class="line">    <span class="keyword">int</span> midVal = nums[mid];</span><br><span class="line">    <span class="keyword">if</span> (midVal &gt; target) &#123;</span><br><span class="line">        <span class="keyword">return</span> insertValueSearch(nums, target, left, mid - <span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (midVal &lt; target) &#123;</span><br><span class="line">        <span class="keyword">return</span> insertValueSearch(nums, target, mid + <span class="number">1</span>, right);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> mid;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>插值查找注意事项</strong>：</p>
+<ol>
+<li>对于数据量较大，关键字分布比较均匀的查找表来说，采用插值查找，速度较快。小文件则折半查找更快。</li>
+<li>关键字分布不均匀的情况下，该方法不一定比折半查找要好</li>
+</ol>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>数据结构与算法</tag>
       </tags>
   </entry>
 </search>
