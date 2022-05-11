@@ -14,7 +14,7 @@
 
 <h2 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h2><p>:rocket: 项目仓库：<a href="https://github.com/KimTou/Open-LetFit">KimTou/Open-LetFit: LetFit小程序后台开源版 </a></p>
 <p>这是我之前写的一个项目，具体代码可以在可以在上面我的GitHub仓库中找到，项目就是使用了本文章介绍的读写分离方式，感兴趣的同学可以作为参考。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202807.png"></p>
 <br>
 
 <h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h4 id="在application-yml配置MySQL"><a href="#在application-yml配置MySQL" class="headerlink" title="在application.yml配置MySQL"></a>在application.yml配置MySQL</h4><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">datasource:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">com.alibaba.druid.pool.DruidDataSource</span></span><br><span class="line">    <span class="comment">#主机</span></span><br><span class="line">    <span class="attr">master:</span></span><br><span class="line">      <span class="attr">username:</span> <span class="string">root</span></span><br><span class="line">      <span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line">      <span class="attr">url:</span> <span class="string">jdbc:mysql://服务器ip:3306/letfit?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf8&amp;serverTimezone=GMT</span></span><br><span class="line">      <span class="attr">driver-class-name:</span> <span class="string">com.mysql.cj.jdbc.Driver</span></span><br><span class="line">    <span class="comment">#从机</span></span><br><span class="line">    <span class="attr">slave:</span></span><br><span class="line">      <span class="attr">username:</span> <span class="string">root</span></span><br><span class="line">      <span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line">      <span class="attr">url:</span> <span class="string">jdbc:mysql://服务器ip:3307/letfit?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf8&amp;serverTimezone=GMT</span></span><br><span class="line">      <span class="attr">driver-class-name:</span> <span class="string">com.mysql.cj.jdbc.Driver</span></span><br><span class="line">    <span class="comment">#连接池</span></span><br><span class="line">    <span class="attr">druid:</span></span><br><span class="line">      <span class="attr">initialSize:</span> <span class="number">5</span></span><br><span class="line">      <span class="attr">minIdle:</span> <span class="number">5</span></span><br><span class="line">      <span class="attr">maxActive:</span> <span class="number">20</span></span><br><span class="line">      <span class="attr">maxWait:</span> <span class="number">60000</span></span><br><span class="line">      <span class="attr">timeBetweenEvictionRunsMillis:</span> <span class="number">60000</span></span><br><span class="line">      <span class="attr">minEvictableIdleTimeMillis:</span> <span class="number">300000</span></span><br><span class="line">      <span class="attr">validationQuery:</span> <span class="string">SELECT</span> <span class="number">1</span> <span class="string">FROM</span> <span class="string">DUAL</span></span><br><span class="line">      <span class="attr">testWhileIdle:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">testOnBorrow:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">testOnReturn:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">poolPreparedStatements:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">filters:</span> <span class="string">stat,wall</span></span><br><span class="line">      <span class="attr">maxPoolPreparedStatementPerConnectionSize:</span> <span class="number">20</span></span><br><span class="line">      <span class="attr">useGlobalDataSourceStat:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">connectionProperties:</span> <span class="string">druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500</span></span><br></pre></td></tr></table></figure>
@@ -67,7 +67,7 @@
 
 
 
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20210528134946.png" alt="从数据源"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202833.png"></p>
 <ul>
 <li>至此，读写分离的工作就完成了！</li>
 </ul>
@@ -85,7 +85,7 @@
   <entry>
     <title>写在开头</title>
     <url>/2021/04/29/%E5%86%99%E5%9C%A8%E5%BC%80%E5%A4%B4/</url>
-    <content><![CDATA[<h4 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h4><p>本人目前是软件工程专业的一名在读本科生，主要方向是java后台开发。平时也喜欢打篮球与听音乐，欢迎小伙伴与我交流，我的个人邮箱：<a href="mailto:&#x37;&#x35;&#x32;&#x31;&#54;&#x30;&#x36;&#x35;&#53;&#x40;&#113;&#113;&#x2e;&#x63;&#111;&#109;">&#x37;&#x35;&#x32;&#x31;&#54;&#x30;&#x36;&#x35;&#53;&#x40;&#113;&#113;&#x2e;&#x63;&#111;&#109;</a></p>
+    <content><![CDATA[<h4 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h4><p>本人目前是软件工程专业的一名在读本科生，主要方向是 Java 后台开发。平时也喜欢打篮球与听音乐，欢迎小伙伴与我交流，我的个人邮箱：<a href="mailto:&#x37;&#x35;&#50;&#x31;&#x36;&#48;&#54;&#x35;&#53;&#64;&#113;&#x71;&#46;&#x63;&#111;&#109;">&#x37;&#x35;&#50;&#x31;&#x36;&#48;&#54;&#x35;&#53;&#64;&#113;&#x71;&#46;&#x63;&#111;&#109;</a></p>
 ]]></content>
       <categories>
         <category>感想</category>
@@ -148,7 +148,7 @@
 <p>1、主库（master）把数据更改记录到<strong>二进制日志（binlog）</strong>中。</p>
 <p>2、从库（slave）的<strong>I/O线程</strong>把主库的二进制日志读取保存到自己的<strong>中继日志（relay log）</strong>中。</p>
 <p>3、从库的<strong>SQL线程</strong>执行中继日志，重做中继日志中的日志，即再执行一遍SQL，更新自己的数据库，以达到数据的一致性。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20210528000926.png" alt="主从复制"></p>
+<p><img src="https://cdn.tojintao.cn/20220511203337.png"></p>
 <p>注意要点：</p>
 <p>主从复制不是完全实时地进行同步，而是<strong>异步实时</strong>。从库同步主库数据的过程是串行化的，也就是说主库上并行的操作，在从库上会串行执行。由于从库从主库拷贝日志以及串行执行 SQL 的特点，会有<strong>主从同步时延</strong>，在高并发的情况下，该问题就越明显。</p>
 <br>
@@ -180,7 +180,9 @@
 </ul>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id=10</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">innodb_flush_log_at_trx_commit=1</span><br><span class="line">sync_binlog=1</span><br></pre></td></tr></table></figure>
 
-<img src="https://gitee.com/KIMTOU/img/raw/master/20210528000934.PNG" alt="mycnf" style="zoom: 67%;" />
+
+
+<img src="https://cdn.tojintao.cn/20220511203414.PNG" style="zoom:67%;" />
 
 
 
@@ -326,7 +328,7 @@
 <p><strong>ConsumerGroup</strong>代表同一类Consumer的集合，这类Consumer通常消费同一类消息且消费逻辑一致。消费者组使得在消息消费方面，实现负载均衡和容错的目标变得非常容易。要注意的是，消费者组的消费者实例必须订阅完全相同的Topic。RocketMQ 支持两种消息模式：集群消费（Clustering）和广播消费（Broadcasting）。</p>
 <h4 id="队列-Queue"><a href="#队列-Queue" class="headerlink" title="队列 Queue"></a>队列 Queue</h4><p>在<strong>Kafka</strong>中叫Partition，每个Queue内部是有序的，在<strong>RocketMQ</strong>中分为读和写两种队列，一般来说读写队列数量一致，如果不一致就会出现很多问题。</p>
 <h4 id="消费位移-Offset"><a href="#消费位移-Offset" class="headerlink" title="消费位移 Offset"></a>消费位移 Offset</h4><p>在RocketMQ 中，所有消息队列都是持久化，长度无限的数据结构，所谓长度无限是指队列中的每个存储单元都是定长，访问其中的存储单元使用Offset 来访问，Offset 为 java long 类型，64 位，理论上在 100年内不会溢出，所以认为是长度无限。也可以认为 Message Queue 是一个长度无限的数组，Offset 就是下标。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20210913210810.png" alt="消息模型"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202511.png"></p>
 <p><strong>一个主题存在多个队列</strong>，生产者每次生产消息后向指定主题中的某个队列发送消息。在集群消费模式下，一个消费者集群的多个消费者共同消费一个<code>Topic</code>的多个队列，<strong>一个队列只会被一个消费者消费</strong>，如果某个消费者挂掉，分组内其它消费者会接替挂掉的消费者继续消费。一般来讲要控制<strong>消费者组中的消费者个数和主题中队列个数相同</strong> ，当然也可以消费者个数小于队列个数，只不过不太建议。</p>
 <p><strong>同时每个消费者组在每个队列上维护一个消费位移offset</strong></p>
 <blockquote>
@@ -414,7 +416,7 @@
 <p> <code>RocketMQ</code> 使用 <strong>事务消息（half半消息）加上事务消息回查机制</strong> 来解决分布式事务问题的</p>
 <h4 id="Half-Message-半消息"><a href="#Half-Message-半消息" class="headerlink" title="Half Message 半消息"></a>Half Message 半消息</h4><p><strong>是指暂不能被Consumer消费的消息</strong>。Producer 已经把消息成功发送到了 Broker 端，但此消息被标记为<code>暂不能投递</code>状态，处于该种状态下的消息称为半消息。需要 Producer对消息的<code>二次确认</code>后，Consumer才能去消费它。当broker收到此类消息后，会存储到RMQ_SYS_TRANS_HALF_TOPIC的消息消费队列中</p>
 <h4 id="事务消息回查"><a href="#事务消息回查" class="headerlink" title="事务消息回查"></a>事务消息回查</h4><p>由于网络波动，生产者应用重启等原因。导致 Producer 端一直没有收到对 Half Message(半消息) 进行二次确认。<strong>这时Broker会开启一个定时任务，从Topic为RMQ_SYS_TRANS_HALF_TOPIC中拉取消息进行消费</strong>，主动向Producer消息发送者确认事务执行状态（提交、回滚、未知），根据事务状态来决定是提交或回滚消息。如果是未知，Broker会定时去回调在重新检查，如果超过回查次数（超时），默认回滚消息。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20210921155621.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202532.png"></p>
 <h4 id="事务消息流程"><a href="#事务消息流程" class="headerlink" title="事务消息流程"></a>事务消息流程</h4><p>分为两个流程：正常事务消息的发送及提交、事务消息的补偿流程。</p>
 <p>1、事务消息发送及提交：</p>
 <p>(1) 发送消息（half半消息）。</p>
@@ -502,7 +504,7 @@
 <h4 id="实现事务的监听接口"><a href="#实现事务的监听接口" class="headerlink" title="实现事务的监听接口"></a>实现事务的监听接口</h4><p>当发送半消息成功时，我们使用 <code>executeLocalTransaction</code> 方法来执行本地事务。它返回前一节中提到的三个事务状态之一。<code>checkLocalTransaction</code> 方法用于检查本地事务状态，并回应消息队列的检查请求。它也是返回前一节中提到的三个事务状态之一。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TransactionListenerImpl</span> <span class="keyword">implements</span> <span class="title">TransactionListener</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> AtomicInteger transactionIndex = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ConcurrentHashMap&lt;String, Integer&gt; localTrans = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 执行本地事务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> LocalTransactionState <span class="title">executeLocalTransaction</span><span class="params">(Message msg, Object arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> value = transactionIndex.getAndIncrement();</span><br><span class="line">        <span class="keyword">int</span> status = value % <span class="number">3</span>;</span><br><span class="line">        localTrans.put(msg.getTransactionId(), status);</span><br><span class="line">        <span class="comment">//返回未知，让Broker回查事务状态</span></span><br><span class="line">        <span class="keyword">return</span> LocalTransactionState.UNKNOW;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 检查本地事务状态</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> LocalTransactionState <span class="title">checkLocalTransaction</span><span class="params">(MessageExt msg)</span> </span>&#123;</span><br><span class="line">        Integer status = localTrans.get(msg.getTransactionId());</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">null</span> != status)&#123;</span><br><span class="line">            <span class="keyword">switch</span> (status)&#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">                    <span class="keyword">return</span> LocalTransactionState.UNKNOW;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                    <span class="keyword">return</span> LocalTransactionState.COMMIT_MESSAGE;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">                    <span class="keyword">return</span> LocalTransactionState.ROLLBACK_MESSAGE;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> LocalTransactionState.COMMIT_MESSAGE;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h4 id="事务消息流程"><a href="#事务消息流程" class="headerlink" title="事务消息流程"></a>事务消息流程</h4><p><img src="https://gitee.com/KIMTOU/img/raw/master/20210921155621.png"></p>
+<h4 id="事务消息流程"><a href="#事务消息流程" class="headerlink" title="事务消息流程"></a>事务消息流程</h4><p><img src="https://cdn.tojintao.cn/20220511202532.png"></p>
 <p>分为两个流程：正常事务消息的发送及提交、事务消息的补偿流程。</p>
 <p>1、事务消息发送及提交：</p>
 <p>(1) 发送消息（half半消息）。</p>
@@ -566,10 +568,7 @@
 <h3 id="消费类型"><a href="#消费类型" class="headerlink" title="消费类型"></a>消费类型</h3><h4 id="拉取式消费-Pull-Consumer"><a href="#拉取式消费-Pull-Consumer" class="headerlink" title="拉取式消费 Pull Consumer"></a>拉取式消费 Pull Consumer</h4><p>Consumer消费的一种类型，应用通常主动调用Consumer的拉消息方法从Broker服务器拉消息、主动权由应用控制。一旦获取了批量消息，应用就会启动消费过程。</p>
 <h4 id="推动式消费-Push-Consumer"><a href="#推动式消费-Push-Consumer" class="headerlink" title="推动式消费 Push Consumer"></a>推动式消费 Push Consumer</h4><p>Consumer消费的一种类型，该模式下Broker收到数据后会主动推送给消费端，该消费模式一般实时性较高。</p>
 <hr>
-<h2 id="架构设计"><a href="#架构设计" class="headerlink" title="架构设计"></a>架构设计</h2><img src="https://gitee.com/KIMTOU/img/raw/master/20210912214133.png" style="zoom:150%;" />
-
-
-
+<h2 id="架构设计"><a href="#架构设计" class="headerlink" title="架构设计"></a>架构设计</h2><p><img src="https://cdn.tojintao.cn/20220511203212.png"></p>
 <p><strong>RocketMQ架构上主要分为四部分</strong>，如上图所示:</p>
 <ul>
 <li><strong>Producer：消息发布的角色</strong>，支持分布式集群方式部署。Producer通过MQ的负载均衡模块选择相应的Broker集群队列进行消息投递，投递的过程支持快速失败并且低延迟。</li>
@@ -603,7 +602,7 @@
 <ul>
 <li>查找JVM配置：</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20210912214128.PNG"></p>
+<p><img src="https://cdn.tojintao.cn/20220511203227.PNG"></p>
 <ul>
 <li>将其修改成：</li>
 </ul>
@@ -614,7 +613,7 @@
 <ul>
 <li>查找JVM配置：</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20210912214122.PNG"></p>
+<p><img src="https://cdn.tojintao.cn/20220511203234.PNG"></p>
 <p>将其修改成：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">JAVA_OPT=&quot;$&#123;JAVA_OPT&#125; -server -Xms256m -Xmx256m&quot;</span><br></pre></td></tr></table></figure>
 
@@ -890,11 +889,9 @@
   <entry>
     <title>ElasticSearch、Kibana安装教程</title>
     <url>/2021/10/07/ElasticSearch%E3%80%81Kibana%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<h2 id="初始ElasticSearch"><a href="#初始ElasticSearch" class="headerlink" title="初始ElasticSearch"></a>初始ElasticSearch</h2><h4 id="关于ES"><a href="#关于ES" class="headerlink" title="关于ES"></a>关于ES</h4><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214537.svg" style="zoom:200%;" />
-
-<p>Elasticsearch是一个基于Lucene的搜索引擎。适用于所有类型的数据，包括文本、数字、地理空间、结构化和非结构化数据。是一个分布式、RESTful 风格的搜索和数据分析引擎。</p>
+    <content><![CDATA[<h2 id="初始ElasticSearch"><a href="#初始ElasticSearch" class="headerlink" title="初始ElasticSearch"></a>初始ElasticSearch</h2><h4 id="关于ES"><a href="#关于ES" class="headerlink" title="关于ES"></a>关于ES</h4><p>Elasticsearch是一个基于Lucene的搜索引擎。适用于所有类型的数据，包括文本、数字、地理空间、结构化和非结构化数据。是一个分布式、RESTful 风格的搜索和数据分析引擎。</p>
 <h4 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h4><p>下载网址：<a href="https://www.elastic.co/cn/elasticsearch/">https://www.elastic.co/cn/elasticsearch</a></p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214603.PNG"></p>
+<p><img src="https://cdn.tojintao.cn/20220511200427.PNG"></p>
 <h4 id="了解目录"><a href="#了解目录" class="headerlink" title="了解目录"></a>了解目录</h4><ul>
 <li><p><code>bin</code>：启动文件</p>
 </li>
@@ -925,7 +922,7 @@
 
 
 <h4 id="可视化插件-ES-head"><a href="#可视化插件-ES-head" class="headerlink" title="可视化插件 ES-head"></a>可视化插件 ES-head</h4><p>下载地址：<a href="https://github.com/mobz/elasticsearch-head">https://github.com/mobz/elasticsearch-head</a></p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214606.PNG"></p>
+<p><img src="https://cdn.tojintao.cn/20220511200438.PNG"></p>
 <ul>
 <li><strong>下载相关依赖：</strong></li>
 </ul>
@@ -944,7 +941,7 @@
 <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line"><span class="regexp">//</span>启动失败可以尝试修改es的jvm选项，提升运行内存到<span class="number">2</span>g</span><br></pre></td></tr></table></figure>
 
 <h4 id="访问测试"><a href="#访问测试" class="headerlink" title="访问测试"></a>访问测试</h4><p>访问：<code>localhost:5601</code>，之后所有操作都在 Dev Tools 进行</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214608.PNG"></p>
+<p><img src="https://cdn.tojintao.cn/20220511200447.PNG"></p>
 <h4 id="汉化"><a href="#汉化" class="headerlink" title="汉化"></a>汉化</h4><p>打开 <code>kibana.yml</code>，修改为：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Specifies locale to be used for all localizable strings, dates and number formats.</span></span><br><span class="line"><span class="comment"># Supported languages are the following: English - en , by default , Chinese - zh-CN .</span></span><br><span class="line"><span class="comment">#i18n.locale: &quot;en&quot;</span></span><br><span class="line"><span class="attr">i18n.locale:</span> <span class="string">&quot;zh-CN&quot;</span></span><br></pre></td></tr></table></figure>
 
@@ -1336,7 +1333,7 @@
 
 
 
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211007214615.PNG" alt="html"></p>
+<p><img src="https://cdn.tojintao.cn/20220511200651.PNG"></p>
 <ul>
 <li>测试</li>
 </ul>
@@ -1602,7 +1599,7 @@
 <li><strong>容器（Container）</strong>：镜像（Image）和容器（Container）的关系，就像是面向对象程序设计中的类和实例一样，镜像是静态的定义，容器是镜像运行时的实体。容器可以被创建、启动、停止、删除、暂停等。</li>
 <li><strong>仓库（Repository）</strong>：仓库可看成一个代码控制中心，用来保存镜像。</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211017002530.png" alt="docker"></p>
+<p><img src="https://cdn.tojintao.cn/20220511200131.png"></p>
 <h4 id="容器与镜像"><a href="#容器与镜像" class="headerlink" title="容器与镜像"></a>容器与镜像</h4><p>镜像是一种静态的结构，可以看成面向对象里面的类，而容器是镜像的一个实例。</p>
 <p>镜像包含着容器运行时所需要的代码以及其它组件，它是一种分层结构，每一层都是只读的（read-only layers）。构建镜像时，会一层一层构建，前一层是后一层的基础。镜像的这种分层存储结构很适合镜像的复用以及定制。</p>
 <p>构建容器时，通过在镜像的基础上添加一个可写层（writable layer），用来保存着容器运行过程中的修改。</p>
@@ -1764,7 +1761,9 @@
 
 
 
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211017002816.png" alt="dockercmd" style="zoom: 67%;" />
+<img src="https://cdn.tojintao.cn/20220511200213.png" style="zoom: 67%;" />
+
+
 
 <br>
 
@@ -1811,7 +1810,7 @@
 
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 测试</span></span><br><span class="line">1、启动一个默认的tomcat</span><br><span class="line">2、发现没有webapps</span><br><span class="line">3、进行拷贝</span><br><span class="line">4、使用commit提交该修改过的镜像</span><br><span class="line"><span class="meta">#</span><span class="bash"> 类似于VM里的快照</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211017002941.PNG" alt="docker_commit"></p>
+<p><img src="https://cdn.tojintao.cn/20220511200235.PNG"></p>
 <br>
 
 <h2 id="容器数据卷"><a href="#容器数据卷" class="headerlink" title="容器数据卷"></a>容器数据卷</h2><p>在Docker容器的实际使用中，经常会遇到容器的数据持久化，容器之间的数据共享等问题，通常我们有两种解决方案：</p>
@@ -1862,7 +1861,7 @@
 <br>
 
 <h2 id="DockerFile"><a href="#DockerFile" class="headerlink" title="DockerFile"></a>DockerFile</h2><p>Dockerfile 是一个用来构建镜像的文本文件，文本内容包含了一条条构建镜像所需的指令和说明。</p>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211019211654.jpg" alt="Dockerfile" style="zoom: 67%;" />
+<img src="D:\技术书籍与笔记图片\笔记图片\docker\Dockerfile.jpg" style="zoom:67%;" />
 
 
 
@@ -2040,7 +2039,7 @@
     <url>/2021/10/17/MongoDB%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<h1 id="初始"><a href="#初始" class="headerlink" title="初始"></a>初始</h1><h3 id="什么是MongoDB"><a href="#什么是MongoDB" class="headerlink" title="什么是MongoDB"></a>什么是MongoDB</h3><p>MongoDB 是一个基于分布式文件存储的数据库。</p>
 <p>MongoDB 将数据存储为一个文档，数据结构由键值(key=&gt;value)对组成。MongoDB 文档类似于 JSON 对象。字段值可以包含其他文档，数组及文档数组。</p>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211017235512.png" style="zoom:50%;" />
+<img src="https://cdn.tojintao.cn/20220511201219.png" style="zoom:67%;" />
 
 <h3 id="与MySQL相比的优势"><a href="#与MySQL相比的优势" class="headerlink" title="与MySQL相比的优势"></a>与MySQL相比的优势</h3><h5 id="1、弱一致性（最终一致），更能保证用户的访问速度"><a href="#1、弱一致性（最终一致），更能保证用户的访问速度" class="headerlink" title="1、弱一致性（最终一致），更能保证用户的访问速度"></a>1、弱一致性（最终一致），更能保证用户的访问速度</h5><h5 id="2、文档结构的存储方式，高扩展性"><a href="#2、文档结构的存储方式，高扩展性" class="headerlink" title="2、文档结构的存储方式，高扩展性"></a>2、文档结构的存储方式，高扩展性</h5><p>高扩展性，存储的数据格式是json格式</p>
 <h5 id="3、第三方支持丰富"><a href="#3、第三方支持丰富" class="headerlink" title="3、第三方支持丰富"></a>3、第三方支持丰富</h5><h5 id="4、性能优越"><a href="#4、性能优越" class="headerlink" title="4、性能优越"></a>4、性能优越</h5><p>MySQL在海量数据处理的时候效率会显著变慢。</p>
@@ -2061,7 +2060,6 @@
 <p>use 数据库 ：进入到指定数据库（不管有没有该数据库，都可以进入，若插入了文档，便会创建该数据库）</p>
 <p>db：当前所处数据库</p>
 <p>show collections：显示数据库中有多少个集合</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211017233927.png" alt="image-20211017233911818"></p>
 <br>
 
 <h1 id="增删改查"><a href="#增删改查" class="headerlink" title="增删改查"></a>增删改查</h1><h2 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h2><h4 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a><strong>创建数据库</strong></h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">use DATABASE_NAME</span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果数据库不存在，则创建数据库，否则切换到指定数据库</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 或者插入时创建数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line">admin   0.000GB</span><br><span class="line">config  0.000GB</span><br><span class="line">local   0.000GB</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.test.insert(&#123;<span class="string">&quot;name&quot;</span>:<span class="string">&quot;Kim&quot;</span>&#125;)</span></span><br><span class="line">WriteResult(&#123; &quot;nInserted&quot; : 1 &#125;)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line">admin   0.000GB</span><br><span class="line">config  0.000GB</span><br><span class="line">local   0.000GB</span><br><span class="line">test    0.000GB</span><br></pre></td></tr></table></figure>
@@ -2354,12 +2352,12 @@
   <entry>
     <title>深入理解Java虚拟机——HotSpot虚拟机对象探秘</title>
     <url>/2021/10/23/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E2%80%94%E2%80%94HotSpot%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AF%B9%E8%B1%A1%E6%8E%A2%E7%A7%98/</url>
-    <content><![CDATA[<h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023095702.png"></p>
+    <content><![CDATA[<h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><p><img src="https://cdn.tojintao.cn/20220511204033.png"></p>
 <h5 id="1、类加载检查"><a href="#1、类加载检查" class="headerlink" title="1、类加载检查"></a>1、类加载检查</h5><p>当虚拟机遇到一条 new 指令时，首先将去检查这个指令的参数是否能在Metaspace的常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否已被加载过、解析和初始化过。如果没有，那必须先执行相应的类加载过程。（通过双亲委派模式，将类加载进内存）</p>
 <h5 id="2、分配内存"><a href="#2、分配内存" class="headerlink" title="2、分配内存"></a>2、分配内存</h5><p>在类加载检查通过后，接下来虚拟机将为新生对象分配内存。<strong>对象所需的内存大小在类加载完成后便可确定，为对象分配空间的任务等同于把一块确定大小的内存块从 Java 堆中划分出来</strong>。分配方式有 “指针碰撞” 和 “空闲列表” 两种，选择哪种分配方式由 Java 堆是否规整决定，而 Java 堆是否规整又由所采用的垃圾收集器是否带有压缩整理功能决定。</p>
 <p><strong>内存分配的两种方式：</strong></p>
 <p>选择以上两种方式中的哪一种，取决于 Java 堆内存是否规整。而 Java 堆内存是否规整，取决于 GC 收集器的算法是”标记-清除”，还是”标记-整理”（也称作”标记-压缩”），复制算法内存也是规整的。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023095705.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204047.png"></p>
 <p><strong>内存分配并发问题：</strong></p>
 <p>在创建对象的时候有一个很重要的问题，就是线程安全，因为在实际开发过程中，对象创建在虚拟机中是非常频繁的行为，即使仅仅修改一个指针所指向的位置，在并发情况下也并不是线程安全的，可能出现正在给对象A分配内存，指针还没来得及修改，对象B又同时使用了原来的指针来分配内存的情况。</p>
 <p>保证内存分配线程安全有两种可选方案：</p>
@@ -2389,11 +2387,11 @@
 <ol>
 <li><strong>句柄：</strong> 如果使用句柄的话，那么 <strong>Java 堆中将会划分出一块内存来作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自的具体地址信息</strong>。</li>
 </ol>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023095709.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204115.png"></p>
 <ol start="2">
 <li><strong>直接指针（HotSpot使用）：</strong> 如果使用直接指针访问的话， Java 堆中对象的内存布局就必须考虑如何放置访问类型数据的相关信息，<strong>reference 中存储的直接就是对象地址</strong>，如果只是访问对象本身的话，就不需要多一次间接访问的开销。缺点是就是一旦对象位置改变（标记-复制算法），reference引用地址也要改变。</li>
 </ol>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023095711.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204128.png"></p>
 <p><strong>这两种对象访问方式各有优势。使用句柄来访问的最大好处是 reference 中存储的是稳定的句柄地址，在对象被移动时（垃圾收集）只会改变句柄中的实例数据指针，而 reference 本身不需要修改。使用直接指针访问方式最大的好处就是速度快，它节省了一次指针定位的时间开销</strong>。</p>
 <br>
 
@@ -2420,10 +2418,10 @@
 <li>堆（线程共享）</li>
 <li>方法区（线程共享）</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023094444.png" alt="JVM体系"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204149.png"></p>
 <p><strong>Java 虚拟机在执行 Java 程序的过程中会把它管理的内存划分成若干个不同的数据区域</strong>。JDK 1.8 和之前的版本略有不同：</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023094450.png"></p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023094452.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204219.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204231.png"></p>
 <br>
 
 <h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><p>程序计数器是一块较小的内存空间，可以看作是当前线程所执行的字节码的行号指示器。<strong>字节码解释器工作时就是通过改变这个计数器的值来选取下一条需要执行的字节码指令，它是程序控制流的指示器，分支、循环、跳转、异常处理、线程恢复等基础功能都需要依赖这个计数器来完成。</strong></p>
@@ -2459,7 +2457,7 @@
 <li>永生代(Permanent Generation)</li>
 </ol>
 <p>JDK 8 版本之后方法区（HotSpot 的永久代）被彻底移除了（JDK1.7 就已经开始了），取而代之是元空间，元空间使用的是本地内存。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023094712.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204242.png"></p>
 <p><strong>上图所示的 Eden 区、两个 Survivor 区都属于新生代（为了区分，这两个 Survivor 区域按照顺序被命名为 from 和 to），中间一层属于老年代。</strong></p>
 <ul>
 <li>堆这里最容易出现的就是 OutOfMemoryError 错误，并且出现这种错误之后的表现形式还会有几种，比如：</li>
@@ -2582,13 +2580,13 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str4 = <span class="keyword">new</span> StringBuilder().append(str1).append(str2).toString();</span><br></pre></td></tr></table></figure>
 
 <p>因此，<code>str4</code> 并不是字符串常量池中存在的对象，属于堆上的新对象。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211023175419.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511205223.png"></p>
 <p>不过，字符串使用 <code>final</code> 关键字声明之后，可以让编译器当做常量来处理。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> String str1 = <span class="string">&quot;str&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> String str2 = <span class="string">&quot;ing&quot;</span>;</span><br><span class="line"><span class="comment">// 下面两个表达式其实是等价的</span></span><br><span class="line">String c = <span class="string">&quot;str&quot;</span> + <span class="string">&quot;ing&quot;</span>;	<span class="comment">// 常量池中的对象</span></span><br><span class="line">String d = str1 + str2; 	<span class="comment">// 常量池中的对象</span></span><br><span class="line">System.out.println(c == d);	<span class="comment">// true</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>被 <code>final</code> 关键字修改之后的 <code>String</code> 会被编译器当做常量来处理，编译器在程序编译期就可以确定它的值，其效果就想到于访问常量。</strong></p>
 <p>可以通过查看字节码文件验证：</p>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211023175522.PNG" style="zoom:67%;" />
+<img src="https://cdn.tojintao.cn/20220511205233.PNG" style="zoom:67%;" />
 
 <p>但如果编译器在运行时才能知道其确切值的话，就无法对其优化，即只要其中有一个是变量，结果就在堆中。</p>
 <br>
@@ -2713,7 +2711,7 @@
     <content><![CDATA[<h2 id="对象已死？"><a href="#对象已死？" class="headerlink" title="对象已死？"></a>对象已死？</h2><h4 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h4><p><strong>给对象中添加一个引用计数器，每当有一个地方引用它，计数器值就加 1；当引用失效时，计数器值就减 1；任何时刻计数器为 0 的对象就是不可能再被使用的。</strong></p>
 <p>引用计数算法实现原理简单，判定效率高，但目前主流的虚拟机中都没有选择这个算法来管理内存，其主要原因是有很多例外情况要考虑，<strong>比如它很难解决对象之间相互循环引用的问题</strong>。所谓对象之间的相互引用问题，即对象 objA 和 objB 都有字段 instance ，且令 objA.instance = objB 及 objB.instance = objA ，除此之外，这两个对象之间再无任何引用。然后将 objA 与 objB 都置为 null，实际上着两个对象已经不可能再被访问，但是他们因为互相引用对方，导致它们的引用计数器都不为 0，于是引用计数算法无法通知 GC 回收器回收他们。</p>
 <h4 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h4><p>这个算法的基本思路就是通过一系列称为 “GC Roots” 的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为 “引用链” ，如果某个对象到 GC Roots 间没有任何引用链相连，或者用图论的话来说就是<strong>从 GC Roots 到这个对象不可达时，则证明此对象是不可能再被使用的</strong>。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194352.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204309.png"></p>
 <p>可作为 GC Roots 的对象包括以下几种:</p>
 <ul>
 <li>虚拟机栈（栈帧中的本地变量表）中引用的对象，譬如当前正在运行方法所使用到的参数、局部变量等。</li>
@@ -2758,7 +2756,7 @@
 <br>
 
 <h2 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h2><h4 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记 - 清除算法"></a>标记 - 清除算法</h4><p><strong>首先标记出所有需要回收的对象，在标记完成后，统一回收掉所有被标记的对象</strong>（也可以反过来）。标记过程就是对象是否属于垃圾的判定过程（即引用计数与可达性分析算法）。</p>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211024194350.png" style="zoom:80%;" />
+<img src="https://cdn.tojintao.cn/20220511204328.png" style="zoom: 80%;" />
 
 <h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
 <li>执行效率不稳定：如果 Java 堆中包含大量可回收对象，这时必须进行大量标记和清除动作，导致标记和清除两个过程的效率都不高。同时需要扫描两次。</li>
@@ -2775,7 +2773,7 @@
 <li>将可用内存缩小为了原来的一半，空间浪费未免太多了一点。</li>
 <li>移动时，需要复制对象，并调整对象引用。</li>
 </ul>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211024194354.png" style="zoom:80%;" />
+<img src="https://cdn.tojintao.cn/20220511204354.png" style="zoom:80%;" />
 
 <blockquote>
 <p>为什么说执行效率更高？</p>
@@ -2789,7 +2787,7 @@
 
 <h4 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记 - 整理算法"></a>标记 - 整理算法</h4><p><strong>复制收集算法在对象存活率较高时就要进行较多的复制操作</strong>，效率将会变低。更关键的是，如果不想浪费50%的空间，就需要有额外的空间进行分配担保，以应对被使用的内存中所有对象都100%存活的极端情况，所以在老年代一般不能直接选用这种算法。</p>
 <p>针对老年代对象的存亡特征，提出了标记 - 整理算法。标记过程仍然与 “标记 - 清除” 算法一样，但后续步骤不是直接对可回收对象进行清理，<strong>而是让所有存活的对象都向内存空间一端移动，然后直接清理掉边界以外的内存</strong>。</p>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211024194358.png" style="zoom:80%;" />
+<img src="https://cdn.tojintao.cn/20220511204404.png" style="zoom:80%;" />
 
 <ul>
 <li><p>优点：不会产生内存碎片</p>
@@ -2825,13 +2823,13 @@
 <li><strong>堆空间的基本结构：</strong></li>
 </ul>
 <p>其中Eden 区、From Survivor0(“From”) 区、To Survivor1(“To”) 区都属于新生代，Old Memory 区属于老年代</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194401.png" alt="堆空间的基本结构"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204417.png"></p>
 <p>大部分情况，对象都会首先在 Eden 区域分配，在一次新生代垃圾回收后<strong>（当Eden区满时触发YGC/Minor GC），如果对象还存活，则会进入 s0 或者 s1，即将Eden区以及From区还存活的对象转移至To，并且对象的年龄还会加 1 (Eden 区转移至Survivor 区后对象的初始年龄变为 1)，当它的年龄增加到一定程度（默认为大于 15 岁），就会被晋升到老年代中</strong>。对象晋升到老年代的年龄阈值，可以通过参数 <code>-XX:MaxTenuringThreshold</code> 来设置默认值，这个值会在虚拟机运行过程中进行调整，可以通过<code>-XX:+PrintTenuringDistribution</code>来打印出当次GC后的Threshold。</p>
 <p>经过这次 GC 后，Eden 区和”From”区已经被清空。这个时候，”From”和”To”会交换他们的角色，也就是新的”To”就是上次 GC 前的“From”，新的”From”就是上次 GC 前的”To”。不管怎样，<strong>都会保证名为 To 的 Survivor 区域是空的</strong>。Minor GC 会一直重复这样的过程，在这个过程中，有可能当次Minor GC后，Survivor 的”From”区域空间不够用，有一些还达不到进入老年代条件的实例放不下，则放不下的部分会提前进入老年代。</p>
 <br>
 
 <h2 id="垃圾收集器"><a href="#垃圾收集器" class="headerlink" title="垃圾收集器"></a>垃圾收集器</h2><p><strong>如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。</strong></p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194403.png"></p>
+<p><img src="D:\技术书籍与笔记图片\笔记图片\JVM\7种垃圾收集器.png"></p>
 <p>以上是 HotSpot 虚拟机中的 7 种垃圾收集器，连线表示垃圾收集器之间可以搭配使用。</p>
 <p>在谈论垃圾收集器的上下文语境中，可用理解为：</p>
 <ul>
@@ -2847,7 +2845,7 @@
 <li>线程数：单线程</li>
 <li>特点：进行垃圾收集时，由于是单线程，需要Stop The World，即将其他所有用户线程停止，直到收集结束。但简单高效（避免线程切换的开销），内存消耗小。</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194406.jpg"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204623.png"></p>
 <br>
 
 <h3 id="ParNew-收集器"><a href="#ParNew-收集器" class="headerlink" title="ParNew 收集器"></a>ParNew 收集器</h3><p>ParNew 收集器其实就是 Serial 收集器的多线程版本，除了使用多线程进行垃圾收集外，其余行为（控制参数、收集算法、回收策略等等）和 Serial 收集器完全一样。</p>
@@ -2857,7 +2855,7 @@
 <li>线程数：多线程</li>
 <li>特点：多线程，在多核CPU情况下垃圾收集效率较高，Stop The World的时间较短。</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194409.jpg"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204634.jpg"></p>
 <br>
 
 <h3 id="Parallel-Scavenge-收集器"><a href="#Parallel-Scavenge-收集器" class="headerlink" title="Parallel Scavenge 收集器"></a>Parallel Scavenge 收集器</h3><p>Parallel Scavenge 收集器也是使用<strong>标记-复制算法</strong>的<strong>多线程</strong>收集器，它看上去几乎和 ParNew 都一样。 那么它有什么特别之处呢？</p>
@@ -2895,7 +2893,7 @@
 <li>线程数：多线程</li>
 <li>特点：目标是提高吞吐量</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194413.jpg"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204649.jpg"></p>
 <br>
 
 <h3 id="CMS-收集器"><a href="#CMS-收集器" class="headerlink" title="CMS 收集器"></a>CMS 收集器</h3><p><strong>CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器。它非常符合在注重用户交互体验的应用上使用。</strong>CMS 收集器是 HotSpot 虚拟机第一款真正意义上的并发收集器，它第一次实现了让垃圾收集线程与用户线程（基本上）同时工作。</p>
@@ -2913,7 +2911,7 @@
 <li><strong>并发清除： 清理删除掉标记阶段判断的已经死亡的对象</strong>，对未标记的区域做清扫。由于不需要移动存活对象，所以这个阶段也是可以与用户线程并发执行的。</li>
 </ul>
 <p>其中初始标记、重新标记这两个步骤仍然需要 “ Stop The World ”，但速度很快。由于在整个过程中耗时最长的并发标记和并发清除阶段中，垃圾收集器线程都可以与用户线程一起工作，所以从总体上 CMS 收集器的内存回收过程是与用户线程一起并发执行的。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194416.jpg"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204658.jpg"></p>
 <br>
 
 <h3 id="G1-收集器"><a href="#G1-收集器" class="headerlink" title="G1 收集器"></a>G1 收集器</h3><p><strong>G1 (Garbage-First) 是一款面向服务端应用的垃圾收集器，主要针对配备多核CPU及大容量内存的机器，以极高概率满足 GC 停顿时间要求的同时，还兼具高吞吐量的性能特征</strong>。被视为 JDK1.7 中 HotSpot 虚拟机的一个重要进化特征，在 JDK 9 时正式取代 Parallel Scavenge + Parallel Old 组合成为默认垃圾收集器。</p>
@@ -2924,7 +2922,7 @@
 <li>特点：以缩短停顿时间为目标，同时兼顾高吞吐量</li>
 </ul>
 <p>G1出现之前的垃圾收集器，包括CMS在内，垃圾收集的目标范围要么是整个新生代（Minor GC），要么就是整个老年代（Major GC），再要么就是整个 Java 堆（Full GC）。而 G1 跳出了这个框架，它可以面向堆内存的任何部分来组成<strong>回收集(Collection Set，CSet)<strong>，</strong>衡量标准不再是它属于哪个分代，而是哪块内存中存放的垃圾数量最多</strong>，回收收益最大，这就是 G1 收集器的 <strong>Mixed GC</strong> 模式。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194419.PNG"></p>
+<p><img src="http://cdn.tojintao.cn/20220511195759.png"></p>
 <p>G1 是基于 Region 的堆内存布局来进行回收的，G1不再坚持固定大小以及固定数量的分代区域划分，<strong>而是把连续的 Java 堆划分为多个大小相等的独立区域 Region，每一个 Region 都可以根据需要，扮演新生代的 Eden 空间、Survivor 空间或者老年代空间</strong>，收集器能够对不同角色的 Region 采用不同的策略去处理。</p>
 <p><strong>Region 中还有一类特殊的 Humongous 区域，专门用来存储大对象</strong>。G1 认为只要大小超过了一个 Region 容量一半的对象即可判定为大对象。对于超过了整个 Region 容量的超级大对象，将会存放在 N 个连续的 Humongous Region 中，G1 大多数行为都会把 Humongous Region 作为老年代的一部分来看待。</p>
 <h4 id="运行过程"><a href="#运行过程" class="headerlink" title="运行过程"></a>运行过程</h4><p>G1收集器的运作过程大致可划分为以下四个步骤：</p>
@@ -2934,7 +2932,7 @@
 <li><strong>最终标记：对用户线程做另一个短暂的暂停，用于处理并发阶段结束后仍遗留下来的最后那少量的 SATB 记录</strong>（原始快照，用来记录并发标记中某些对象）。</li>
 <li><strong>筛选回收：负责更新 Region 的统计数据，对各个 Region 的回收价值和成本进行排序，根据用户所期望的停顿时间来制定回收计划</strong>，可以自由选择任意多个 Region 构成回收集，然后<strong>把决定要回收的那一部分 Region 的存活对象复制到空的 Region 中，再清理掉整个旧 Region 的全部空间</strong>。这里的操作涉及存活对象的移动，所以必须要暂停用户线程，由多条收集器线程并行完成。</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194422.jpg"></p>
+<p><img src="http://cdn.tojintao.cn/20220511195819.jpg"></p>
 <br>
 
 <h2 id="内存分配策略"><a href="#内存分配策略" class="headerlink" title="内存分配策略"></a>内存分配策略</h2><h4 id="1、对象优先在-Eden-分配"><a href="#1、对象优先在-Eden-分配" class="headerlink" title="1、对象优先在 Eden 分配"></a>1、对象优先在 Eden 分配</h4><p>大多数情况下，对象在新生代 Eden 区分配，当 Eden 区没有足够空间进行分配时，虚拟机发起一次 Minor GC。</p>
@@ -2991,7 +2989,7 @@
 <li><strong>并发清除： 清理删除掉标记阶段判断的已经死亡的对象</strong>，对未标记的区域做清扫。由于不需要移动存活对象，所以这个阶段也是可以与用户线程并发执行的。</li>
 </ul>
 <p>其中初始标记、重新标记这两个步骤仍然需要 “ Stop The World ”，但速度很快。由于在整个过程中耗时最长的并发标记和并发清除阶段中，垃圾收集器线程都可以与用户线程一起工作，所以从总体上 CMS 收集器的内存回收过程是与用户线程一起并发执行的。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194416.jpg"></p>
+<p><img src="http://cdn.tojintao.cn/20220511195743.jpg"></p>
 <p>CMS 是一款非常优秀的垃圾收集器，有着<strong>并发收集（2，4阶段）、低延迟（1，3阶段）</strong>的优点。但还远没有完美的程度，至少有三个明显缺点：</p>
 <ul>
 <li>CMS 对处理器资源非常敏感，在并发阶段，虽然不会造成用户线程停顿，但是却会因为占用一部分线程而导致应用程序变慢，降低总吞吐量。</li>
@@ -3011,7 +3009,7 @@
 
 <h3 id="G1-收集器"><a href="#G1-收集器" class="headerlink" title="G1 收集器"></a>G1 收集器</h3><p><strong>G1 (Garbage-First) 是一款面向服务端应用的垃圾收集器，主要针对配备多核CPU及大容量内存的机器，以极高概率满足 GC 停顿时间要求的同时，还兼具高吞吐量的性能特征</strong>。被视为 JDK1.7 中 HotSpot 虚拟机的一个重要进化特征，在 JDK 9 时正式取代 Parallel Scavenge + Parallel Old 组合成为默认垃圾收集器。</p>
 <p>G1出现之前的垃圾收集器，包括CMS在内，垃圾收集的目标范围要么是整个新生代（Minor GC），要么就是整个老年代（Major GC），再要么就是整个 Java 堆（Full GC）。而 G1 跳出了这个框架，它可以面向堆内存的任何部分来组成<strong>回收集(Collection Set，CSet)<strong>，</strong>衡量标准不再是它属于哪个分代，而是哪块内存中存放的垃圾数量最多</strong>，回收收益最大，这就是 G1 收集器的 <strong>Mixed GC</strong> 模式。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194419.PNG"></p>
+<p><img src="http://cdn.tojintao.cn/20220511195759.png"></p>
 <p>G1 是基于 Region 的堆内存布局来进行回收的，G1不再坚持固定大小以及固定数量的分代区域划分，<strong>而是把连续的 Java 堆划分为多个大小相等的独立区域 Region，每一个 Region 都可以根据需要，扮演新生代的 Eden 空间、Survivor 空间或者老年代空间</strong>，收集器能够对不同角色的 Region 采用不同的策略去处理。</p>
 <p><strong>Region 中还有一类特殊的 Humongous 区域，专门用来存储大对象</strong>。G1 认为只要大小超过了一个 Region 容量一半的对象即可判定为大对象。对于超过了整个 Region 容量的超级大对象，将会存放在 N 个连续的 Humongous Region 中，G1 大多数行为都会把 Humongous Region 作为老年代的一部分来看待。</p>
 <h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ul>
@@ -3050,12 +3048,12 @@
 <li><strong>最终标记：对用户线程做另一个短暂的暂停，用于处理并发阶段结束后仍遗留下来的最后那少量的 SATB 记录</strong>（原始快照，用来记录并发标记中某些对象）。</li>
 <li><strong>筛选回收：负责更新 Region 的统计数据，对各个 Region 的回收价值和成本进行排序，根据用户所期望的停顿时间来制定回收计划</strong>，可以自由选择任意多个 Region 构成回收集，然后<strong>把决定要回收的那一部分 Region 的存活对象复制到空的 Region 中，再清理掉整个旧 Region 的全部空间</strong>。这里的操作涉及存活对象的移动，所以必须要暂停用户线程，由多条收集器线程并行完成。</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194422.jpg"></p>
+<p><img src="http://cdn.tojintao.cn/20220511195819.jpg"></p>
 <h4 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h4><p><strong>1、将Java堆分成多个独立Region后，Region里面存在的跨Region引用对象怎么解决？</strong></p>
 <p>出现该情况可能是老年代Region引用新生代Region等，为了避免进行Minor GC回收新生代时还要扫描老年代对象，解决方案是<strong>使用记忆集避免全堆作为GC Roots扫描</strong>。</p>
 <p><strong>每个Region都有一个对应的记忆集，每次Reference类型数据写操作时，都会产生一个写屏障暂时中断操作</strong>；然后检查将要写入的引用指向的对象是否和该Reference类型数据在不同的Region（其他收集器：检查老年代对象是否引用了新生代对象）；如果不同，通过卡表把相关引用信息记录到引用指向对象的所在Region对应的记忆集中；</p>
 <p>当进行垃圾收集时，在GC根节点的枚举范围加入记忆集；就可以保证不进行全局扫描，也不会有遗漏。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024194424.png"></p>
+<p><img src="http://cdn.tojintao.cn/20220511195903.png"></p>
 <p><strong>2、G1 使用原始快照（SATB）算法来保证收集线程与于户线程互不干扰地运行，即用户线程改变对象引用关系时，必须保证其不能打破原本的对象图结构</strong>。</p>
 <p>3、垃圾收集对用户线程的影响还体现在回收过程中新创建对象的内存分配上，程序要继续运行就肯定会持续有新对象被创建，<strong>G1为每个Region设计了两个名为TAMS（Top at Mark Start） 的指针，把Region中的一部分空间划分出来用于并发过程中的新对象分配</strong>，并发回收时新分配的对象地址都必须要在这两个指针位置以上。<br>G1会默认这个地址上的对象是存活的，如果内存回收跟不上内存分配的速度，那么G1收集器也会被迫冻结用户的线程，导致Full GC而产生长时间 Stop The World</p>
 <br>
@@ -3076,8 +3074,8 @@
     <title>深入理解Java虚拟机——类加载机制</title>
     <url>/2021/10/24/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E2%80%94%E2%80%94%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</url>
     <content><![CDATA[<h2 id="类加载机制"><a href="#类加载机制" class="headerlink" title="类加载机制"></a>类加载机制</h2><h4 id="类的生命周期"><a href="#类的生命周期" class="headerlink" title="类的生命周期"></a>类的生命周期</h4><p>一个类型从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期将会经历<strong>加载（Loading）、验证（Verification）、准备（Preparation）、解析（Resolution）、初始化（Initialization）</strong>、使用（Using）和卸载（Unloading）七个阶段，<strong>其中验证、准备、解析三个部分统称为连接（Linking）</strong>。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024203855.png"></p>
-<h4 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h4><p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024203859.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204821.png"></p>
+<h4 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h4><p><img src="https://cdn.tojintao.cn/20220511204831.png"></p>
 <h5 id="1、加载"><a href="#1、加载" class="headerlink" title="1、加载"></a>1、加载</h5><p>类加载过程的第一步，Java虚拟机需要完成以下三件事情：</p>
 <ol>
 <li><strong>通过一个类的全限定名来获取定义此类的二进制字节流。</strong></li>
@@ -3097,7 +3095,7 @@
 <li><p>这里不包含用final修饰的static，因为final在编译的时候就会分配了，准备阶段会显示初始化：比如给 value 变量加上了 final 关键字<code>public static final int value = 123</code>使其成为常量 ，那么准备阶段 value 的值就被赋值为 123。</p>
 </li>
 </ol>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024203906.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204840.png"></p>
 <h5 id="4、解析"><a href="#4、解析" class="headerlink" title="4、解析"></a>4、解析</h5><p><strong>解析阶段是虚拟机将常量池内的符号引用替换为直接引用的过程</strong>。解析动作主要针对类或接口、字段、类方法、接口方法、方法类型、方法句柄和调用限定符7类符号引用进行。</p>
 <h5 id="5、初始化"><a href="#5、初始化" class="headerlink" title="5、初始化"></a>5、初始化</h5><p>类的初始化阶段是类加载的最后一个步骤，此时 Java 虚拟机才真正开始执行类中编写的 Java 程序代码。</p>
 <p><strong>初始化阶段就是执行类构造器<code>&lt;clinit&gt;()</code>方法的过程。</strong><code>&lt;clinit&gt; ()</code>方法是编译之后自动生成的。</p>
@@ -3144,7 +3142,7 @@
 <br>
 
 <h2 id="双亲委派模型"><a href="#双亲委派模型" class="headerlink" title="双亲委派模型"></a>双亲委派模型</h2><p>下图展示了各种类加载器之间的层次关系，称为双亲委派模型（Parents Delegation Model）。<strong>该模型要求除了顶层的启动类加载器外，其它的类加载器都要有自己的父类加载器。不过这里类加载器之间的父子关系一般不是以继承关系（Inheritance）来实现的，而是通常使用组合关系（Composition）来复用父加载器的代码</strong>。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211024203910.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204851.png"></p>
 <h4 id="工作过程"><a href="#工作过程" class="headerlink" title="工作过程"></a>工作过程</h4><p>每一个类都有一个对应它的类加载器。系统中的 ClassLoader 在协同工作的时候会默认使用 <strong>双亲委派模型</strong> 。即在类加载的时候，系统会首先判断当前类是否被加载过。已经被加载的类会直接返回，否则才会尝试加载。加载的时候，<strong>首先会把该请求委派给父类加载器的 <code>loadClass()</code> 处理</strong>，因此所有的加载请求最终都应该传送到最顶层的启动类加载器 <code>BootstrapClassLoader</code> 中。<strong>当父类加载器无法处理这个加载请求时，子加载才会尝试自己去完成加载</strong>。当父类加载器为 null 时，会使用启动类加载器 <code>BootstrapClassLoader</code> 作为父类加载器。</p>
 <blockquote>
 <p>当一个 .class 文件要被加载时，不考虑我们自定义类加载器类，首先会在AppClassLoader中检查是否加载过，如果有那就无需再加载；如果没有会交到父加载器，然后调用父加载器的loadClass方法。父加载器同样也会先检查自己是否已经加载过，如果没有再往上，直到到达BootstrapClassLoader之前，都是在检查是否加载过，并不会选择自己去加载。到了根加载器时，才会开始检查是否能够加载当前类，能加载就结束，使用当前的加载器；否则就通知子加载器进行加载；子加载器重复该步骤。如果到最底层还不能加载，就抛出异常<code>ClassNotFoundException</code></p>
@@ -3248,7 +3246,7 @@
   <entry>
     <title>十大排序算法——Java实现</title>
     <url>/2021/11/10/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E2%80%94%E2%80%94Java%E5%AE%9E%E7%8E%B0/</url>
-    <content><![CDATA[<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211110232247.png" alt="sort"></p>
+    <content><![CDATA[<p><img src="https://cdn.tojintao.cn/20220511205054.png"></p>
 <h2 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h2><p>从要排序序列的第一个元素开始，不断比较相邻元素的值，发现逆序则交换，将值较大的元素逐渐从前向后移动。</p>
 <p>每找到待排序序列的最大值时，就将该最大值固定在待排序序列的尾部，且每找到一个待排序序列最大值需要循环一次，n 个值则需要循环 n 次，但最后一个值无需比较，则实际需循环 n-1 次，即 <code>i &lt; arr.length - 1</code> 。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">bubbleSort</span> <span class="params">(<span class="keyword">int</span>[] arr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arr.length - <span class="number">1</span>; i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; arr.length - i - <span class="number">1</span>; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (arr[j] &gt; arr[j + <span class="number">1</span>]) &#123;</span><br><span class="line">                <span class="keyword">int</span> temp = arr[j];</span><br><span class="line">                arr[j] = arr[j + <span class="number">1</span>];</span><br><span class="line">                arr[j + <span class="number">1</span>] = temp;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -3313,7 +3311,7 @@
 <h2 id="堆排序"><a href="#堆排序" class="headerlink" title="堆排序"></a>堆排序</h2><p>堆排序是指利用堆这种数据结构所设计的一种排序算法。堆是一类完全二叉树，具有以下特性：</p>
 <p><strong>大顶堆：每个结点的值都大于或等于其左右孩子结点的值</strong></p>
 <p><strong>小顶堆：每个结点的值都小于或等于其左右孩子结点的值</strong></p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211226203122.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511205116.png"></p>
 <p><strong>堆排序基本步骤</strong>：</p>
 <ol>
 <li>将待排序数组构造成一个大顶堆，<strong>即从右至左、从下至上进行下沉操作</strong>。此时，整个序列的最大值就是堆顶的根节点。<strong>一般升序采用大顶堆，降序采用小顶堆</strong></li>
@@ -3489,7 +3487,7 @@
 </blockquote>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 由 take、poll 等持有的锁</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ReentrantLock takeLock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"><span class="comment">// 由 put、offer 等持有的锁</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ReentrantLock putLock = <span class="keyword">new</span> ReentrantLock();</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211122233047.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511201127.png"></p>
 <blockquote>
 <p>图源：<a href="https://javadoop.com/post/java-concurrent-queue">https://javadoop.com/post/java-concurrent-queue</a></p>
 </blockquote>
@@ -3586,7 +3584,7 @@
 <li><strong>当任务队列已满，则创建新的线程（非核心线程）来处理任务（注意，执行这一步需要获得全局锁）。</strong></li>
 <li><strong>当任务队列已满， 且当前运行总线程数达到了 maximumPoolSize，则会采取拒绝策略进行处理</strong>。</li>
 </ol>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211123234325.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511200822.png"></p>
 <p>以下是 <code>ThreadPoolExecute</code> 的 <code>execute</code> 方法的执行流程的源码：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable command)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (command == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">int</span> c = ctl.get();</span><br><span class="line">    <span class="comment">// 1.当前线程数小于corePoolSize, 则调用addWorker方法创建核心线程执行任务</span></span><br><span class="line">    <span class="keyword">if</span> (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">        <span class="keyword">if</span> (addWorker(command, <span class="keyword">true</span>))</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        c = ctl.get();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 2.如果线程数大于等于corePoolSize, 则将任务加入workQueue工作队列中</span></span><br><span class="line">    <span class="keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">        <span class="keyword">int</span> recheck = ctl.get(); <span class="comment">// 再次获取线程池状态，判断线程池状态是否改变，防止任务永远不会执行</span></span><br><span class="line">        <span class="comment">// 如果线程池不处于running状态，则remove这个任务，然后执行拒绝策略</span></span><br><span class="line">        <span class="keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">            reject(command);</span><br><span class="line">        <span class="comment">// 如果当前线程池为空就新创建一个线程并执行。</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (workerCountOf(recheck) == <span class="number">0</span>)</span><br><span class="line">            addWorker(<span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 3.如果放入workQueue失败（任务队列已满），则创建非核心线程执行任务</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (!addWorker(command, <span class="keyword">false</span>))</span><br><span class="line">        <span class="comment">// 4.如果创建非核心线程失败(当前线程总数不小于maximumPoolSize时)，就会执行拒绝策略</span></span><br><span class="line">        reject(command);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -3612,7 +3610,7 @@
 <li>任务的执行：包括任务执行机制的核心接口 <strong><code>Executor</code></strong> ，以及继承自 <code>Executor</code> 接口的 <strong><code>ExecutorService</code> 接口。<code>ThreadPoolExecutor</code></strong> 和 <strong><code>ScheduledThreadPoolExecutor</code></strong> 这两个关键类实现了 <strong>ExecutorService 接口</strong>。</li>
 <li>异步计算的结果：**<code>Future</code>** 接口以及 <code>Future</code> 接口的实现类 <strong><code>FutureTask</code></strong> 类都可以代表异步计算的结果。</li>
 </ul>
-<h4 id="Executor-框架的使用示意图"><a href="#Executor-框架的使用示意图" class="headerlink" title="Executor 框架的使用示意图"></a>Executor 框架的使用示意图</h4><p><img src="https://gitee.com/KIMTOU/img/raw/master/20211123234346.png"></p>
+<h4 id="Executor-框架的使用示意图"><a href="#Executor-框架的使用示意图" class="headerlink" title="Executor 框架的使用示意图"></a>Executor 框架的使用示意图</h4><p><img src="https://cdn.tojintao.cn/20220511200837.png"></p>
 <ol>
 <li><strong>主线程首先要创建实现 <code>Runnable</code> 或者 <code>Callable</code> 接口的任务对象。</strong></li>
 <li><strong>把创建完成的实现 <code>Runnable</code>/<code>Callable</code>接口的对象直接交给 <code>ExecutorService</code> 执行</strong>: <code>ExecutorService.execute（Runnable command）</code>）或者也可以把 <code>Runnable</code> 对象或<code>Callable</code> 对象提交给 <code>ExecutorService</code> 执行（<code>ExecutorService.submit（Runnable task）</code>或 <code>ExecutorService.submit（Callable &lt;T&gt; task）</code>）。</li>
@@ -3622,7 +3620,7 @@
 <br>
 
 <h2 id="ThreadPoolExector"><a href="#ThreadPoolExector" class="headerlink" title="ThreadPoolExector"></a>ThreadPoolExector</h2><p>Java中的线程池核心实现类是ThreadPoolExecutor，UML 类图如下：</p>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211123234354.PNG" style="zoom: 67%;" />
+<img src="https://cdn.tojintao.cn/20220511200858.PNG" style="zoom: 67%;" />
 
 <p>ThreadPoolExecutor实现的顶层接口是Executor，顶层接口Executor提供了一种思想：<strong>将任务提交和任务执行分离开来进行解耦</strong>。用户无需关注如何创建线程，如何调度线程来执行任务，用户只需提供Runnable对象，将任务的运行逻辑提交到执行器（Executor）中，<strong>由Executor框架完成线程的调配和任务的执行部分</strong>。</p>
 <p>ExecutorService接口增加了一些能力：</p>
@@ -3644,7 +3642,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ExecutorService <span class="title">newFixedThreadPool</span><span class="params">(<span class="keyword">int</span> nThreads)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> ThreadPoolExecutor(nThreads, nThreads,</span><br><span class="line">                                  <span class="number">0L</span>, TimeUnit.MILLISECONDS,</span><br><span class="line">                                  <span class="keyword">new</span> LinkedBlockingQueue&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong><code>FixedThreadPool</code> 的 <code>corePoolSize</code> 和 <code>maximumPoolSize</code> 都被设置为 nThreads，这个 nThreads 参数是我们使用时指定的线程数。</strong><code>keepAliveTime</code> 设置为 0L，意味着多余的空闲线程会被立即终止。使用无界队列 <code>LinkedBlockingQueue</code>（队列的容量为 Integer.MAX_VALUE）作为线程池的工作队列。</p>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211123234427.png" style="zoom:67%;" />
+<img src="https://cdn.tojintao.cn/20220511200918.png" style="zoom: 67%;" />
 
 <p>FixedThreadPool 的 execute() 运行流程如下：</p>
 <ol>
@@ -3697,7 +3695,7 @@
 <p>本文内容整理自：<a href="https://blog.csdn.net/qq_34337272/article/details/80444032%EF%BC%8C%E5%B9%B6%E9%99%84%E4%B8%8A%E8%87%AA%E5%B7%B1%E7%9A%84%E7%90%86%E8%A7%A3">https://blog.csdn.net/qq_34337272/article/details/80444032，并附上自己的理解</a></p>
 </blockquote>
 <h1 id="CAP理论"><a href="#CAP理论" class="headerlink" title="CAP理论"></a>CAP理论</h1><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><strong>CAP</strong> 也就是 <strong>Consistency（一致性）</strong>、<strong>Availability（可用性）</strong>、<strong>Partition Tolerance（分区容错性）</strong> 这三个单词首字母组合。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211127225448.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511203302.png"></p>
 <p>在理论计算机科学中，CAP 定理（CAP theorem）指出对于一个分布式系统来说，当设计读写操作时，只能同时满足以下三点中的两个：</p>
 <ul>
 <li><strong>一致性（Consistency）</strong> : 所有节点访问同一份最新的数据副本</li>
@@ -3854,7 +3852,7 @@
 <p>与OOM的区别：内存泄漏是内存占用无法释放，而OOM是内存不够，内存泄漏会导致OOM。</p>
 </blockquote>
 <p><strong><code>ThreadLocalMap</code> 中使用的 key 为 <code>ThreadLocal</code> 的弱引用，而 value 是强引用</strong>。所以，如果 <code>ThreadLocal</code> 没有被外部强引用的情况下，在垃圾回收的时候，key 会被清理掉，而 value 不会被清理掉。这样一来，<code>ThreadLocalMap</code> 中就会出现 key 为 null 的 Entry，而value还存在着强引用。假如我们不做任何措施的话，value 永远无法被 GC 回收，这个时候就可能会产生内存泄露。<code>ThreadLocalMap</code> 实现中已经考虑了这种情况，在调用 <code>set()</code>、<code>get()</code>、<code>remove()</code> 方法的时候，会清理掉 key 为 null 的记录。使用完 <code>ThreadLocal</code>方法后最好手动调用<code>remove()</code>方法。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211127232429.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511203007.png"></p>
 <p>看到Entry继承自 <code>WeakReferencr&lt;ThreadLocal&lt;?&gt;&gt;</code>，就是一个 key-value 形式的对象。它的 key 就是 ThreadLocal 对象，并且是一个弱引用，如果没有指向 key 的强引用后，该 key 就会被垃圾回收器回收；Entry 的 value 就是存储 Object 对象，是强引用。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadLocalMap</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Entry</span> <span class="keyword">extends</span> <span class="title">WeakReference</span>&lt;<span class="title">ThreadLocal</span>&lt;?&gt;&gt; </span>&#123;</span><br><span class="line">        <span class="comment">/** The value associated with this ThreadLocal. */</span></span><br><span class="line">        Object value;</span><br><span class="line"></span><br><span class="line">        Entry(ThreadLocal&lt;?&gt; k, Object v) &#123;</span><br><span class="line">            <span class="keyword">super</span>(k);</span><br><span class="line">            value = v;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
@@ -3974,7 +3972,7 @@
 <p>然后模板方法会调用使用者（自定义同步器）重写的方法 <code>tryAcquire </code>尝试去获取资源， 如果发现锁这个时候被释放了（state == 0），非公平锁会直接 CAS 抢锁，但是公平锁会判断等待队列是否有线程处于等待状态，如果有则不去抢锁，按顺序排到后面。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">nonfairTryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Thread current = Thread.currentThread();</span><br><span class="line">    <span class="keyword">int</span> c = getState();</span><br><span class="line">    <span class="keyword">if</span> (c == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// if (!hasQueuedPredecessors() &amp;&amp; compareAndSetState(0, acquires)) &#123; 公平锁实现</span></span><br><span class="line">        <span class="comment">// 公平锁会判断是否有排在自己前面且在等待的线程，而非公平锁继续直接CAS抢锁</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, acquires)) &#123;</span><br><span class="line">            setExclusiveOwnerThread(current);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (current == getExclusiveOwnerThread()) &#123; <span class="comment">//如果获得锁的是当前线程，则可重入</span></span><br><span class="line">        <span class="keyword">int</span> nextc = c + acquires;</span><br><span class="line">        <span class="keyword">if</span> (nextc &lt; <span class="number">0</span>) <span class="comment">// overflow</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">&quot;Maximum lock count exceeded&quot;</span>);</span><br><span class="line">        setState(nextc);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h4 id="获取资源流程图"><a href="#获取资源流程图" class="headerlink" title="获取资源流程图"></a>获取资源流程图</h4><img src="https://gitee.com/KIMTOU/img/raw/master/20211128203117.jpg" style="zoom: 80%;" />
+<h4 id="获取资源流程图"><a href="#获取资源流程图" class="headerlink" title="获取资源流程图"></a>获取资源流程图</h4><img src="http://cdn.tojintao.cn/20220511195650.jpg" style="zoom:80%;" />
 
 <blockquote>
 <p>state 初始化为 0，表示未锁定状态。A 线程 lock() 时，会调用 tryAcquire()独占该锁并将 state+1。此后，其他线程再 tryAcquire()时就会失败，直到 A 线程 unlock()到 state=0（即释放锁）为止，其它线程才有机会获取该锁。当然，释放锁之前，A 线程自己是可以重复获取此锁的（state 会累加），这就是可重入的概念。但要注意，获取多少次就要释放多少次，这样才能保证 state 是能回到零态的。</p>
@@ -4000,7 +3998,7 @@
 <p><strong>Java 线程之间的通信由 Java 内存模型（JMM）控制，JMM 决定了一个线程对共享变量的写入何时对另一个线程可见</strong>。</p>
 <h4 id="Java-内存模型的组成部分"><a href="#Java-内存模型的组成部分" class="headerlink" title="Java 内存模型的组成部分"></a>Java 内存模型的组成部分</h4><p>JMM 定义了线程和主内存之间的抽象关系：</p>
 <p><strong>线程之间的共享变量存储在主内存（Main Memoery）中，每个线程都有一个私有的本地内存（Local Memoery），存储了该线程以读 / 写共享变量的副本</strong>。线程对共享变量的所有操作都必须在本地内存中进行，而不能直接对主内存进行操作。并且每个线程不能访问其他线程的工作内存。<strong>JMM 通过控制主内存与每个线程的本地内存之间的交互，来提供内存可见性保证</strong>。</p>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211128203510.jpg" style="zoom: 50%;" />
+<img src="https://cdn.tojintao.cn/20220511203119.jpg" style="zoom: 50%;" />
 
 <blockquote>
 <p>本地内存是 JMM 的一个抽象概念，并不真实存在。它涵盖了缓存、写缓冲区、寄存器等。</p>
@@ -4141,7 +4139,7 @@
 <li>在每个 volatile 读操作的后面插入一个 LoadLoad 屏障。</li>
 <li>在每个 volatile 读操作的后面插入一个 LoadStore 屏障。</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128203926.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511204926.png"></p>
 <h4 id="什么是内存屏障"><a href="#什么是内存屏障" class="headerlink" title="什么是内存屏障"></a>什么是内存屏障</h4><p>JVM是怎么限制处理器的重排序的呢？它是通过<strong>内存屏障</strong>来实现的。</p>
 <p>什么是内存屏障？硬件层面，内存屏障分两种：读屏障（Load Barrier）和写屏障（Store Barrier）。</p>
 <p>内存屏障有两个作用：</p>
@@ -4302,7 +4300,7 @@
 <li>遍历线程栈，如果存在锁记录的话，需要修复锁记录和Mark Word，使其变成无锁状态。</li>
 <li>唤醒被停止的线程，将当前锁升级成轻量级锁。</li>
 </ol>
-<img src="https://gitee.com/KIMTOU/img/raw/master/20211128204941.png" style="zoom:80%;" />
+<img src="https://cdn.tojintao.cn/20220511202936.png" style="zoom: 67%;" />
 
 <p>如果应用程序里所有的锁通常处于竞争状态，那么偏向锁就会是一种累赘，对于这种情况，我们可以一开始就把偏向锁这个默认功能给关闭，<code>-XX:UseBiasedLocking=false</code>，那么程序默认会进入轻量级锁状态。</p>
 <h4 id="轻量级锁"><a href="#轻量级锁" class="headerlink" title="轻量级锁"></a>轻量级锁</h4><p>轻量级锁是指当前锁是偏向锁的时候，资源被另外的线程所访问，那么偏向锁就会升级为轻量级锁，其他线程会通过自旋的形式尝试获取锁，线程不会阻塞，从而提高性能。</p>
@@ -4401,7 +4399,7 @@
 <li><code>len</code> 属性的值为 <code>5</code> ， 表示这个 SDS 保存了一个 5 字节长的字符串。</li>
 <li><code>buf</code> 属性是一个 <code>char</code> 类型的数组， 数组的前 5 个字节分别保存了 <code>&#39;R&#39;</code> 、 <code>&#39;e&#39;</code> 、 <code>&#39;d&#39;</code> 、 <code>&#39;i&#39;</code> 、 <code>&#39;s&#39;</code> 5 个字符， 而最后一个字节则保存了空字符 <code>&#39;\0&#39;</code> 。</li>
 </ul>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128205733.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202143.png"></p>
 <blockquote>
 <p>SDS 遵循 C 字符串以空字符结尾的惯例， 保存空字符的 <code>1</code> 字节空间不计算在 SDS 的 <code>len</code> 属性里面， 并且为空字符分配额外的 <code>1</code> 字节空间， 以及添加空字符到字符串末尾等操作都是由 SDS 函数自动完成的。遵循空字符结尾这一惯例的好处是， SDS 可以兼容 C 语言，直接重用一部分 C 字符串函数库里面的函数。</p>
 </blockquote>
@@ -4496,7 +4494,7 @@
     <content><![CDATA[<p><strong>跳跃表（skiplist）是一种有序数据结构，它通过在每个节点中维持多个指向其他节点的指针，从而达到快速访问节点的目的</strong>。跳跃表支持平均 O(log N) 、最坏 O(N) 复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</p>
 <p>Redis 使用跳跃表作为有序集合键的底层实现之一：如果一个有序集合包含的元素数量比较多，又或者有序集合中元素的成员（member）是比较长的字符串时，Redis 就会使用跳跃表来作为有序集合键的底层实现。</p>
 <h3 id="跳跃表的实现"><a href="#跳跃表的实现" class="headerlink" title="跳跃表的实现"></a>跳跃表的实现</h3><p><strong>Redis 的跳跃表由 <code>zskiplistNode</code> 和 <code>zskiplist</code> 两个结构定义，<code>zskiplistNode</code> 结构用于表示跳跃表节点， <code>zskiplist</code> 结构用于保存跳跃表节点相关信息，比如节点的数量，以及指向表头节点和表尾节点的指针等</strong>。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128210516.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202242.png"></p>
 <p>如图展示了一个跳跃表示例， 位于图片最左边的是 <code>zskiplist</code> 结构， 该结构包含以下属性：</p>
 <ul>
 <li><strong>header</strong> ：指向跳跃表的表头节点。</li>
@@ -4572,14 +4570,14 @@
 <p>因为 <code>dictEntry</code> 节点组成的链表没有指向链表表尾的指针， 所以为了速度考虑， 程序总是将新节点添加到链表的表头位置（复杂度为 O(1)）， 排在其他已有节点的前面。</p>
 </blockquote>
 <p>下图展示了如何通过 <code>next</code> 指针，将两个索引值相同的键 <code>k1</code> 和 <code>k0</code> 连接在一起：</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128210239.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202334.png"></p>
 <h4 id="字典"><a href="#字典" class="headerlink" title="字典"></a>字典</h4><p>Redis 中的字典由 <code>dict.h/dict</code> 结构表示：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dict</span> &#123;</span></span><br><span class="line">    <span class="comment">// 类型特定函数</span></span><br><span class="line">    dictType *type;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 私有数据</span></span><br><span class="line">    <span class="keyword">void</span> *privdata;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 哈希表</span></span><br><span class="line">    dictht ht[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// rehash 索引</span></span><br><span class="line">    <span class="comment">// 当 rehash 不在进行时，值为 -1</span></span><br><span class="line">    <span class="keyword">int</span> rehashidx; <span class="comment">/* rehashing not in progress if rehashidx == -1 */</span></span><br><span class="line">&#125; dict;</span><br></pre></td></tr></table></figure>
 
 <p><code>type</code> 属性和 <code>privdata</code> 属性是针对不同类型的键值对，为创建多态字典而设置的。</p>
 <p><strong><code>ht</code> 属性是一个大小为 2 的数组，数组中的每个元素都是一个 <code>dictht</code> 哈希表。一般情况下，字典只使用 <code>ht[0]</code> 哈希表，<code>ht[1]</code> 哈希表只会在对 <code>ht[0]</code> 哈希表进行 rehash 时使用。<code>rehashidx</code> 记录了 rehash 目前的进度，如果目前没有进行 rehash，则值为 -1</strong> 。</p>
 <p>下图展示了一个普通状态下（没有进行 rehash）的字典：</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128210244.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202400.png"></p>
 <h3 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h3><p>当要将一个新的键值对添加到字典里面时， 程序需要先根据键值对的键计算出哈希值和索引值， 然后再根据索引值， 将包含新键值对的哈希表节点放到哈希表数组的指定索引上面。</p>
 <p>Redis 计算哈希值和索引值的方法如下：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 使用字典设置的哈希函数，计算键 key 的哈希值</span></span><br><span class="line">hash = dict-&gt;type-&gt;hashFunction(key);</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 使用哈希表的 sizemask 属性和哈希值，计算出索引值</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 根据情况不同， ht[x] 可以是 ht[0] 或者 ht[1]</span></span><br><span class="line">index = hash &amp; dict-&gt;ht[x].sizemask;</span><br></pre></td></tr></table></figure>
@@ -4623,7 +4621,7 @@
 <li><strong>在 rehash 进行期间，每次对字典执行添加、删除、查找或者更新操作时，程序除了会执行指定的操作以外，还会顺带将 <code>ht[0]</code> 哈希表在 <code>rehashidx</code> 索引上的所有键值对 rehash 到 <code>ht[1]</code> ，当 rehash 工作完成之后，将 <code>rehashidx</code> 属性的值加 1</strong>，即从索引 0 开始顺序迁移。</li>
 <li>随着字典操作的不断执行，最终在某个时间点上，<code>ht[0]</code> 的所有键值对都会被 rehash 至 <code>ht[1]</code> ， 此时将 <code>rehashidx</code> 属性的值设为 <code>-1</code> ，表示 rehash 操作已完成。</li>
 </ol>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128210248.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202423.png"></p>
 <h4 id="渐进式-rehash-执行期间的哈希表操作"><a href="#渐进式-rehash-执行期间的哈希表操作" class="headerlink" title="渐进式 rehash 执行期间的哈希表操作"></a>渐进式 rehash 执行期间的哈希表操作</h4><p>在渐进式 rehash 时，因为字典会同时使用<code>ht[0]</code>和<code>ht[1]</code>两个哈希表，所以此时对字典的删除、查找和更新操作都可能会在两个哈希表进行。</p>
 <ul>
 <li><p><strong>如果要查找一个键时，先在<code>ht[0]</code>中查找，如果没找到，则会继续到<code>ht[1]</code>中查找。</strong></p>
@@ -4654,7 +4652,7 @@
 <p>如果字符串对象保存的是一个字符串值，并且这个字符串值的长度小于等于 39 字节，那么字符串对象将使用 embstr 编码的方式来保存这个字符串值。</p>
 </blockquote>
 <p>看到这，我马上实践了一波，结果直接懵了。。。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128231641.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511203448.png"></p>
 <p>当我创建了一个长度为 39 的字符串，编码为 embstr，这没有什么问题，但长度变为 41 的时候，此时编码应该转换为 raw 才对，然而并没有！</p>
 <p>我的第一直觉便觉得应该就是版本问题，因为《Redis 设计与实现》是基于 Redis 3.0 版本的，而我之前专门看过 Redis 3.0 和 6.0 版本的 SDS 源码，已经知道 Redis 在 3.2 版本的时候对 SDS 进行了内存优化，很可能是因为这个原因导致编码转换的边界值发生改变。</p>
 <p>上网一搜，看到这位博主跟我遇到了一样的问题：<a href="https://blog.csdn.net/XiyouLinux_Kangyijie/article/details/78045385">Redis的embstr与raw编码方式不再以39字节为界了！</a>，发现原因确实是这样的。只不过博主并没有将不同版本的源码来对比说明，这里便通过源码加以佐证。</p>
@@ -4696,7 +4694,7 @@
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisObject</span> &#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>;</span><br><span class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>;</span><br><span class="line">    <span class="keyword">unsigned</span> lru:REDIS_LRU_BITS;</span><br><span class="line">    <span class="keyword">int</span> refcount;</span><br><span class="line">    <span class="keyword">void</span> *ptr;</span><br><span class="line">&#125; robj;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sdshdr</span> &#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> len;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="built_in">free</span>;</span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>embstr 编码的字符串是一块连续的内存区域，由 redisObject 和 sdshdr 组成。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128232457.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511203511.png"></p>
 <p><strong>其中 redisObject 占 16 个字节，当 buf 数组内的字符串长度是 39 时，sdshdr 的大小为 4+4+39+1=48，那一个字节是 ‘\0’，加起来刚好 64</strong>。</p>
 <blockquote>
 <p>从2.4版本开始，Redis 开始使用 jemalloc 内存分配器。这个比 glibc 的 malloc 要好不少，还省内存。在这里可以简单理解，jemalloc 会分配8，16，32，64等字节的内存。</p>
@@ -4716,7 +4714,7 @@
 
 <br>
 
-<h3 id="进行验证"><a href="#进行验证" class="headerlink" title="进行验证"></a>进行验证</h3><p><img src="https://gitee.com/KIMTOU/img/raw/master/20211128231635.PNG"></p>
+<h3 id="进行验证"><a href="#进行验证" class="headerlink" title="进行验证"></a>进行验证</h3><p><img src="https://cdn.tojintao.cn/20220511203524.PNG"></p>
 <p>可以看到，当字符串长度达到大于 44 时，字符串对象就会从 <code>embstr</code> 编码转换为 <code>raw</code>。</p>
 <hr>
 <p>从发现问题再到深入底层探索细节，最后得出结论，整个历程都让我受益匪浅。一个小小的实践却让我深入探究了 SDS 的底层细节，也加深了自己对其的理解，不枉费自己在图书馆的一个下午哈哈。</p>
@@ -5185,7 +5183,7 @@
 </li>
 </ul>
 <p><strong>总结：为了提升性能，让有序集合的查找和范围型操作都尽可能快地执行， Redis 选择了同时使用字典和跳跃表两种数据结构来实现有序集合</strong>。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211205193452.png"></p>
+<p><img src="https://cdn.tojintao.cn/20220511202034.png"></p>
 <h4 id="编码转换-4"><a href="#编码转换-4" class="headerlink" title="编码转换"></a>编码转换</h4><p><strong>当有序集合保存的所有元素成员长度都小于64字节，且元素数量小于128个时，使用<code>ziplist</code>编码，否则使用<code>skiplist</code>编码</strong>。</p>
 <br>
 
@@ -5206,7 +5204,8 @@
     <url>/2021/12/05/Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/</url>
     <content><![CDATA[<p>Redis 支持主从同步，提供 Cluster 集群部署模式，通过 Sentinel 哨兵来监控 Redis 主节点的状态，以此来保证 Redis 的高可用，而主从复制正是高可用的基石。</p>
 <p>一主多从，主负责写，并且将数据复制到其它的 slave 节点，从节点负责读。所有的<strong>读请求全部走从节点</strong>。这样也可以很轻松实现水平扩容，<strong>支撑读高并发</strong>。从节点的数据来自主节点，实现原理就是<strong>主从复制机制</strong>。</p>
-<h2 id="主从复制过程"><a href="#主从复制过程" class="headerlink" title="主从复制过程"></a>主从复制过程</h2><p>主从复制过程大体可以分为3个阶段：<strong>连接建立阶段（即准备阶段）、数据同步阶段、命令传播阶段</strong>。</p>
+<h2 id="主从复制过程"><a href="#主从复制过程" class="headerlink" title="主从复制过程"></a>主从复制过程</h2><p>一主多从，主负责写，并且将数据复制到其它的 slave 节点，从节点负责读。所有的<strong>读请求全部走从节点</strong>。这样也可以很轻松实现水平扩容，<strong>支撑读高并发</strong>。从节点的数据来自主节点，实现原理就是<strong>主从复制机制</strong>。</p>
+<p>主从复制过程大体可以分为3个阶段：<strong>连接建立阶段（即准备阶段）、数据同步阶段、命令传播阶段</strong>。</p>
 <h3 id="连接建立阶段"><a href="#连接建立阶段" class="headerlink" title="连接建立阶段"></a>连接建立阶段</h3><ol>
 <li><strong>保存主节点信息</strong></li>
 <li><strong>建立socket连接</strong>：slave 将根据指定的 IP 地址和端口，向 master 发起套接字（socket）连接，master 在接受（accept） slave 的套接字连接之后，为该套接字创建相应的客户端状态，此时连接建立完成。</li>
@@ -5216,35 +5215,59 @@
 </ol>
 <br>
 
-<h3 id="数据同步阶段"><a href="#数据同步阶段" class="headerlink" title="数据同步阶段"></a>数据同步阶段</h3><p>主从复制包括全量复制，增量复制两种。一般当slave第一次启动连接master，或者认为是第一次连接，就采用<strong>全量复制</strong>，而在后续，master持续将写命令，异步复制给 slave，采用增量复制。slave 将向 master 发送 <code>PSYNC</code> 命令， master 收到该命令后判断是进行部分重同步还是完整重同步，然后根据策略进行数据的同步。</p>
-<p><img src="https://gitee.com/KIMTOU/img/raw/master/20211205195837.png"></p>
-<h4 id="全量复制（完整重同步）"><a href="#全量复制（完整重同步）" class="headerlink" title="全量复制（完整重同步）"></a>全量复制（完整重同步）</h4><p>Redis通过 <code>psync</code> 命令进行全量复制的过程如下：</p>
+<h3 id="数据同步阶段"><a href="#数据同步阶段" class="headerlink" title="数据同步阶段"></a>数据同步阶段</h3><p>主从复制包括全量复制，增量复制两种。一般当 slave 第一次启动连接 master，就采用<strong>全量复制</strong>；而后续 master持续将写命令，异步复制给 slave，采用增量复制。<strong>数据同步阶段使用全量复制</strong>。</p>
+<p>slave 将向 master 发送 <code>PSYNC</code> 命令，表示要进行数据同步。master 收到该命令后判断是进行部分重同步还是完整重同步，然后根据策略进行数据的同步。</p>
+<p>psync 命令包含两个参数，分别是<strong>主服务器的 runID</strong> 和<strong>复制进度 offset</strong>。</p>
 <ul>
-<li>主节点收到全量复制的命令后，执行 bgsave 命令，fork 一个子进程在后台生成RDB文件，并使用一个内存缓冲区（称为复制缓冲区）记录从现在开始执行的所有写命令；</li>
+<li>runID，每个 Redis 服务器在启动时都会自动生产一个随机的 ID 来唯一标识自己。当从服务器和主服务器第一次同步时，因为不知道主服务器的 runID，所以将其设置为 “?”。</li>
+<li>offset，表示复制的进度，第一次同步时，其值为 -1。</li>
+</ul>
+<p><img src="https://cdn.tojintao.cn/20220511201942.png"></p>
+<h4 id="全量复制"><a href="#全量复制" class="headerlink" title="全量复制"></a>全量复制</h4><p>执行了 <code>replicaof</code> 命令后，从服务器就会给主服务器发送 <code>psync</code> 命令，表示要进行数据同步。主服务器收到 <code>psync</code> 命令后，会用 <code>FULLRESYNC</code> 作为响应命令返回给对方。<code>FULLRESYNC</code> 响应命令表示采用<strong>全量复制</strong>的方式：</p>
+<ul>
+<li><strong>主节点会执行 bgsave 命令生成 RDB 文件</strong>，并将 RDB 文件发送给从节点；<strong>从节点首先清除自己当前的旧数据，然后载入接收的 RDB 文件</strong>，将数据库状态更新至主节点执行 bgsave 时的数据库状态，期间<strong>基于旧的数据版本</strong>对外提供服务；</li>
+<li>同时在生成 RDB 的过程是不会阻塞主线程的，那么为了保证这期间的写操作命令能够同步到从节点，<strong>主服务器会将在 RDB 文件生成后收到的写操作命令，写入到 replication buffer 复制缓冲区里</strong>；</li>
 </ul>
 <ul>
-<li>主节点的bgsave执行完成后，将RDB文件发送给从节点；<strong>从节点首先清除自己的旧数据，然后载入接收的</strong>RDB文件，将数据库状态更新至主节点执行bgsave时的数据库状态，期间<strong>基于旧的数据版本</strong>对外提供服务；</li>
-<li>主节点将前述复制缓冲区中的所有写命令发送给从节点，从节点执行这些写命令，将数据库状态更新至主节点的最新状态；</li>
+<li>主节点在生成的 RDB 文件发送后，会将 replication buffer <strong>复制缓冲区里记录的所有写操作命令发送给从节点</strong>，然后从节点执行这些写操作，将数据库状态更新至主节点的最新状态；</li>
 </ul>
-<h4 id="增量复制（部分重同步）"><a href="#增量复制（部分重同步）" class="headerlink" title="增量复制（部分重同步）"></a>增量复制（部分重同步）</h4><ul>
-<li>复制偏移量</li>
-</ul>
-<p><strong>主节点和从节点分别维护一个复制偏移量（offset），代表的是主节点向从节点传递的字节数</strong>；主节点每次向从节点传播N个字节数据时，主节点的offset增加N；从节点每次收到主节点传来的N个字节数据时，从节点的offset增加N。</p>
+<h4 id="分摊主节点压力"><a href="#分摊主节点压力" class="headerlink" title="分摊主节点压力"></a>分摊主节点压力</h4><p>主从节点在第一次数据同步的过程中，主节点会做两件耗时的操作：<strong>生成 RDB 文件和传输 RDB 文件</strong>。主节点是可以有多个从节点的，如果从节点数量非常多，而且都与主节点进行全量同步的话，就会带来两个问题：</p>
 <ul>
-<li>复制积压缓冲区</li>
+<li>由于是通过 bgsave 命令来生成 RDB 文件的，那么主节点就会忙于使用 fork() 创建子进程，如果主节点的内存数据非大，在执行 fork() 函数时是会阻塞主线程的，从而使得 Redis 无法正常处理请求；</li>
+<li>传输 RDB 文件会占用主节点的网络带宽，会对主节点响应命令请求产生影响。</li>
 </ul>
-<p>复制积压缓冲区是由主节点维护的、固定长度的、先进先出(FIFO)队列，默认大小1MB；当主节点开始有从节点时创建，其作用是备份主节点最近发送给从节点的数据。注意，无论主节点有一个还是多个从节点，都只需要一个复制积压缓冲区。</p>
-<ul>
-<li>服务器运行ID(runid)</li>
-</ul>
-<p>每个Redis节点(无论主从)，在启动时都会自动生成一个随机ID(每次启动都不一样)，由40个随机的十六进制字符组成；runid用来唯一识别一个Redis节点。</p>
+<p><strong>主服务器生成 RDB 和传输 RDB 的压力可以分摊到从服务器</strong>。在「从服务器」上执行 <code>replicaof &lt;目标服务器IP&gt; 6379</code> 这条命令，使其作为目标服务器的从服务器：此时如果目标服务器本身也是「从服务器」，那么该目标服务器不仅可以接受主服务器同步的数据，也会把数据同步给自己旗下的从服务器，从而减轻主服务器的负担。</p>
 <br>
 
-<h3 id="命令传播阶段"><a href="#命令传播阶段" class="headerlink" title="命令传播阶段"></a>命令传播阶段</h3><p>当完成了数据同步之后，就会进入命令传播阶段，<strong>这时 master 只要一直将自己执行的写命令发送给 slave ，而 slave 只要一直接收并执行 master 发来的写命令</strong>，就可以保证 master 和 slave 一直保持一致了。</p>
+<h3 id="命令传播阶段"><a href="#命令传播阶段" class="headerlink" title="命令传播阶段"></a>命令传播阶段</h3><p>当主从节点完成了全量数据同步之后，就会进入命令传播阶段，双方之间会维护一个 TCP 连接。<strong>后续 master 只要一直将自己执行的写命令发送给 slave ，而 slave 只要一直接收并执行 master 发来的写命令</strong>，就可以保证 master 和 slave 数据库状态保持一致了。</p>
+<p>并且这个 TCP 连接是长连接，目的是避免频繁的 TCP 连接和断开带来的性能开销。</p>
 <blockquote>
-<p>即slave与master全量同步之后，master上的数据，如果再次发生更新，就会触发<strong>增量复制</strong>。</p>
-</blockquote>
 <p>在命令传播阶段，每隔指定的时间，<strong>主节点会向从节点发送</strong>PING命令，这个PING命令的作用，主要是为了让从节点进行超时判断。<strong>从节点会向主节点发送</strong>REPLCONF ACK命令，频率是每秒1次；命令格式为：REPLCONF ACK {offset}，其中offset指从节点保存的复制偏移量。</p>
+</blockquote>
+<h4 id="增量复制"><a href="#增量复制" class="headerlink" title="增量复制"></a>增量复制</h4><p>主从服务器在完成第一次同步后，就会基于长连接进行命令传播。但如果主从服务器间的网络连接断开了，就无法进行命令传播了，客户端就可能从「从服务器」读到旧的数据。那么<strong>如果此时断开的网络又恢复正常了，或者从节点宕机又恢复了之后</strong>，要怎么继续保证主从服务器的数据一致性呢？</p>
+<p>在 Redis 2.8 之前，如果主从服务器在命令同步时出现了网络断开又恢复的情况，从服务器就会和主服务器重新进行一次<strong>全量复制</strong>，很明显这样的开销太大了。</p>
+<p>所以，从 Redis 2.8 开始，网络断开又恢复后，从主从服务器会采用<strong>增量复制</strong>的方式继续同步，也就是只会把网络断开期间主服务器接收到的写操作命令，同步给从服务器。</p>
+<ol>
+<li>从服务器在恢复网络后，会发送 psync 命令 <code>psync &#123;runID&#125; &#123;offset&#125;</code> 给主服务器，此时的 psync 命令里的 offset 参数不是 -1；</li>
+<li>主服务器收到该命令后，然后用 <code>CONTINUE</code> 响应命令告诉从服务器接下来采用增量复制的方式同步数据；</li>
+<li>然后主服务将主从服务器断线期间，所执行的写命令发送给从服务器，然后从服务器执行这些命令。</li>
+</ol>
+<p>而这些<strong>增量数据</strong>则是通过复制偏移量以及复制积压缓存区实现的：</p>
+<ul>
+<li><strong>复制积压缓冲区 repl_backlog_buffer</strong>：是一个<strong>环形</strong>缓冲区，用于主从服务器断连后，从中找到差异的数据；</li>
+<li><strong>复制偏移量 replication offset</strong>：主节点和从节点分别维护各自的复制偏移量 (offset)，标记复制积压缓冲区的同步进度，主服务器使用 master_repl_offset 来记录自己「写」到的位置，从服务器使用 slave_repl_offset 来记录自己「读」到的位置。</li>
+</ul>
+<p><strong>在主服务器进行命令传播时，不仅会将写命令发送给从服务器，还会将写命令写入到复制积压缓冲区里</strong>，因此缓冲区里会保存着最近传播的写命令。网络断开后，当从服务器重新连上主服务器时，从服务器会通过 psync 命令将自己的复制偏移量 slave_repl_offset 发送给主服务器，主服务器根据自己的 master_repl_offset 和 slave_repl_offset 之间的差距，然后来决定对从服务器执行哪种同步操作：</p>
+<ul>
+<li>如果判断出从服务器要读取的数据<strong>还在复制积压缓冲区里</strong>，那么主服务器将采用<strong>增量同步</strong>的方式；</li>
+<li>相反，如果判断出从服务器要读取的数据<strong>已经不存在复制积压缓冲区里</strong>（因为是环形缓冲区），那么主服务器将采用<strong>全量同步</strong>的方式。</li>
+</ul>
+<p><strong>当主服务器在复制积压缓冲区中找到主从服务器差异（增量）的数据后</strong>，就会将增量的数据写入到 replication buffer <strong>复制缓冲区</strong>，这个缓冲区我们在全量复制时也提到过，它是缓存将要传播给从服务器的命令。</p>
+<p>repl_backlog_buffer 复制积压缓冲区的默认大小是 1M，并且由于它是一个环形缓冲区，所以当缓冲区写满后，主服务器继续写入就会覆盖之前的数据。那么在网络恢复时，如果从服务器想读的数据已经被覆盖了，主服务器就会采用全量同步，这个方式比增量同步的性能损耗要大很多。</p>
+<p>因此为了避免在网络恢复时，主服务器频繁地使用全量同步的方式，我们应该<strong>调整下复制积压缓冲区大小</strong>，尽可能的大一些，减少出现从服务器要读取的数据被覆盖的概率，从而使得主服务器采用增量同步的方式。</p>
+<blockquote>
+<p>**服务器运行ID(runid)**：每个Redis节点(无论主从)，在启动时都会自动生成一个随机ID(每次启动都不一样)，由40个随机的十六进制字符组成；runid用来唯一识别一个Redis节点。</p>
+</blockquote>
 <br>
 
 <blockquote>
