@@ -1,0 +1,314 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从 Reactor 模式看 Netty、Redis 线程模型 | KimTou</title><meta name="keywords" content="Netty"><meta name="author" content="chenjintao"><meta name="copyright" content="chenjintao"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Reactor 模式目前存在的线程模型有：传统阻塞 I&#x2F;O 服务模型 和 Reactor 模式。 Reactor 模式是基于事件驱动开发的，核心组成部分包括 Reactor 和线程池，其中 Reactor 负责监听和分发事件，线程池负责处理事件。Reactor 分为三种模型：  单线程模型 (单 Reactor 单线程) 多线程模型 (单 Reactor 多线程) 主从多线程模型 (多 React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从 Reactor 模式看 Netty、Redis 线程模型">
+<meta property="og:url" content="https://blog.tojintao.cn/2022/05/07/%E4%BB%8E-Reactor-%E6%A8%A1%E5%BC%8F%E7%9C%8B-Netty%E3%80%81Redis-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="KimTou">
+<meta property="og:description" content="Reactor 模式目前存在的线程模型有：传统阻塞 I&#x2F;O 服务模型 和 Reactor 模式。 Reactor 模式是基于事件驱动开发的，核心组成部分包括 Reactor 和线程池，其中 Reactor 负责监听和分发事件，线程池负责处理事件。Reactor 分为三种模型：  单线程模型 (单 Reactor 单线程) 多线程模型 (单 Reactor 多线程) 主从多线程模型 (多 React">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.tojintao.cn/Netty线程模型.png">
+<meta property="article:published_time" content="2022-05-07T14:29:57.000Z">
+<meta property="article:modified_time" content="2022-05-13T14:35:26.153Z">
+<meta property="article:author" content="chenjintao">
+<meta property="article:tag" content="Netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.tojintao.cn/Netty线程模型.png"><link rel="shortcut icon" href="/images/T.png"><link rel="canonical" href="https://blog.tojintao.cn/2022/05/07/%E4%BB%8E-Reactor-%E6%A8%A1%E5%BC%8F%E7%9C%8B-Netty%E3%80%81Redis-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '从 Reactor 模式看 Netty、Redis 线程模型',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-05-13 22:35:26'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/images/KT.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">17</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">14</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.tojintao.cn/Netty线程模型.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">KimTou</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">从 Reactor 模式看 Netty、Redis 线程模型</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-05-07T14:29:57.000Z" title="发表于 2022-05-07 22:29:57">2022-05-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-05-13T14:35:26.153Z" title="更新于 2022-05-13 22:35:26">2022-05-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Netty/">Netty</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="从 Reactor 模式看 Netty、Redis 线程模型"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Reactor-模式"><a href="#Reactor-模式" class="headerlink" title="Reactor 模式"></a>Reactor 模式</h1><p>目前存在的线程模型有：传统阻塞 <code>I/O</code> 服务模型 和 <code>Reactor</code> 模式。</p>
+<p><strong>Reactor 模式是基于事件驱动开发的，核心组成部分包括 Reactor 和线程池，其中 Reactor 负责监听和分发事件，线程池负责处理事件</strong>。Reactor 分为三种模型：</p>
+<ul>
+<li>单线程模型 (单 Reactor 单线程)</li>
+<li>多线程模型 (单 Reactor 多线程)</li>
+<li>主从多线程模型 (多 Reactor 多线程)</li>
+</ul>
+<h3 id="单-Reactor-单线程"><a href="#单-Reactor-单线程" class="headerlink" title="单 Reactor 单线程"></a>单 Reactor 单线程</h3><p><strong>Reactor 和 Handler 都在同一个线程中执行，即 select 多路复用、事件分发和事件处理都是在同一个线程上完成的</strong>。既要接收客户端的连接请求，向服务端发起连接，又要发送/读取请求或应答/响应消息。</p>
+<ul>
+<li><strong>优点</strong>：模型简单，没有多线程频繁切换、资源竞争的问题，全部都在一个线程中完成。</li>
+<li><strong>缺点：性能问题</strong>：一个 NIO 线程同时处理成百上千的链路，存在性能问题，无法完全发挥多核 <code>CPU</code> 的性能，当 <code>Handler</code>在处理某个连接上的业务时，如果发生阻塞，其他所有 Handler 都得不到执行，将无法输入输出，也无法建立连接。</li>
+<li><strong>缺点：可靠性问题</strong>：若线程进入死循环，整个程序不可用，对于高负载、大并发的应用场景不合适。</li>
+<li>使用场景：客户端的数量有限，业务处理非常快速。</li>
+</ul>
+<img src="https://cdn.tojintao.cn/单 Reactor 单线程.png" style="zoom: 33%;" />
+
+<ol>
+<li><code>Select</code> 是前面 <code>I/O</code> 复用模型介绍的标准网络编程 <code>API</code>，可以实现应用程序通过一个阻塞对象监听多路连接请求；</li>
+<li><code>Reactor</code> 对象通过 <code>Select</code> 监控客户端请求事件，收到事件后通过 <code>Dispatch</code> 进行分发；</li>
+<li>如果是建立连接请求事件，则由 <code>Acceptor</code> 通过 <code>Accept</code> 处理连接请求，然后创建一个 <code>Handler</code> 对象处理连接完成后的后续业务处理；</li>
+<li>如果不是建立连接事件，则 <code>Reactor</code> 会分发调用连接对应的 <code>Handler</code> 来响应；</li>
+<li><strong><code>Handler</code> 会完成 <code>Read</code> → 业务处理 → <code>Send</code> 的完整业务流程</strong>。</li>
+</ol>
+<h3 id="单-Reactor-多线程"><a href="#单-Reactor-多线程" class="headerlink" title="单 Reactor 多线程"></a>单 Reactor 多线程</h3><p>一个 NIO 线程（Acceptor）只负责服务端监听，接收客户端的 TCP 连接请求；NIO 线程池负责网络 IO 的操作，即消息的读取、解码、编码和发送；1 个 NIO 线程可以同时处理 N 条链路，但是 1 个链路只对应 1 个 NIO 线程，这是为了防止发生并发操作问题。但在并发百万客户端连接或需要安全认证时，一个 Acceptor 线程可能会存在性能不足问题。</p>
+<ul>
+<li>优点：可以充分的利用多核 <code>cpu</code> 的处理能力。</li>
+<li>缺点：多线程数据共享和访问比较复杂。<code>Reactor</code> 承担所有的事件的监听和处理响应，它是单线程运行，在高并发场景容易出现性能瓶颈。也就是说 <code>Reactor</code> 主线程存在网络 IO 瓶颈。</li>
+</ul>
+<img src="https://cdn.tojintao.cn/单Reactor多线程.png" style="zoom:33%;" />
+1. `Reactor` 对象通过 `Select` 监控客户端请求事件，收到事件后，通过 `Dispatch` 进行分发；
+2. 如果是建立连接请求，则由 `Acceptor` 通过 `accept` 处理连接请求，然后创建一个 `Handler` 对象处理完成连接后的各种事件；
+3. 如果是处理请求，则由 `Reactor` 分发调用连接对应的 `handler` 来处理（也就是说连接已建立，后续客户端再来请求就基本是处理请求了，直接调用之前为这个连接创建好的 handler 来处理）；
+4. **`handler` 只负责读取数据、响应事件**，不做具体的业务处理（这样不会使 handler 阻塞太久），通过 `read` 读取数据后，会分发给后面的 `worker` 线程池的某个线程处理业务，Reactor 线程可以处理其他事件。【业务处理是最费时的，所以将业务处理交给线程池去执行】；
+5. `worker` 线程池会分配独立线程完成真正的业务，并将结果返回给 `handler`；
+6. `handler` 收到响应后，通过 `send` 将结果返回给 `client`。
+
+<h3 id="主从-Reactor-多线程"><a href="#主从-Reactor-多线程" class="headerlink" title="主从 Reactor 多线程"></a>主从 Reactor 多线程</h3><p>可以将 Reactor 线程拆分为多个子 Reactor 线程；同时引入多个 Selector 选择器，并为每一个 SubReactor 引入一个线程，一个线程负责一个选择器的事件轮询。</p>
+<p>主 Reactor 线程用于绑定监听端口，接收客户端连接。当连接建立，将 SocketChannel 从主 Reactor 线程的多路复用器上移除，重新注册到 Sub 线程池的线程上， 用于处理 I/O 的读写等操作，从而保证 mainReactor 只负责接入认证、握手等操作。</p>
+<ul>
+<li>优点：父线程与子线程的数据交互简单，职责明确。父线程只需要接收新连接，之后交给子线程完成后续的业务处理。父线程与子线程的数据交互简单，<code>Reactor</code> 主线程只需要把新连接传给子线程，子线程无需返回数据给主线程。</li>
+<li>缺点：编程复杂度较高。<br><img src="https://cdn.tojintao.cn/%E4%B8%BB%E4%BB%8EReactor%E5%A4%9A%E7%BA%BF%E7%A8%8B.png"></li>
+</ul>
+<ol>
+<li><code>Reactor</code> 主线程 <code>MainReactor</code> 对象通过 <code>select</code> 监听连接事件，收到事件后，通过 <code>Acceptor</code> 处理连接事件；当 <code>Acceptor</code> 处理连接事件后，<code>MainReactor</code> 将连接分配给 <code>SubReactor</code>；</li>
+<li><code>subReactor</code> 将连接加入到连接队列进行监听，并创建 <code>handler</code> 进行各种事件处理；</li>
+<li>当有新事件发生时，<code>subReactor</code> 就会调用对应的 <code>handler</code> 处理；</li>
+<li><code>handler</code> 通过 <code>read</code> 读取数据，分发给后面的 <code>worker</code> 线程处理；</li>
+<li><code>worker</code> 线程池分配独立的 <code>worker</code> 线程进行业务处理，并返回结果；</li>
+<li><code>handler</code> 收到响应的结果后，再通过 <code>send</code> 将结果返回给 <code>client</code>；</li>
+<li><code>Reactor</code> 主线程可以对应多个 <code>Reactor</code> 子线程。</li>
+</ol>
+<br>
+
+<h1 id="Netty-线程模型"><a href="#Netty-线程模型" class="headerlink" title="Netty 线程模型"></a>Netty 线程模型</h1><p>Netty 主要基于主从 <code>Reactor</code> 多线程模型并做了一定的改进，其中主从 <code>Reactor</code> 多线程模型有多个 <code>Reactor</code>。内部实现了两个线程池，boss 线程池和 work 线程池，其中 boss 线程池的线程负责处理请求的 accept 事件，当接收到 accept 事件的请求时，把对应的 socket 封装到一个 NioSocketChannel 中，并交给 work 线程池。work 线程池负责轮询并处理 read 和 write 事件，由对应的 Handler 处理。</p>
+<p><img src="https://cdn.tojintao.cn/Netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.png"></p>
+<ol>
+<li><code>BossGroup</code> 线程维护 <code>Selector</code>，只关注 <code>Accecpt</code>；</li>
+<li>当接收到 <code>Accept</code> 事件，获取到对应的 <code>SocketChannel</code>，封装成 <code>NIOScoketChannel</code> 并注册到 <code>Worker</code> 线程（事件循环）进行维护，并创建对应 Handler 加入到通道；</li>
+<li>当 <code>Worker</code> 线程监听到 <code>Selector</code> 中通道发生自己感兴趣的事件后，就由 <code>handler</code>进行处理。</li>
+</ol>
+<p><code>BossGroup</code> 表示主<code>Reactor</code> 可以有多个（在 Netty 编程时我们通常会把 boss 线程池设置成单个线程），<code>WorkerGroup</code> 则代表 <code>SubReactor</code> 一样可以有多个（work 线程池则会直接使用默认的 <code>CPU 核心数 * 2</code> 个线程数）。</p>
+<img src="https://cdn.tojintao.cn/Netty线程模型流程.png" style="zoom:50%;" />
+
+<ol>
+<li><p><code>Netty</code> 抽象出两组线程池 ，**<code>BossGroup</code> 负责接收客户端的连接，<code>WorkerGroup</code> 负责网络 IO 读写**；<code>BossGroup</code> 和 <code>WorkerGroup</code> 类型都是 <code>NioEventLoopGroup</code>；</p>
+</li>
+<li><p><code>NioEventLoopGroup</code> 相当于一个事件循环组，这个组中含有多个事件循环，每一个事件循环是 <code>NioEventLoop</code>；</p>
+</li>
+<li><p><code>NioEventLoop</code> 表示一个不断循环的执行处理任务的线程，每个 <code>NioEventLoop</code> 都有一个 <code>Selector</code>，用于监听绑定在其上的 <code>socket</code> 的网络通讯；</p>
+</li>
+<li><p><code>NioEventLoopGroup</code> 可以有多个线程，即可以含有多个 <code>NioEventLoop</code>；</p>
+</li>
+<li><p>每个 <code>BossGroup</code>下面的<code>NioEventLoop</code> 循环执行的步骤有 <code>3</code> 步：</p>
+<ol>
+<li>轮询 <code>accept</code> 事件；</li>
+<li>处理 <code>accept</code> 事件，与 <code>client</code> 建立连接，生成 <code>NioScocketChannel</code>，并将其注册到某个 <code>workerGroup</code> <code>NIOEventLoop</code> 上的 <code>Selector</code>；</li>
+<li>继续处理任务队列的任务，即 <code>runAllTasks</code>；</li>
+</ol>
+</li>
+<li><p>每个 <code>WorkerGroup</code> 的 <code>NIOEventLoop</code> 循环执行的步骤</p>
+<ol>
+<li>轮询 <code>read</code>，<code>write</code> 事件；</li>
+<li>处理 <code>I/O</code> 事件，即 <code>read</code>，<code>write</code> 事件，在对应 <code>NioScocketChannel</code> 处理；</li>
+<li>处理任务队列的任务，即 <code>runAllTasks</code>；</li>
+</ol>
+</li>
+<li><p>每个 <code>Worker</code>  的 <code>NIOEventLoop</code> 处理业务时，会使用 <code>pipeline</code>（管道），<code>pipeline</code> 中包含了 <code>channel</code>，即通过 <code>pipeline</code> 可以获取到对应通道，管道中维护了很多的处理器。</p>
+</li>
+</ol>
+<p><code>NioEventLoopGroup</code> 下包含多个 <code>NioEventLoop</code>；每个 <code>NioEventLoop</code> 中包含有一个 <code>Selector</code>，一个 <code>taskQueue</code>；每个 <code>NioEventLoop</code> 的 <code>Selector</code> 上可以注册监听多个 <code>NioChannel</code>；每个 <code>NioChannel</code> 只会绑定在唯一的 <code>NioEventLoop</code> 上；**每个请求对应一个 <code>SocketChannel</code>，每个 <code>NioSocketChannel</code> 都绑定有一个自己的 <code>pipeline</code>，里面包含一连串的 <code>Handler</code>**。</p>
+<h3 id="1、串行化设计避免线程竞争"><a href="#1、串行化设计避免线程竞争" class="headerlink" title="1、串行化设计避免线程竞争"></a>1、串行化设计避免线程竞争</h3><p><strong>Netty 采用串行化设计理念，从消息的读取-&gt;解码-&gt;处理-&gt;编码-&gt;发送，始终由单个 IO 线程 NioEventLoop 负责。整个流程不会进行线程上下文切换，数据无并发修改风险</strong>。</p>
+<p>一个NioEventLoop 聚合一个多路复用器 selector，因此可以处理多个客户端连接。</p>
+<p>Netty 只负责提供和管理“IO线程”，其他的业务线程模型由用户自己集成。<strong>时间可控的简单业务建议直接在“IO线程”上处理，复杂和时间不可控的业务建议投递到业务线程池中处理</strong>。</p>
+<h3 id="2、定时任务与时间轮"><a href="#2、定时任务与时间轮" class="headerlink" title="2、定时任务与时间轮"></a>2、定时任务与时间轮</h3><p>NioEventLoop中的Thread线程按照时间轮中的步骤不断循环执行：</p>
+<ol>
+<li>在时间片Tirck内执行selector.select()轮询监听IO事件；</li>
+<li>处理监听到的就绪IO事件；</li>
+<li>执行任务队列taskQueue/delayTaskQueue中的非IO任务。</li>
+</ol>
+<br>
+
+<h1 id="Redis-线程模型"><a href="#Redis-线程模型" class="headerlink" title="Redis 线程模型"></a>Redis 线程模型</h1><p>Redis 基于 Reactor 模式开发了自己的<strong>文件事件处理器</strong>，由 4 个部分组成：<strong>多个 Socket 套接字、I/O 多路复用程序、文件事件分派器（dispatcher）、各种事件处理器</strong>。</p>
+<p>多个 socket 可能会并发产生不同的操作，每个操作对应不同的文件事件，IO 多路复用程序会监听多个 socket，将<strong>产生事件的 socket</strong> 放入队列中排队，<strong>文件事件分派器每次从队列中取出一个 socket</strong>，根据 socket 的事件类型交给对应的<strong>事件处理器</strong>进行处理。</p>
+<p>Redis 使用 <strong>epoll</strong> 作为 I/O 多路复用技术的实现。并且，Redis自身的事件处理模型将 epoll 中的连接、读写、关闭都转换为事件，不在网络 I/O 上浪费过多的时间。</p>
+<p><img src="https://cdn.tojintao.cn/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.png"><br><strong>套接字</strong>：socket 连接，也就是客户端连接。当一个套接字准备好执行连接、写入、读取、关闭等操作时， 就会产生一个相应的文件事件。</p>
+<p><strong>I/O 多路复用程序</strong>：使用 epoll 实现，会根据当前系统自动选择最佳的方式。<strong>负责监听多个套接字，当套接字产生事件时，会向文件事件分派器传送那些产生了事件的套接字。当多个文件事件并发出现时， I/O 多路复用程序会将所有产生事件的套接字都放到一个队列里面，然后通过这个队列，以有序、同步、每次一个套接字的方式向文件事件分派器传送套接字</strong>：当上一个套接字产生的事件被处理完毕之后，才会继续传送下一个套接字。</p>
+<p><strong>文件事件分派器</strong>：<strong>接收 I/O 多路复用程序传来的套接字， 并根据套接字的事件类型来为套接字关联不同的事件处理器</strong>。</p>
+<p><strong>事件处理器</strong>：事件处理器就是一个个函数， 定义了某个事件发生时， 服务器应该执行的动作。例如：建立连接、命令查询、命令写入、连接关闭等等。包含<strong>连接应答处理器、命令请求处理器、命令回复处理器</strong>。</p>
+<br>
+
+<h3 id="Redis-的单线程"><a href="#Redis-的单线程" class="headerlink" title="Redis 的单线程"></a>Redis 的单线程</h3><p>值得注意的是，Redis 正常处理客户端请求的核心流程，也就是<strong>执行命令</strong>阶段，一直都是<strong>单线程</strong>的。即使 Redis 6.0 再次引入了多线程，也主要是用于<strong>网络 IO</strong> 的，也就是接收命令和写回结果阶段，执行命令的核心流程依旧是单线程串行处理。</p>
+<p>这也是 Redis 设计者的初衷，单线程编程更简单且容易维护，同时避免了线程的上下文切换以及死锁的问题，<strong>更重要的是无需使用加锁等方式进行线程同步，保证了数据安全</strong>。</p>
+<p>再比如说 <strong>AOF 重写</strong>也是这个道理，Redis 是 <code>fork</code> 一个子进程 <code>bgrewriteaof</code> 进行后台重写，而不是创建线程进行处理，因为如果使用的是线程，多线程之间会共享内存，这样修改共享数据时就需要加锁来保证数据安全，会降低性能。而子进程则一开始通过<strong>拷贝页表</strong>的方式与父进程共享物理内存，在发生共享数据修改时则会触发 <code>Copy-On-Write</code> <strong>写时复制</strong>，于是父子进程就会有独立的数据副本，就不用加锁来保证数据安全。</p>
+<hr>
+<p>正是因为 IO 多路复用模型使得服务器得以支撑百万级的并发连接。</p>
+<br>
+
+<blockquote>
+<p>参考资料：<br><a target="_blank" rel="noopener" href="https://xiaozhuanlan.com/topic/2153098467">https://xiaozhuanlan.com/topic/2153098467</a></p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">chenjintao</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.tojintao.cn/2022/05/07/%E4%BB%8E-Reactor-%E6%A8%A1%E5%BC%8F%E7%9C%8B-Netty%E3%80%81Redis-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/">https://blog.tojintao.cn/2022/05/07/%E4%BB%8E-Reactor-%E6%A8%A1%E5%BC%8F%E7%9C%8B-Netty%E3%80%81Redis-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.tojintao.cn" target="_blank">KimTou</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Netty/">Netty</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.tojintao.cn/Netty线程模型.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/05/11/%E5%93%88%E5%A4%AB%E6%9B%BC%E6%A0%91-%E5%93%88%E5%A4%AB%E6%9B%BC%E7%BC%96%E7%A0%81/"><img class="prev-cover" src="https://cdn.tojintao.cn/哈夫曼编码.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">哈夫曼树 &amp; 哈夫曼编码</div></div></a></div><div class="next-post pull-right"><a href="/2022/05/07/Netty-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E4%BB%A5%E5%8F%8A%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/"><img class="next-cover" src="https://cdn.tojintao.cn/Netty功能特性.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Netty 基本概念以及核心组件</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/04/30/NIO-网络编程——群聊系统实现/" title="NIO 网络编程——群聊系统实现"><img class="cover" src="https://cdn.tojintao.cn/Selector和SelectionKey和Channel关系图.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-04-30</div><div class="title">NIO 网络编程——群聊系统实现</div></div></a></div><div><a href="/2022/05/03/Netty入门实战——TCP服务、群聊系统的实现/" title="Netty入门实战——TCP服务、群聊系统的实现"><img class="cover" src="https://cdn.tojintao.cn/netty_logo.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-03</div><div class="title">Netty入门实战——TCP服务、群聊系统的实现</div></div></a></div><div><a href="/2022/05/07/Netty-基本概念以及核心组件/" title="Netty 基本概念以及核心组件"><img class="cover" src="https://cdn.tojintao.cn/Netty功能特性.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-07</div><div class="title">Netty 基本概念以及核心组件</div></div></a></div><div><a href="/2022/04/30/Java-NIO-基本原理以及三大核心组件/" title="Java NIO 基本原理以及三大核心组件"><img class="cover" src="https://cdn.tojintao.cn/Selector 与 Channel 的关系图.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-04-30</div><div class="title">Java NIO 基本原理以及三大核心组件</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/images/KT.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">chenjintao</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">17</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">14</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/KimTou"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/KimTou" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:752160655@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/KIMTOU" target="_blank" title="CSDN"><i class="fa fa-edit"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客呀 ~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Reactor-%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">Reactor 模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95-Reactor-%E5%8D%95%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.0.1.</span> <span class="toc-text">单 Reactor 单线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95-Reactor-%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.0.2.</span> <span class="toc-text">单 Reactor 多线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E-Reactor-%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.0.3.</span> <span class="toc-text">主从 Reactor 多线程</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Netty-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">Netty 线程模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E4%B8%B2%E8%A1%8C%E5%8C%96%E8%AE%BE%E8%AE%A1%E9%81%BF%E5%85%8D%E7%BA%BF%E7%A8%8B%E7%AB%9E%E4%BA%89"><span class="toc-number">2.0.1.</span> <span class="toc-text">1、串行化设计避免线程竞争</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E4%B8%8E%E6%97%B6%E9%97%B4%E8%BD%AE"><span class="toc-number">2.0.2.</span> <span class="toc-text">2、定时任务与时间轮</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Redis-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">Redis 线程模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis-%E7%9A%84%E5%8D%95%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.0.1.</span> <span class="toc-text">Redis 的单线程</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/05/11/%E5%93%88%E5%A4%AB%E6%9B%BC%E6%A0%91-%E5%93%88%E5%A4%AB%E6%9B%BC%E7%BC%96%E7%A0%81/" title="哈夫曼树 &amp; 哈夫曼编码"><img src="https://cdn.tojintao.cn/哈夫曼编码.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="哈夫曼树 &amp; 哈夫曼编码"/></a><div class="content"><a class="title" href="/2022/05/11/%E5%93%88%E5%A4%AB%E6%9B%BC%E6%A0%91-%E5%93%88%E5%A4%AB%E6%9B%BC%E7%BC%96%E7%A0%81/" title="哈夫曼树 &amp; 哈夫曼编码">哈夫曼树 &amp; 哈夫曼编码</a><time datetime="2022-05-11T14:35:47.000Z" title="发表于 2022-05-11 22:35:47">2022-05-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/07/%E4%BB%8E-Reactor-%E6%A8%A1%E5%BC%8F%E7%9C%8B-Netty%E3%80%81Redis-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/" title="从 Reactor 模式看 Netty、Redis 线程模型"><img src="https://cdn.tojintao.cn/Netty线程模型.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="从 Reactor 模式看 Netty、Redis 线程模型"/></a><div class="content"><a class="title" href="/2022/05/07/%E4%BB%8E-Reactor-%E6%A8%A1%E5%BC%8F%E7%9C%8B-Netty%E3%80%81Redis-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/" title="从 Reactor 模式看 Netty、Redis 线程模型">从 Reactor 模式看 Netty、Redis 线程模型</a><time datetime="2022-05-07T14:29:57.000Z" title="发表于 2022-05-07 22:29:57">2022-05-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/07/Netty-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E4%BB%A5%E5%8F%8A%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/" title="Netty 基本概念以及核心组件"><img src="https://cdn.tojintao.cn/Netty功能特性.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Netty 基本概念以及核心组件"/></a><div class="content"><a class="title" href="/2022/05/07/Netty-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E4%BB%A5%E5%8F%8A%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/" title="Netty 基本概念以及核心组件">Netty 基本概念以及核心组件</a><time datetime="2022-05-07T14:27:16.000Z" title="发表于 2022-05-07 22:27:16">2022-05-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/03/Netty%E5%85%A5%E9%97%A8%E5%AE%9E%E6%88%98%E2%80%94%E2%80%94TCP%E6%9C%8D%E5%8A%A1%E3%80%81%E7%BE%A4%E8%81%8A%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%9E%E7%8E%B0/" title="Netty入门实战——TCP服务、群聊系统的实现"><img src="https://cdn.tojintao.cn/netty_logo.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Netty入门实战——TCP服务、群聊系统的实现"/></a><div class="content"><a class="title" href="/2022/05/03/Netty%E5%85%A5%E9%97%A8%E5%AE%9E%E6%88%98%E2%80%94%E2%80%94TCP%E6%9C%8D%E5%8A%A1%E3%80%81%E7%BE%A4%E8%81%8A%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%9E%E7%8E%B0/" title="Netty入门实战——TCP服务、群聊系统的实现">Netty入门实战——TCP服务、群聊系统的实现</a><time datetime="2022-05-03T14:25:31.000Z" title="发表于 2022-05-03 22:25:31">2022-05-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/30/NIO-%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E2%80%94%E2%80%94%E7%BE%A4%E8%81%8A%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0/" title="NIO 网络编程——群聊系统实现"><img src="https://cdn.tojintao.cn/Selector和SelectionKey和Channel关系图.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="NIO 网络编程——群聊系统实现"/></a><div class="content"><a class="title" href="/2022/04/30/NIO-%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E2%80%94%E2%80%94%E7%BE%A4%E8%81%8A%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0/" title="NIO 网络编程——群聊系统实现">NIO 网络编程——群聊系统实现</a><time datetime="2022-04-30T14:23:56.000Z" title="发表于 2022-04-30 22:23:56">2022-04-30</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://cdn.tojintao.cn/Netty线程模型.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By chenjintao</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '5XebCWoNuAORvoRzuGHb3nY8-gzGzoHsz',
+      appKey: 'WybpoIIAsPcC9uBcr9oJUmjS',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
