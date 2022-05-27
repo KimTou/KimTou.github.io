@@ -5941,4 +5941,207 @@
         <tag>Zookeeper</tag>
       </tags>
   </entry>
+  <entry>
+    <title>SpringCloud学习——服务注册中心</title>
+    <url>/2022/05/27/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</url>
+    <content><![CDATA[<h2 id="服务注册中心"><a href="#服务注册中心" class="headerlink" title="服务注册中心"></a>服务注册中心</h2><p>在微服务架构中，一个系统通常被拆分为多个模块 / 服务，此时就涉及到模块之间的服务调用问题。</p>
+<p>在服务是单实例情况下，可以采用点对点的 HTTP 直接调用，即 IP + Port + 接口的形式。可各模块通常都是多实例集群部署的，以应对服务的压力以及保证可用性。但此时又面临一个问题，调用方如何知晓调用哪个实例，当实例运行失败后，如何转移到别的实例上去处理请求？如果采用了负载均衡，但往往是静态的，在服务不可用时，如果动态的更新负载均衡列表，保证调用者的正常调用呢？</p>
+<p>服务注册中心便是为了解决上述问题，将所有的服务统一的、动态的管理起来。<strong>所有的服务都与注册中心发生连接，由注册中心统一配置管理，不再由实例自身直接调用</strong>。服务管理过程大致过程如下：</p>
+<ol>
+<li>服务提供者启动时，将服务提供者的信息主动提交到服务注册中心进行服务注册。</li>
+<li>服务调用者启动时，将服务提供者信息从注册中心下载到调用者本地，调用者从本地的服务提供者列表中，基于某种负载均衡策略选择一台服务实例发起远程调用，这是一个点到点调用的方式。</li>
+<li>服务注册中心能够感知服务提供者某个实例下线，同时将该实例服务提供者信息从注册中心清除，并通知服务调用者集群中的每一个实例，告知服务调用者不再调用本实例，以免调用失败。</li>
+</ol>
+<p>常见的服务注册中心组件如下：</p>
+<ul>
+<li><strong>Eureka</strong></li>
+<li>Consul</li>
+<li><strong>Zookeeper</strong></li>
+<li>Etcd</li>
+<li><strong>Nacos</strong></li>
+</ul>
+<br>
+
+<h2 id="Eureka"><a href="#Eureka" class="headerlink" title="Eureka"></a>Eureka</h2><p>SpringCloud 封装了 Netflix 公司开发的 Eureka 模块来实现服务治理。</p>
+<p><strong>什么是服务治理</strong>：在传统的 RPC 远程调用框架中，管理每个服务与服务之间依赖关系比较复杂，管理比较复杂，所以需要使用服务治理，管理服务于服务之间依赖关系，可以实现服务调用、负载均衡、容错等，实现服务发现与注册。</p>
+<h3 id="架构设计"><a href="#架构设计" class="headerlink" title="架构设计"></a>架构设计</h3><p>Eureka 采用了 CS 的设计架构，Eureka Sever 作为服务注册功能的服务器，它是服务注册中心。而系统中的其他微服务，使用 Eureka 的客户端连接到 Eureka Server 并维持心跳连接。这样系统的维护人员就可以通过 Eureka Server 来监控系统中各个微服务是否正常运行。</p>
+<p>在服务注册与发现中，有一个注册中心。当服务器启动的时候，会把当前自己服务器的信息比如服务地址通讯地址等以别名方式注册到注册中心上。另一方（消费者服务提供者），以该别名的方式去注册中心上获取到实际的服务通讯地址，然后再实现本地 RPC 调用。RPC 远程调用框架核心设计思想：在于注册中心，因为使用注册中心管理每个服务与服务之间的一个依赖关系（服务治理概念）。在任何 RPC 远程框架中，都会有一个注册中心存放服务地址相关信息（接口地址）。</p>
+<p><img src="https://cdn.tojintao.cn/Eureka%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.png" alt="image-20220521102616081"></p>
+<p>Eureka 采用 CS（Client/Server，客户端/服务器） 架构，它包括以下两大组件：</p>
+<ul>
+<li><strong>Eureka Server</strong>：Eureka 服务注册中心，主要用于提供服务注册功能。当微服务启动时，会将自己的服务信息注册到 Eureka Server。Eureka Server 维护了一个可用服务列表，<strong>存储了所有注册到 Eureka Server 的可用服务节点的信息</strong>，服务节点的信息可以在 Eureka Server 的管理界面中直观看到。</li>
+<li><strong>Eureka Client</strong>：Eureka 客户端，通常指的是微服务系统中各个微服务，主要用于和 Eureka Server 进行交互。在微服务应用启动后，Eureka Client 会向 Eureka Server 发送心跳（默认周期为 30 秒）。若 Eureka Server 在多个心跳周期内没有接收到某个 Eureka Client 的心跳，Eureka Server 将它从可用服务列表中移除（默认 90 秒）。</li>
+</ul>
+<p>默认情况下，<strong>Eureka Server同时也是Eureka Client。多个Eureka Server实例，互相之间通过增量复制的方式，来实现服务注册表中数据的同步</strong>。Eureka Server默认保证在90秒内，Eureka Server集群内的所有实例中的数据达到一致。从这个架构来看，Eureka Server所有实例所处的角色都是<strong>对等</strong>的，没有类似Zookeeper、Consul、Etcd等注册中心的选举过程，也不存在主从，<strong>所有的节点都是主节点</strong>。Eureka官方将Eureka Server集群中的所有实例称为 “对等体”。</p>
+<p>Eureka Client会缓存服务注册表中的信息。这种方式有一定的优势——首先，微服务无需每次请求都查询Eureka Server，从而降低了Eureka Server的压力；其次，即使Eureka Server所有节点都宕掉，服务消费者依然可以使用缓存中的信息找到服务提供者并完成调用。</p>
+<br>
+
+<h3 id="服务注册与发现的流程"><a href="#服务注册与发现的流程" class="headerlink" title="服务注册与发现的流程"></a>服务注册与发现的流程</h3><p><strong>Eureka 实现服务注册与发现的流程如下</strong>：</p>
+<ol>
+<li>搭建一个 Eureka Server 作为服务注册中心；</li>
+<li>服务提供者 Eureka Client 启动时，会把当前服务器的信息以服务名（spring.application.name）的方式注册到服务注册中心；</li>
+<li>服务消费者 Eureka Client 启动时，也会向服务注册中心注册；</li>
+<li>服务消费者还会获取一份可用服务列表，该列表中包含了所有注册到服务注册中心的服务信息（包括服务提供者和自身的信息）；</li>
+<li>在获得了可用服务列表后，服务消费者通过 HTTP 或消息中间件远程调用服务提供者提供的服务。</li>
+</ol>
+<br>
+
+<h3 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h3><h4 id="Eureka-Server"><a href="#Eureka-Server" class="headerlink" title="Eureka Server"></a>Eureka Server</h4><p>添加依赖，修改 pom.xml</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--eureka-server--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>application.yml</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">7001</span></span><br><span class="line"></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">localhost</span> <span class="comment">#eureka服务端的实例名称</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="comment">#false表示不向注册中心注册自己。</span></span><br><span class="line">    <span class="attr">register-with-eureka:</span> <span class="literal">false</span></span><br><span class="line">    <span class="comment">#false表示自己端就是注册中心，我的职责就是维护服务实例，并不需要去检索服务</span></span><br><span class="line">    <span class="attr">fetch-registry:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="comment">#设置与Eureka server交互的地址查询服务和注册服务都需要依赖这个地址。</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://$&#123;eureka.instance.hostname&#125;:$&#123;server.port&#125;/eureka/</span></span><br></pre></td></tr></table></figure>
+
+<p>主启动类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableEurekaServer</span>	<span class="comment">//关键注解</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EurekaApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(EurekaApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>浏览器输入 <code>http://localhost:7001/</code> 回车，会查看到 Spring Eureka 服务主页。</p>
+<h4 id="Eureka-Client"><a href="#Eureka-Client" class="headerlink" title="Eureka Client"></a>Eureka Client</h4><p>添加依赖，修改 pom.xml</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>application.yml</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">consumer-order</span>	<span class="comment">#应用名称与注册服务节点名称一致</span></span><br><span class="line"></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="comment">#表示是否将自己注册进EurekaServer默认为true。</span></span><br><span class="line">    <span class="attr">register-with-eureka:</span> <span class="literal">true</span></span><br><span class="line">    <span class="comment">#是否从EurekaServer抓取已有的注册信息，默认为true。</span></span><br><span class="line">    <span class="comment">#单节点无所谓，集群必须设置为true才能配合ribbon使用负载均衡</span></span><br><span class="line">    <span class="attr">fetchRegistry:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:7001/eureka</span>	 <span class="comment">#EurekaServer地址</span></span><br></pre></td></tr></table></figure>
+
+<p>主启动类添加注解</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableEurekaClient</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(OrderApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：应用名称就是注册进 Eureka 的服务节点名称</p>
+<p><img src="https://cdn.tojintao.cn/Eureka%E6%B3%A8%E5%86%8C%E5%90%8D%E7%A7%B0.png" alt="image-20220521105946634"></p>
+<br>
+
+<h3 id="集群搭建"><a href="#集群搭建" class="headerlink" title="集群搭建"></a>集群搭建</h3><p>找到 <code>C:\Windows\System32\drivers\etc</code> 路径下的 hosts 文件，修改映射配置添加进 hosts 文件</p>
+<figure class="highlight accesslog"><table><tr><td class="code"><pre><span class="line"><span class="number">127.0.0.1</span> eureka7001.com</span><br><span class="line"><span class="number">127.0.0.1</span> eureka7002.com</span><br></pre></td></tr></table></figure>
+
+<p>修改各个 Eureka Server 的 yml 配置文件</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">7001</span></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">eureka7001.com</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">register-with-eureka:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">fetch-registry:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://eureka7002.com:7002/eureka/</span>  <span class="comment">#相互注册</span></span><br><span class="line"></span><br><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">7002</span></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">eureka7002.com</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">register-with-eureka:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">fetch-registry:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://eureka7001.com:7001/eureka/</span>  <span class="comment">#相互注册</span></span><br></pre></td></tr></table></figure>
+
+<p>将订单与支付微服务注册进集群，修改 yml 配置文件。</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">register-with-eureka:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">fetchRegistry:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="comment">#defaultZone: http://localhost:7001/eureka 单机版</span></span><br><span class="line">      <span class="comment">#集群版</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/</span> </span><br></pre></td></tr></table></figure>
+
+<p>同时将支付服务也集群化，多台支付服务的 <code>spring.application.name</code> 都一样。再修改订单远程调用的逻辑，不再使用之前写死的地址，而是从注册中心获取地址。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/order&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line">    <span class="comment">//private static final String PAYMENT_URL = &quot;http://localhost:8081&quot;; 单机版（固定地址）</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String PAYMENT_URL = <span class="string">&quot;http://PROVIDER-PAYMENT&quot;</span>; <span class="comment">//集群版</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/create&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CommonResult&lt;Integer&gt; <span class="title">create</span><span class="params">(Payment payment)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> restTemplate.postForObject(PAYMENT_URL + <span class="string">&quot;/payment/create&quot;</span>, payment, CommonResult.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/getPaymentById/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CommonResult&lt;Payment&gt; <span class="title">getPaymentById</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Long id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> restTemplate.getForObject(PAYMENT_URL + <span class="string">&quot;/payment/getPaymentById/&quot;</span> + id, CommonResult.class);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>并给 <code>restTemplate</code> 加上负载均衡机制，即使用 <code>@LoadBalanced</code> 注解，否则会报错。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="meta">@LoadBalanced</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> RestTemplate <span class="title">getRestTemplate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> RestTemplate();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="Eureka-自我保护模式"><a href="#Eureka-自我保护模式" class="headerlink" title="Eureka 自我保护模式"></a>Eureka 自我保护模式</h3><p><strong>导致原因：某时刻某一个微服务不可用了，Eureka 不会立刻清理，依旧会对该微服务的信息进行保存</strong>。</p>
+<p>保护模式主要用于一组客户端和 Eureka Server 之间存在网络分区场景下的保护。默认情况下，如果 EurekaServer 在一定时间内没有接收到某个微服务实例的心跳，EurekaServer 将会注销该实例（默认90秒）。但是当网络分区故障发生（延时、卡顿、拥挤）时，微服务与 EurekaServer 之间无法正常通信，以上行为可能变得非常危险了——因为微服务本身其实是健康的，此时本不应该注销这个微服务。</p>
+<p>Eureka 通过 “自我保护模式” 来解决这个问题——当 EurekaServer 节点在短时间内丢失过多客户端时（可能发生了网络分区故障），那么这个节点就会进入自我保护模式。<strong>一旦进入保护模式，Eureka Server 将会保护其服务注册表中的信息，不再删除服务注册表中的数据，也就是不会注销任何微服务</strong>。属于 CAP 里面的 AP 分支。</p>
+<br>
+
+<h2 id="ZooKeeper"><a href="#ZooKeeper" class="headerlink" title="ZooKeeper"></a>ZooKeeper</h2><p>ZooKeeper 是一个开源的<strong>分布式协调服务</strong>，它的设计目标是将那些复杂且容易出错的分布式一致性服务封装起来，构成一个高效可靠的原语集，并以一系列简单易用的接口提供给用户使用。</p>
+<p><strong>ZooKeeper 提供了高可用、高性能、稳定的分布式数据一致性解决方案，通常被用于实现诸如数据发布/订阅、负载均衡、命名服务、分布式协调/通知、集群管理、Master 选举、分布式锁和分布式队列等功能</strong>。</p>
+<p>ZooKeeper 的一个典型应用场景就是注册中心，主要原理是：让 <strong>服务提供者</strong> 在 <code>zookeeper</code> 中创建一个临时节点并且将自己的 <code>ip、port、调用方式</code> 写入节点，当 <strong>服务消费者</strong> 需要进行调用的时候会 <strong>通过注册中心找到相应的服务的地址列表(IP端口什么的)</strong> ，并缓存到本地(方便以后调用)，当消费者调用服务时，不会再去请求注册中心，而是直接通过负载均衡算法从地址列表中取一个服务提供者的服务器调用服务。当服务提供者的某台服务器宕机或下线时，相应的地址会从服务提供者地址列表中移除。同时，注册中心会将新的服务地址列表发送给服务消费者的机器并缓存在消费者本机。</p>
+<br>
+
+<h2 id="Nacos"><a href="#Nacos" class="headerlink" title="Nacos"></a>Nacos</h2><p>Nacos 是一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。</p>
+<p>Nacos 组合了服务注册发现中心、配置中心、服务管理等功能，类似于 Eureka + Config + Bus 的合体。</p>
+<table>
+<thead>
+<tr>
+<th>服务注册与发现框架</th>
+<th>CAP模型</th>
+<th>控制台管理</th>
+<th>社区活跃度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Eureka</td>
+<td>AP</td>
+<td>支持</td>
+<td>低(2.x版本闭源)</td>
+</tr>
+<tr>
+<td>Zookeeper</td>
+<td>CP</td>
+<td>不支持</td>
+<td>中</td>
+</tr>
+<tr>
+<td>consul</td>
+<td>CP</td>
+<td>支持</td>
+<td>高</td>
+</tr>
+<tr>
+<td>Nacos</td>
+<td>AP/CP</td>
+<td>支持</td>
+<td>高</td>
+</tr>
+</tbody></table>
+<h3 id="Nacos-的特性"><a href="#Nacos-的特性" class="headerlink" title="Nacos 的特性"></a>Nacos 的特性</h3><ul>
+<li><strong>服务发现</strong>：Nacos 支持基于 DNS 和 RPC 的服务发现。当服务提供者使用原生 SDK、OpenAPI 或一个独立的 Agent TODO 向 Nacos 注册服务后，服务消费者可以在 Nacos 上通过 DNS TODO 或 HTTP&amp;API 查找、发现服务。</li>
+<li><strong>服务健康监测</strong>：Nacos 提供对服务的实时健康检查，能够阻止请求发送到不健康主机或服务实例上。Nacos 还提供了一个健康检查仪表盘，能够帮助我们根据健康状态管理服务的可用性及流量。</li>
+<li><strong>动态配置服务</strong>：动态配置服务可以让您以中心化、外部化和动态化的方式管理所有环境的应用配置和服务配置。动态配置消除了配置变更时重新部署应用和服务的需要，让配置管理变得更加高效和敏捷。配置中心化管理让实现无状态服务变得更简单，让服务按需弹性扩展变得更容易。</li>
+<li><strong>动态 DNS 服务</strong>：Nacos 提供了动态 DNS 服务，能够让我们更容易地实现负载均衡、流量控制以及数据中心内网的简单 DNS 解析服务。</li>
+<li><strong>服务及其元数据管理</strong>：Nacos 能让我们从微服务平台建设的视角管理数据中心的所有服务及元数据，包括管理服务的描述、生命周期、服务的静态依赖分析、服务的健康状态、服务的流量管理、路由及安全策略、服务的 SLA 以及 metrics 统计数据。</li>
+</ul>
+<br>
+
+<h3 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h3><p><img src="https://cdn.tojintao.cn/nacos%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84.png"></p>
+<br>
+
+<h3 id="服务注册与发现-Discovery"><a href="#服务注册与发现-Discovery" class="headerlink" title="服务注册与发现 Discovery"></a>服务注册与发现 Discovery</h3><blockquote>
+<p><a href="https://spring-cloud-alibaba-group.github.io/github-pages/greenwich/spring-cloud-alibaba.html#_spring_cloud_alibaba_nacos_discovery">Spring Cloud Alibaba Reference Documentation</a></p>
+</blockquote>
+<p>Nacos 作为服务注册中心可以实现服务的注册与发现，流程如下图。</p>
+<p>![](<a href="https://cdn.tojintao.cn/Nacos">https://cdn.tojintao.cn/Nacos</a> 服务注册与发现.png)</p>
+<p>共涉及到以下 3 个角色：</p>
+<ul>
+<li><strong>服务注册中心（Register Service）</strong>：它是一个 Nacos Server，可以为服务提供者和服务消费者提供服务注册和发现功能。</li>
+<li><strong>服务提供者（Provider Service）</strong>：它是一个 Nacos Client，用于对外服务。它将自己提供的服务注册到服务注册中心，以供服务消费者发现和调用。</li>
+<li><strong>服务消费者（Consumer Service）</strong>：它是一个 Nacos Client，用于消费服务。它可以从服务注册中心获取服务列表，调用所需的服务。</li>
+</ul>
+<p>Nacos 实现服务注册与发现的流程如下：</p>
+<ol>
+<li>服务提供者 Nacos Client 启动时，会把服务以服务名（spring.application.name）的方式注册到服务注册中心（Nacos Server）；</li>
+<li>服务消费者 Nacos Client 启动时，也会将自己的服务注册到服务注册中心；</li>
+<li>服务消费者在注册服务的同时，它还会从服务注册中心获取一份服务注册列表信息，该列表中包含了所有注册到服务注册中心上的服务的信息（包括服务提供者和自身的信息）；</li>
+<li>在获取了服务提供者的信息后，服务消费者通过 HTTP 或消息中间件远程调用服务提供者提供的服务。</li>
+</ol>
+<br>
+
+<h3 id="服务提供者注册"><a href="#服务提供者注册" class="headerlink" title="服务提供者注册"></a>服务提供者注册</h3><p>添加依赖，修改 pom.xml</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>application.yml</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8081</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-payment-provider</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&#x27;*&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>主启动类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableDiscoveryClient</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PaymentApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(PaymentApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="服务消费者注册和负载均衡"><a href="#服务消费者注册和负载均衡" class="headerlink" title="服务消费者注册和负载均衡"></a>服务消费者注册和负载均衡</h3><p>Nacos 自带负载均衡（集成了 Ribbon）</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>application.yml</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-consumer-order</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span>  <span class="comment">#注册进Nacos</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#消费者将要去访问的微服务名称(注册成功进nacos的微服务提供者)</span></span><br><span class="line"><span class="comment">#不是默认配置，而是我们自定义的配置，目的是不在Controller内硬编码服务提供者的服务名</span></span><br><span class="line"><span class="attr">service-url:</span></span><br><span class="line">  <span class="attr">nacos-user-service:</span> <span class="string">http://nacos-payment-provider</span></span><br></pre></td></tr></table></figure>
+
+<p>主启动类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableDiscoveryClient</span>  <span class="comment">//开启服务注册与发现功能</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(OrderApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>restTemplate</code> 配置</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationContextConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="meta">@LoadBalanced</span> <span class="comment">//与Ribbon集成，并开启负载均衡功能</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RestTemplate <span class="title">getRestTemplate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> RestTemplate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用 RestTemplate 访问服务提供方接口（也可使用 OpenFeign）</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/order&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;service-url.nacos-user-service&#125;&quot;)</span> <span class="comment">//实现配置与代码分离</span></span><br><span class="line">    <span class="keyword">private</span> String serverURL;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/paymentInfo/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> restTemplate.getForObject(serverURL + </span><br><span class="line">                                         <span class="string">&quot;/payment/getPayment/&quot;</span> + id, String.class);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="Nacos-支持-AP-和-CP-模式的切换"><a href="#Nacos-支持-AP-和-CP-模式的切换" class="headerlink" title="Nacos 支持 AP 和 CP 模式的切换"></a>Nacos 支持 AP 和 CP 模式的切换</h3><p>C 是所有节点在同一时间看到的数据是一致的；而 A 的定义是所有的请求都会收到响应。</p>
+<p>—般来说，如果不需要存储服务级别的信息且服务实例是通过 nacos-client 注册，并能够保持心跳上报，那么就可以选择 AP 模式。当前主流的服务如 Spring Cloud 和 Dubbo 服务，都适用于 AP 模式，AP 模式为了服务的可能性而减弱了一致性，因此 AP 模式下只支持注册临时实例。</p>
+<p>如果需要在服务级别编辑或者存储配置信息，那么 CP 是必须，K8S 服务和 DNS 服务则适用于 CP 模式。CP 模式下则支持注册持久化实例，此时则是以 Raft 协议为集群运行模式，该模式下注册实例之前必须先注册服务，如果服务不存在，则会返回错误。</p>
+]]></content>
+      <categories>
+        <category>SpringCloud</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+        <tag>SpringCloud</tag>
+      </tags>
+  </entry>
 </search>
