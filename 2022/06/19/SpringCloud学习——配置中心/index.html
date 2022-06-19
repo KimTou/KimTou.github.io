@@ -1,0 +1,351 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SpringCloud学习——配置中心 | KimTou</title><meta name="keywords" content="分布式,SpringCloud"><meta name="author" content="chenjintao"><meta name="copyright" content="chenjintao"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在分布式微服务系统中，几乎所有服务的运行都离不开配置文件的支持，这些配置文件通常由各个服务自行管理，以 properties 或 yml 格式保存在各个微服务的类路径下，例如 application.properties 或 application.yml 等。 这种将配置文件散落在各个服务中的管理方式，存在以下问题：  管理难度大：配置文件散落在各个微服务中，难以管理。 安全性低：配置跟随源代码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud学习——配置中心">
+<meta property="og:url" content="https://blog.tojintao.cn/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/index.html">
+<meta property="og:site_name" content="KimTou">
+<meta property="og:description" content="在分布式微服务系统中，几乎所有服务的运行都离不开配置文件的支持，这些配置文件通常由各个服务自行管理，以 properties 或 yml 格式保存在各个微服务的类路径下，例如 application.properties 或 application.yml 等。 这种将配置文件散落在各个服务中的管理方式，存在以下问题：  管理难度大：配置文件散落在各个微服务中，难以管理。 安全性低：配置跟随源代码">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.tojintao.cn/Config工作原理.png">
+<meta property="article:published_time" content="2022-06-19T07:39:13.000Z">
+<meta property="article:modified_time" content="2022-06-19T08:03:26.826Z">
+<meta property="article:author" content="chenjintao">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="SpringCloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.tojintao.cn/Config工作原理.png"><link rel="shortcut icon" href="/images/T.png"><link rel="canonical" href="https://blog.tojintao.cn/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'SpringCloud学习——配置中心',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-06-19 16:03:26'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/images/KT.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">58</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">16</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.tojintao.cn/Config工作原理.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">KimTou</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">SpringCloud学习——配置中心</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-06-19T07:39:13.000Z" title="发表于 2022-06-19 15:39:13">2022-06-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-06-19T08:03:26.826Z" title="更新于 2022-06-19 16:03:26">2022-06-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/SpringCloud/">SpringCloud</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="SpringCloud学习——配置中心"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>在分布式微服务系统中，几乎所有服务的运行都离不开配置文件的支持，这些配置文件通常由各个服务自行管理，以 properties 或 yml 格式保存在各个微服务的类路径下，例如 application.properties 或 application.yml 等。</p>
+<p>这种将配置文件散落在各个服务中的管理方式，存在以下问题：</p>
+<ul>
+<li><strong>管理难度大</strong>：配置文件散落在各个微服务中，难以管理。</li>
+<li><strong>安全性低</strong>：配置跟随源代码保存在代码库中，容易造成配置泄漏。</li>
+<li><strong>时效性差</strong>：微服务中的配置修改后，必须重启服务，否则无法生效。</li>
+<li><strong>局限性明显</strong>：无法支持动态调整，例如日志开关、功能开关。</li>
+</ul>
+<br>
+
+<h2 id="Config"><a href="#Config" class="headerlink" title="Config"></a>Config</h2><p>SpringCloud Config 为微服务架构中的微服务提供<strong>集中化的外部配置支持</strong>，配置服务器为各个不同微服务应用的所有环境提供了一个中心化的外部配置。</p>
+<p>SpringCloud Config 分为<strong>服务端</strong>和<strong>客户端</strong>两部分。</p>
+<ul>
+<li>Config Server：也被称为分布式配置中心，它是一个独立运行的微服务应用，用来连接配置仓库并为客户端提供获取配置信息、加密信息和解密信息的访问接口。</li>
+<li>Config Client：指的是微服务架构中的各个微服务，它们通过 Config Server 对配置进行管理，并从 Config Sever 中获取和加载配置信息。</li>
+</ul>
+<p>Spring Cloud Config 默认使用 Git 存储配置信息，因此使用 Spirng Cloud Config 构建的配置服务器天然就支持对微服务配置的版本管理。我们可以使用 Git 客户端工具方便地对配置内容进行管理和访问。</p>
+<h3 id="Config-工作原理"><a href="#Config-工作原理" class="headerlink" title="Config 工作原理"></a>Config 工作原理</h3><p>Spring Cloud Config 工作流程如下：</p>
+<ol>
+<li>开发或运维人员提交配置文件到远程的 Git 仓库。</li>
+<li>Config 服务端（分布式配置中心）负责连接配置仓库 Git，并对 Config 客户端暴露获取配置的接口。</li>
+<li>Config 客户端通过 Config 服务端暴露出来的接口，拉取配置仓库中的配置。</li>
+<li>Config 客户端获取到配置信息，以支持服务的运行。</li>
+</ol>
+<p><img src="https://cdn.tojintao.cn/Config%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86.png"></p>
+<h3 id="Config-的特点与作用"><a href="#Config-的特点与作用" class="headerlink" title="Config 的特点与作用"></a>Config 的特点与作用</h3><p>Spring Cloud Config 具有以下特点与作用：</p>
+<ul>
+<li>集中管理配置文件。</li>
+<li>一个应用可能有多个环境，例如开发（dev）环境、测试（test）环境、生产（prod）环境等等，开发人员可以通过 Spring Cloud Config 对不同环境的各配置进行管理，且能够确保应用在环境迁移后仍然有完整的配置支持其正常运行。</li>
+<li>运行期间动态调整配置，不再需要在每个服务部署的机器上编写配置文件，服务可以通过 Spring Cloud Config 向配置中心统一拉取属于它们自己的配置信息。</li>
+<li>当配置发生变化时，微服务不需要重启即可感知到配置的变化，并自动获取和应用最新配置。</li>
+<li>Config 将所有微服务的配置文件集中存储在一个外部的存储仓库或系统（例如 Git）中，统一管理。</li>
+<li>Spring Cloud Config 配置中心将配置以 REST 接口的形式暴露给各个微服务，以方便各个微服务获取。</li>
+</ul>
+<br>
+
+<h3 id="Config-服务端搭建"><a href="#Config-服务端搭建" class="headerlink" title="Config 服务端搭建"></a>Config 服务端搭建</h3><p>创建 Github 仓库，并创建多个配置文件：config-dev.yml、config-prod.yml、config-test.yml。</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">config:</span></span><br><span class="line">  <span class="attr">info:</span> <span class="string">&quot;master branch,SpringCloud-ConfigCenter/config-dev.yml version=1&quot;</span> </span><br></pre></td></tr></table></figure>
+
+<p>创建 Config 微服务</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-config-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">3344</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span>  <span class="string">config-center</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">config:</span></span><br><span class="line">      <span class="attr">server:</span></span><br><span class="line">        <span class="attr">git:</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">git@github.com:KimTou/SpringCloud-ConfigCenter.git</span> <span class="comment">#GitHub上面的git仓库名字</span></span><br><span class="line">          <span class="comment">##搜索目录</span></span><br><span class="line">          <span class="attr">search-paths:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">SpringCloud-ConfigCenter</span></span><br><span class="line">          <span class="comment"># 如果Git仓库为公开仓库，可以不填写用户名和密码，如果是私有仓库需要填写</span></span><br><span class="line">          <span class="comment"># username: ********</span></span><br><span class="line">          <span class="comment"># password: ********</span></span><br><span class="line">      <span class="comment">##分支名</span></span><br><span class="line">      <span class="attr">label:</span> <span class="string">master</span></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableConfigServer</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConfigApplication</span> </span>&#123;</span><br></pre></td></tr></table></figure>
+
+<p>windows下修改hosts文件，增加映射（可配可不配）</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0.0.1</span> config-<span class="number">3344</span>.com</span><br></pre></td></tr></table></figure>
+
+<p>访问：<a target="_blank" rel="noopener" href="http://config-3344.com:3344/master/config-dev.yml">http://config-3344.com:3344/master/config-dev.yml</a></p>
+<br>
+
+<h3 id="Config-客户端搭建"><a href="#Config-客户端搭建" class="headerlink" title="Config 客户端搭建"></a>Config 客户端搭建</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-config<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>applicaiton.yml 是用户级的资源配置项；bootstrap.yml 是系统级的，优先级高于 application.yml。要将 Client 模块下的 application.yml 文件改为 bootstrap.yml，因为 bootstrap.yml 是比 application.yml 先加载的。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">3355</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">config-client</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">config:</span>  <span class="comment">#Config客户端配置</span></span><br><span class="line">      <span class="attr">label:</span> <span class="string">master</span>  <span class="comment">#分支名称</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">config</span>  <span class="comment">#配置文件名称</span></span><br><span class="line">      <span class="attr">profile:</span> <span class="string">dev</span>  <span class="comment">#读取后缀名称</span></span><br><span class="line">      <span class="comment">#上面3个综合：master分支上config-dev.yml的配置文件被读取</span></span><br><span class="line">      <span class="comment">#http://config-3344.com:3344/master/config-dev.yml</span></span><br><span class="line">      <span class="attr">uri:</span> <span class="string">http://localhost:3344</span>  <span class="comment">#配置中心地址</span></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/</span></span><br></pre></td></tr></table></figure>
+
+<p>配置中心将配置以 REST 接口的形式暴露给各个微服务。从 3344 端口获取 /master/config-dev.yml 信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConfigClientController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.info&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String configInfo;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/configInfo&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getConfigInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> configInfo;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>存在的问题是：</p>
+<ul>
+<li>配置更新后，Spring Cloud Config 服务端（Server）可以直接从 Git 仓库中获取最新的配置。</li>
+<li>除非重启 Spring Cloud Config 客户端（Client），否则无法通过 Spring Cloud Config 服务端获取最新的配置信息。</li>
+</ul>
+<h3 id="手动刷新配置"><a href="#手动刷新配置" class="headerlink" title="手动刷新配置"></a>手动刷新配置</h3><p>POM 引入 actuator 监控：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>修改 bootstrap.yml，添加暴露监控端口配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 暴露监控端点</span></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&quot;*&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>@RefreshScope</code> 注解开启配置刷新</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RefreshScope</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConfigClientController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.info&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String configInfo;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/configInfo&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getConfigInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> configInfo;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当修改配置文件后，要想 Config Client 也拉去到最新的配置，需要打开命令行窗口，手动使用以下命令发送一个 POST 请求刷新 Config 3355 客户端，通知客户端配置文件已经修改，需要重新拉去配置。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST &quot;http://localhost:3355/actuator/refresh&quot;</span><br></pre></td></tr></table></figure>
+
+<h4 id="手动刷新配置的问题"><a href="#手动刷新配置的问题" class="headerlink" title="手动刷新配置的问题"></a>手动刷新配置的问题</h4><p>在上面的实例中，我们通过在 Config 客户端（端口号：3355）中引入 Spring Boot actuator 监控组件来监控配置的变化，使我们可以在不重启 Config 客户端的情况下获取到了最新配置。</p>
+<p>这种方式虽然解决了重启 Config 客户端才能获取最新配置的问题，但另一个问题却也接踵而至，那就是只要配置仓库中的配置发生改变，就需要我们挨个向 Config 客户端手动发送 POST 请求，通知它们重新拉取配置。</p>
+<p>那么有没有“一次通知，处处生效”的方式呢？答案是肯定的。Spring Cloud Config 配合 Bus 就可以实现配置的动态刷新。</p>
+<br>
+
+<h3 id="Config-Bus-实现配置的动态刷新"><a href="#Config-Bus-实现配置的动态刷新" class="headerlink" title="Config+Bus 实现配置的动态刷新"></a>Config+Bus 实现配置的动态刷新</h3><p>Spring Cloud Bus 又被称为消息总线，它能够通过轻量级的消息代理（例如 RabbitMQ、Kafka 等）将微服务架构中的各个服务连接起来，实现广播状态更改、事件推送等功能，还可以实现微服务之间的通信功能。</p>
+<p>目前 Spring Cloud Bus 支持两种消息代理：RabbitMQ 和 Kafka。</p>
+<h4 id="Spring-Cloud-Bus-的基本原理"><a href="#Spring-Cloud-Bus-的基本原理" class="headerlink" title="Spring Cloud Bus 的基本原理"></a>Spring Cloud Bus 的基本原理</h4><p>Spring Cloud Bus 会使用一个轻量级的消息代理来构建一个公共的消息主题 Topic（默认为 <code>springCloudBus</code>），这个 Topic 中的消息会被所有服务实例监听和消费。当其中的一个服务刷新数据时，Spring Cloud Bus 会把信息保存到 Topic 中，这样监听这个 Topic 的服务就收到消息并自动消费。</p>
+<h4 id="Spring-Cloud-Bus-动态刷新配置的原理"><a href="#Spring-Cloud-Bus-动态刷新配置的原理" class="headerlink" title="Spring Cloud Bus 动态刷新配置的原理"></a>Spring Cloud Bus 动态刷新配置的原理</h4><p>利用 Spring Cloud Bus 的特殊机制可以实现很多功能，其中配合 Spring Cloud Config 实现配置的动态刷新就是最典型的应用场景之一。</p>
+<p>当 Git 仓库中的配置发生了改变，我们只需要向某一个服务（既可以是 Config 服务端，也可以是 Config 客户端）发送一个 POST 请求，Spring Cloud Bus 就可以通过消息代理通知其他服务重新拉取最新配置，以实现配置的动态刷新。</p>
+<p>利用 Spring Cloud Bus 实现配置的动态刷新需要以下步骤：</p>
+<ol>
+<li>当 Git 仓库中的配置发生改变后，运维人员向 Config 服务端发送一个 POST 请求，请求路径为“/actuator/refresh”。</li>
+<li>Config 服务端接收到请求后，会将该请求转发给服务总线 Spring Cloud Bus。</li>
+<li>Spring Cloud Bus 接到消息后，会通知给所有 Config 客户端。</li>
+<li>Config 客户端接收到通知，请求 Config 服务端拉取最新配置。</li>
+<li>所有 Config 客户端都获取到最新的配置。</li>
+</ol>
+<br>
+
+<h2 id="Nacos"><a href="#Nacos" class="headerlink" title="Nacos"></a>Nacos</h2><p>Nacos Server 还可以作为配置中心，对 Spring Cloud 应用的外部配置进行统一地集中化管理。而我们只需要在应用的 POM 文件中引入 spring-cloud-starter-alibaba-nacos-config 即可实现配置的获取与动态刷新。</p>
+<h3 id="服务搭建"><a href="#服务搭建" class="headerlink" title="服务搭建"></a>服务搭建</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-config<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Nacos 同 SpringCloud Config 一样，在项目初始化时，要保证先从配置中心进行配置拉取，拉取配置之后，才能保证项目的正常启动。SpringBoot 中配置文件的加载是存在优先级顺序的，bootstrap 优先级高于 application。</p>
+<p>bootstrap.yml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">3377</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">config-nacos-client</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span>  <span class="comment">#注册进Nacos</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span>  <span class="comment">#Nacos作为配置中心</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span>  <span class="comment">#指定yaml格式的配置</span></span><br></pre></td></tr></table></figure>
+
+<p>application.yml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">profiles:</span></span><br><span class="line">    <span class="attr">active:</span> <span class="string">dev</span>  <span class="comment">#指定环境</span></span><br></pre></td></tr></table></figure>
+
+<p>controller</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/config&quot;)</span></span><br><span class="line"><span class="meta">@RefreshScope</span> <span class="comment">//支持Nacos动态刷新</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConfigNacosController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.info&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String configInfo;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/configInfo&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getConfigInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> configInfo;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>在 Nacos Spring Cloud 中，<code>dataId</code> 的完整格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$&#123;prefix&#125;-$&#123;spring.profiles.active&#125;.$&#123;file-extension&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>prefix</code> 默认为 <code>spring.application.name</code> 的值，也可以通过配置项 <code>spring.cloud.nacos.config.prefix</code>来配置。</li>
+<li><code>spring.profiles.active</code> 即为当前环境对应的 profile。 <strong>注意：当 <code>spring.profiles.active</code> 为空时，对应的连接符 <code>-</code> 也将不存在，dataId 的拼接格式变成 <code>$&#123;prefix&#125;.$&#123;file-extension&#125;</code></strong></li>
+<li><code>file-exetension</code> 为配置内容的数据格式，可以通过配置项 <code>spring.cloud.nacos.config.file-extension</code> 来配置。目前只支持 <code>properties</code> 和 <code>yaml</code> 类型。</li>
+</ul>
+<p><strong>最后公式</strong>：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$&#123;spring<span class="selector-class">.application</span>.name&#125;-$&#123;spring<span class="selector-class">.profile</span>.active&#125;.$&#123;spring<span class="selector-class">.cloud</span><span class="selector-class">.nacos</span><span class="selector-class">.config</span>.file-extension&#125;</span><br><span class="line">config-nacos-client-dev.yaml</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.tojintao.cn/Nacos%E8%AF%A6%E7%BB%86%E9%85%8D%E7%BD%AE.png"></p>
+<hr>
+<p>在 Nacos 配置列表新建配置文件：</p>
+<img src="https://cdn.tojintao.cn/Nacos配置文件创建.png" style="zoom: 60%;" />
+
+<br>
+
+<h3 id="命名空间分组和-DataID-三者关系"><a href="#命名空间分组和-DataID-三者关系" class="headerlink" title="命名空间分组和 DataID 三者关系"></a>命名空间分组和 DataID 三者关系</h3><p><strong>Namespace+Group+Data lD三者关系？为什么这么设计？</strong></p>
+<p>类似 Java 里面的 package 名和类名，最外层的 namespace 是可以用于区分部署环境的，Group 和 DatalD 逻辑上区分两个目标对象。</p>
+<p><img src="https://cdn.tojintao.cn/Nacos%E4%B8%89%E8%80%85%E6%B8%85%E7%A9%BA.png"></p>
+<p>默认情况：Namespace=public，Group=DEFAULT_GROUP，默认Cluster是DEFAULT</p>
+<ul>
+<li>Nacos默认的Namespace是public，Namespace主要用来实现隔离。<ul>
+<li>比方说我们现在有三个环境：开发、测试、生产环境，我们就可以创建三个Namespace，不同的Namespace之间是隔离的。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>Group默认是DEFAULT_GROUP，Group可以把不同的微服务划分到同一个分组里面去</li>
+<li>Service就是微服务:一个Service可以包含多个Cluster (集群)，Nacos默认Cluster是DEFAULT，Cluster是对指定微服务的一个虚拟划分。</li>
+<li>最后是Instance，就是微服务的实例。</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">config-nacos-client</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span>  <span class="comment">#注册进Nacos</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span>  <span class="comment">#Nacos作为配置中心</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span>  <span class="comment">#指定yaml格式的配置</span></span><br><span class="line">        <span class="attr">group:</span> <span class="string">DEV_GROUP</span>	<span class="comment">#配置分组</span></span><br><span class="line">        <span class="attr">namespace:</span> <span class="string">dc21f277-6490-4bbd-b627-ade2e2f9e837</span>	<span class="comment">#配置命名空间</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">chenjintao</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.tojintao.cn/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/">https://blog.tojintao.cn/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.tojintao.cn" target="_blank">KimTou</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><a class="post-meta__tags" href="/tags/SpringCloud/">SpringCloud</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.tojintao.cn/Config工作原理.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E9%99%90%E6%B5%81%E3%80%81%E9%99%8D%E7%BA%A7%E3%80%81%E7%86%94%E6%96%AD/"><img class="prev-cover" src="https://cdn.tojintao.cn/hystrix-command流程图.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">SpringCloud学习——Histrix服务限流、降级、熔断</div></div></a></div><div class="next-post pull-right"><a href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3Gateway/"><img class="next-cover" src="https://cdn.tojintao.cn/gateway工作流程.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">SpringCloud学习——服务网关Gateway</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/06/19/SpringCloud学习——服务调用与负载均衡（Ribbon、OpenFeign）/" title="SpringCloud学习——服务调用与负载均衡（Ribbon、OpenFeign）"><img class="cover" src="https://cdn.tojintao.cn/Ribbon架构.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-19</div><div class="title">SpringCloud学习——服务调用与负载均衡（Ribbon、OpenFeign）</div></div></a></div><div><a href="/2022/05/27/SpringCloud学习——服务注册中心（Eureka、ZooKeeper、Nacos）/" title="SpringCloud学习——服务注册中心（Eureka、ZooKeeper、Nacos）"><img class="cover" src="https://cdn.tojintao.cn/nacos%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-27</div><div class="title">SpringCloud学习——服务注册中心（Eureka、ZooKeeper、Nacos）</div></div></a></div><div><a href="/2022/06/19/SpringCloud学习——服务网关Gateway/" title="SpringCloud学习——服务网关Gateway"><img class="cover" src="https://cdn.tojintao.cn/gateway工作流程.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-19</div><div class="title">SpringCloud学习——服务网关Gateway</div></div></a></div><div><a href="/2022/06/19/SpringCloud学习——SpringCloud-Alibaba-Sentinel/" title="SpringCloud学习——SpringCloud Alibaba Sentinel"><img class="cover" src="https://cdn.tojintao.cn/snetinel特性.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-19</div><div class="title">SpringCloud学习——SpringCloud Alibaba Sentinel</div></div></a></div><div><a href="/2022/06/19/SpringCloud学习——服务限流、降级、熔断/" title="SpringCloud学习——Histrix服务限流、降级、熔断"><img class="cover" src="https://cdn.tojintao.cn/hystrix-command流程图.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-19</div><div class="title">SpringCloud学习——Histrix服务限流、降级、熔断</div></div></a></div><div><a href="/2021/11/27/分布式基础——CAP理论与BASE理论/" title="分布式基础——CAP理论与BASE理论"><img class="cover" src="https://cdn.tojintao.cn/20220511203302.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-27</div><div class="title">分布式基础——CAP理论与BASE理论</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/images/KT.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">chenjintao</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">58</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">16</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/KimTou"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/KimTou" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:752160655@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/KIMTOU" target="_blank" title="CSDN"><i class="fa fa-edit"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的个人博客呀 ~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Config"><span class="toc-number">1.</span> <span class="toc-text">Config</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Config-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">1.1.</span> <span class="toc-text">Config 工作原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Config-%E7%9A%84%E7%89%B9%E7%82%B9%E4%B8%8E%E4%BD%9C%E7%94%A8"><span class="toc-number">1.2.</span> <span class="toc-text">Config 的特点与作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Config-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%90%AD%E5%BB%BA"><span class="toc-number">1.3.</span> <span class="toc-text">Config 服务端搭建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Config-%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%90%AD%E5%BB%BA"><span class="toc-number">1.4.</span> <span class="toc-text">Config 客户端搭建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE"><span class="toc-number">1.5.</span> <span class="toc-text">手动刷新配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.5.1.</span> <span class="toc-text">手动刷新配置的问题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Config-Bus-%E5%AE%9E%E7%8E%B0%E9%85%8D%E7%BD%AE%E7%9A%84%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0"><span class="toc-number">1.6.</span> <span class="toc-text">Config+Bus 实现配置的动态刷新</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Spring-Cloud-Bus-%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="toc-number">1.6.1.</span> <span class="toc-text">Spring Cloud Bus 的基本原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Spring-Cloud-Bus-%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">1.6.2.</span> <span class="toc-text">Spring Cloud Bus 动态刷新配置的原理</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nacos"><span class="toc-number">2.</span> <span class="toc-text">Nacos</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E6%90%AD%E5%BB%BA"><span class="toc-number">2.1.</span> <span class="toc-text">服务搭建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E5%88%86%E7%BB%84%E5%92%8C-DataID-%E4%B8%89%E8%80%85%E5%85%B3%E7%B3%BB"><span class="toc-number">2.2.</span> <span class="toc-text">命名空间分组和 DataID 三者关系</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94SpringCloud-Alibaba-Sentinel/" title="SpringCloud学习——SpringCloud Alibaba Sentinel"><img src="https://cdn.tojintao.cn/snetinel特性.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringCloud学习——SpringCloud Alibaba Sentinel"/></a><div class="content"><a class="title" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94SpringCloud-Alibaba-Sentinel/" title="SpringCloud学习——SpringCloud Alibaba Sentinel">SpringCloud学习——SpringCloud Alibaba Sentinel</a><time datetime="2022-06-19T08:59:28.000Z" title="发表于 2022-06-19 16:59:28">2022-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E9%99%90%E6%B5%81%E3%80%81%E9%99%8D%E7%BA%A7%E3%80%81%E7%86%94%E6%96%AD/" title="SpringCloud学习——Histrix服务限流、降级、熔断"><img src="https://cdn.tojintao.cn/hystrix-command流程图.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringCloud学习——Histrix服务限流、降级、熔断"/></a><div class="content"><a class="title" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E9%99%90%E6%B5%81%E3%80%81%E9%99%8D%E7%BA%A7%E3%80%81%E7%86%94%E6%96%AD/" title="SpringCloud学习——Histrix服务限流、降级、熔断">SpringCloud学习——Histrix服务限流、降级、熔断</a><time datetime="2022-06-19T08:09:40.000Z" title="发表于 2022-06-19 16:09:40">2022-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/" title="SpringCloud学习——配置中心"><img src="https://cdn.tojintao.cn/Config工作原理.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringCloud学习——配置中心"/></a><div class="content"><a class="title" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/" title="SpringCloud学习——配置中心">SpringCloud学习——配置中心</a><time datetime="2022-06-19T07:39:13.000Z" title="发表于 2022-06-19 15:39:13">2022-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3Gateway/" title="SpringCloud学习——服务网关Gateway"><img src="https://cdn.tojintao.cn/gateway工作流程.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringCloud学习——服务网关Gateway"/></a><div class="content"><a class="title" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3Gateway/" title="SpringCloud学习——服务网关Gateway">SpringCloud学习——服务网关Gateway</a><time datetime="2022-06-19T06:54:14.000Z" title="发表于 2022-06-19 14:54:14">2022-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%88Ribbon%E3%80%81OpenFeign%EF%BC%89/" title="SpringCloud学习——服务调用与负载均衡（Ribbon、OpenFeign）"><img src="https://cdn.tojintao.cn/Ribbon架构.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringCloud学习——服务调用与负载均衡（Ribbon、OpenFeign）"/></a><div class="content"><a class="title" href="/2022/06/19/SpringCloud%E5%AD%A6%E4%B9%A0%E2%80%94%E2%80%94%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%88Ribbon%E3%80%81OpenFeign%EF%BC%89/" title="SpringCloud学习——服务调用与负载均衡（Ribbon、OpenFeign）">SpringCloud学习——服务调用与负载均衡（Ribbon、OpenFeign）</a><time datetime="2022-06-19T03:23:24.000Z" title="发表于 2022-06-19 11:23:24">2022-06-19</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://cdn.tojintao.cn/Config工作原理.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By chenjintao</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '5XebCWoNuAORvoRzuGHb3nY8-gzGzoHsz',
+      appKey: 'WybpoIIAsPcC9uBcr9oJUmjS',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
